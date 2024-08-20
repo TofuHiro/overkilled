@@ -32,6 +32,8 @@ public class PlayerController : MonoBehaviour
     void OnDisable()
     {
         _input.Player.Disable();
+        _input.Player.Sprint.started -= ToggleSprint;
+        _input.Player.Sprint.canceled -= ToggleSprint;
     }
 
     void Update()
