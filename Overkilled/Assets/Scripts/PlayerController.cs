@@ -5,11 +5,16 @@ using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(PlayerMotor))]
 [RequireComponent(typeof(PlayerStamina))]
+[RequireComponent(typeof(PlayerInteraction))]
+[RequireComponent(typeof(ItemHolder))]
 public class PlayerController : MonoBehaviour
 {
-    PlayerInput _input;
     PlayerMotor _motor;
     PlayerStamina _stamina;
+    PlayerInteraction _interaction;
+    ItemHolder _hands;
+
+    PlayerInput _input;
 
     void Awake()
     {
@@ -20,6 +25,8 @@ public class PlayerController : MonoBehaviour
     {
         _motor = GetComponent<PlayerMotor>();
         _stamina = GetComponent<PlayerStamina>();
+        _interaction = GetComponent<PlayerInteraction>();
+        _hands = GetComponent<ItemHolder>();
     }
 
     void OnEnable()
@@ -27,11 +34,14 @@ public class PlayerController : MonoBehaviour
         _input.Player.Enable();
         _input.Player.Sprint.started += ToggleSprint;
         _input.Player.Sprint.canceled += ToggleSprint;
+        _input.Player.Use.performed += Interact;
+
     }
 
     void OnDisable()
     {
         _input.Player.Disable();
+        _input.Player.Use.performed -= Interact;
     }
 
     void Update()
@@ -53,6 +63,14 @@ public class PlayerController : MonoBehaviour
         else if (context.canceled)
         {
             _stamina.SetSprint(false);
+        }
+    }
+
+    void Interact(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            _interaction.Interact();
         }
     }
 }
