@@ -47,4 +47,10 @@ public class PlayerInteraction : MonoBehaviour
         else if (_hoveredInteract != null )
             _hoveredInteract.Interact(this);
     }
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(transform.position, transform.forward * _interactDistance);    
+    }
 }
