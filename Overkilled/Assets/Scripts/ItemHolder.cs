@@ -7,54 +7,35 @@ public class ItemHolder : MonoBehaviour
 {
     [SerializeField] Transform _holdPosition;
 
-    public bool IsHoldingItem { get; private set; } = false;
+    public bool IsOccupied { get; private set; } = false;
 
-    Item _currentItem;
+    public Item CurrentItem
+    {
+        get { return _currentItem; }
+        set
+        {
+            _currentItem = value;
+
+            if (_currentItem != null)
+            {
+                _currentRigidbody = _currentItem.GetComponent<Rigidbody>();
+                _currentColliders = _currentItem.GetComponents<Collider>();
+                IsOccupied = true;
+            }
+            else
+            {
+                _currentRigidbody = null;
+                _currentColliders = null;
+                IsOccupied = false;
+            }
+        }
+    }
+    private Item _currentItem;
+
     Rigidbody _currentRigidbody;
     Collider[] _currentColliders;
 
-    public void SetItem(Item item)
-    {
-        if (item != null)
-        {
-            _currentItem = item;
-            _currentRigidbody = item.GetComponent<Rigidbody>();
-            _currentColliders = item.GetComponents<Collider>();
-            IsHoldingItem = true;
-            SetLockItem(true);
-        }
-        else
-        {
-            _currentItem = null;
-            _currentRigidbody = null;
-            _currentColliders = null;
-            IsHoldingItem = false;
-        }
-    }
-
-    public void DropItem()
-    {
-        if (_currentItem == null)
-            return;
-
-        SetLockItem(false);
-
-        //Force
-        SetItem(null);
-    }
-
-    public void ThrowItem()
-    {
-        if (_currentItem == null)
-            return;
-
-        SetLockItem(false);
-
-        //Force
-        SetItem(null);
-    }
-
-    void SetLockItem(bool state)
+    public void SetLockItem(bool state)
     {
         foreach (Collider collider in _currentColliders)
             collider.enabled = !state;
@@ -68,6 +49,6 @@ public class ItemHolder : MonoBehaviour
     void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;
-        Gizmos.DrawCube(_holdPosition.position, Vector3.one / 8f);    
+        Gizmos.DrawCube(_holdPosition.position, Vector3.one / 8f);
     }
 }
