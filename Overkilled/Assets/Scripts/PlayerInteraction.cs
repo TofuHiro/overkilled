@@ -1,14 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class PlayerInteraction : MonoBehaviour
 {
     [SerializeField] float _interactDistance = 1f;
-    [SerializeField] LayerMask _interactLayerMask;
-    IInteractable _hoveredInteract;
+    [SerializeField] LayerMask _itemLayerMask;
 
+    LayerMask _defaultMask = 1 << 0;
+    IInteractable _hoveredInteract;
     PlayerHand _hand;
 
     void Start()
@@ -23,7 +23,7 @@ public class PlayerInteraction : MonoBehaviour
 
     void CheckInteractable()
     {
-        Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, _interactDistance, _interactLayerMask);
+        Physics.Raycast(transform.position + Vector3.up, transform.forward, out RaycastHit hit, _interactDistance, _hand.IsHoldingItem ? _defaultMask : _itemLayerMask);
         if (hit.transform != null)
         {
             IInteractable interactable = hit.transform.GetComponent<IInteractable>();
@@ -42,9 +42,11 @@ public class PlayerInteraction : MonoBehaviour
 
     public void Interact()
     {
-        if (_hand.IsHoldingItem)
+        if (_hoveredInteract != null && _hand.IsHoldingItem)
+            _hoveredInteract.Interact(this);
+        else if (_hand.IsHoldingItem)
             _hand.DropItem();
-        else if (_hoveredInteract != null )
+        else if (_hoveredInteract != null)
             _hoveredInteract.Interact(this);
     }
 
