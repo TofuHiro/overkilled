@@ -4,11 +4,13 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(PlayerMotor))]
+[RequireComponent(typeof(PlayerRotation))]
 [RequireComponent(typeof(PlayerStamina))]
 public class PlayerController : MonoBehaviour
 {
     PlayerInput _input;
     PlayerMotor _motor;
+    PlayerRotation _rotation;
     PlayerStamina _stamina;
 
     void Awake()
@@ -19,6 +21,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         _motor = GetComponent<PlayerMotor>();
+        _rotation = GetComponent<PlayerRotation>();
         _stamina = GetComponent<PlayerStamina>();
     }
 
@@ -39,6 +42,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         Movement();
+        Rotation();
     }
 
     void Movement()
@@ -46,6 +50,13 @@ public class PlayerController : MonoBehaviour
         Vector2 input = _input.Player.Move.ReadValue<Vector2>();
         _motor.SetDirection(input);
     } 
+
+    void Rotation()
+    {
+        Vector2 input = _input.Player.Move.ReadValue<Vector2>();
+        _rotation.SetLookDirection(input);
+    }
+
     void ToggleSprint(InputAction.CallbackContext context)
     {
         if (context.started)
