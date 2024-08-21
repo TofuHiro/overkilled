@@ -51,15 +51,6 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Drop",
-                    "type": "Button",
-                    "id": "f69854db-7876-4cf2-b333-1809fd4a2632",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "Sprint",
                     "type": "Button",
                     "id": "631618ac-a47b-4b7d-90a0-9ccaf3927227",
@@ -210,17 +201,6 @@
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "Use",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "80d6ca1b-3933-4b24-97fd-885a6822428d",
-                    "path": "<Keyboard>/q",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard&Mouse",
-                    "action": "Drop",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
