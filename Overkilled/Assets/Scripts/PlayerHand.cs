@@ -15,13 +15,30 @@ public class PlayerHand : MonoBehaviour
         _holder = GetComponent<ItemHolder>();
     }
 
+    public Item GetItem()
+    {
+        return _holder.GetItem();
+    }
+
+    public void SetItem(Item newItem)
+    {
+        _holder.SetItem(newItem);
+    }
+
     public void DropItem()
     {
-        if (_holder.CurrentItem == null)
+        Item item = _holder.GetItem();
+
+        ReleaseItem();
+
+        item.GetComponent<Rigidbody>().AddForce(transform.forward * _dropThrowForce, ForceMode.Impulse);
+    }
+
+    public void ReleaseItem()
+    {
+        if (_holder.GetItem() == null)
             return;
 
-        _holder.SetLockItem(false);
-        _holder.CurrentItem.GetComponent<Rigidbody>().AddForce(transform.forward * _dropThrowForce, ForceMode.Impulse);
-        _holder.CurrentItem = null;
+        _holder.SetItem(null);
     }
 }

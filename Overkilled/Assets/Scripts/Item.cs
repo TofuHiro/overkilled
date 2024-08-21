@@ -14,8 +14,7 @@ public class Item : MonoBehaviour, IInteractable
         ItemHolder holder = player.GetComponent<ItemHolder>();
         if (holder != null)
         {
-            holder.CurrentItem = this;
-            holder.SetLockItem(true);
+            holder.SetItem(this);
         }
     }
 }

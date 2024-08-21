@@ -219,8 +219,8 @@ GameObject:
   - component: {fileID: 2665039299431555294}
   - component: {fileID: 1679494080450844484}
   - component: {fileID: 7133096852087040465}
-  - component: {fileID: -1046150434270177627}
-  m_Layer: 0
+  - component: {fileID: -7530823088849068425}
+  m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -347,9 +347,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _interactDistance: 1
-  _interactLayerMask:
+  _itemLayerMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 65
 --- !u!114 &1679494080450844484
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -377,7 +377,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _rotationSpeed: 1000
---- !u!114 &-1046150434270177627
+--- !u!114 &-7530823088849068425
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
