@@ -9,11 +9,11 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField] LayerMask _interactLayerMask;
     IInteractable _hoveredInteract;
 
-    ItemHolder _hand;
+    PlayerHand _hand;
 
     void Start()
     {
-        _hand = GetComponent<ItemHolder>();
+        _hand = GetComponent<PlayerHand>();
     }
 
     void Update()
