@@ -9,6 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1b728be364c4cb5488446a7bd269f650, type: 3}
-  m_Name: Test
+  m_Script: {fileID: 11500000, guid: ca6c284d80e2b4f408eef234be5ff551, type: 3}
+  m_Name: Test Set
   m_EditorClassIdentifier: 
+  name: Test Set
+  recipes:
+  - {fileID: 11400000, guid: 9189dbc69c7d51346810d4b0b56be310, type: 2}
