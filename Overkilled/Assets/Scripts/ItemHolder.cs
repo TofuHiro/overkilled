@@ -15,6 +15,7 @@ public class ItemHolder : MonoBehaviour
     Collider[] _currentColliders;
 
     public Item GetItem() { return _currentItem; }
+    public Vector3 GetHoldPosition() { return _holdPosition.position; }
 
     public void SetItem(Item item)
     {
