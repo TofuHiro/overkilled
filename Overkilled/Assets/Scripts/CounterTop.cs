@@ -6,7 +6,7 @@ public class CounterTop : MonoBehaviour, IInteractable
 {
     [SerializeField] Transform _itemHoldersParent;
 
-    ItemHolder[] _holders;
+    protected ItemHolder[] _holders;
     int _itemHolderCount;
 
     public bool CounterIsFull
@@ -53,25 +53,40 @@ public class CounterTop : MonoBehaviour, IInteractable
             }
             else
             {
-                Item item = hand.GetItem();
-                hand.ReleaseItem();
-                _holders[GetNextFreeHolderIndex()].SetItem(item);
+                PlaceItemFromHand(hand);
             }
         }
         else 
         {
             if (CounterIsEmpty)
             {
-                Debug.Log("Nothing to take");
+                TakeFromEmptyCounter(hand);
             }
             else
             {
-                ItemHolder holder = _holders[CounterIsFull ? _holders.Length - 1 : GetNextFreeHolderIndex() - 1];
-                Item item = holder.GetItem();
-                holder.SetItem(null);
-                hand.SetItem(item);
+                TakeItemFromCounter(hand);
             }
         }
+    }
+
+    void PlaceItemFromHand(PlayerHand hand)
+    {
+        Item item = hand.GetItem();
+        hand.ReleaseItem();
+        _holders[GetNextFreeHolderIndex()].SetItem(item);
+    }
+
+    protected virtual void TakeFromEmptyCounter(PlayerHand hand)
+    {
+        Debug.Log("Nothing to take");
+    }
+
+    void TakeItemFromCounter(PlayerHand hand)
+    {
+        ItemHolder holder = _holders[CounterIsFull ? _holders.Length - 1 : GetNextFreeHolderIndex() - 1];
+        Item item = holder.GetItem();
+        holder.SetItem(null);
+        hand.SetItem(item);
     }
 
     int GetNextFreeHolderIndex()
