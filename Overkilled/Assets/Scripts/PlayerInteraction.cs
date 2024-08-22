@@ -5,9 +5,10 @@ using UnityEngine;
 public class PlayerInteraction : MonoBehaviour
 {
     [SerializeField] float _interactDistance = 1f;
-    [SerializeField] LayerMask _itemLayerMask;
+    [SerializeField] LayerMask _unarmedLayerMask;
+    [SerializeField] LayerMask _armedLayerMask;
+    [SerializeField] LayerMask _craftingTableMask;
 
-    LayerMask _defaultMask = 1 << 0;
     IInteractable _hoveredInteract;
     PlayerHand _hand;
 
@@ -23,7 +24,7 @@ public class PlayerInteraction : MonoBehaviour
 
     void CheckInteractable()
     {
-        Physics.Raycast(transform.position + Vector3.up, transform.forward, out RaycastHit hit, _interactDistance, _hand.IsHoldingItem ? _defaultMask : _itemLayerMask);
+        Physics.Raycast(transform.position + Vector3.up, transform.forward, out RaycastHit hit, _interactDistance, _hand.IsHoldingItem ? _armedLayerMask : _unarmedLayerMask);
         if (hit.transform != null)
         {
             IInteractable interactable = hit.transform.GetComponent<IInteractable>();
@@ -48,6 +49,45 @@ public class PlayerInteraction : MonoBehaviour
             _hand.DropItem();
         else if (_hoveredInteract != null)
             _hoveredInteract.Interact(this);
+    }
+
+    public void StartAttack()
+    {
+        if (_hand.IsHoldingItem)
+        {
+            //check weapon and start attack
+        }
+        else
+        {
+            TryCraft();
+        }
+    }
+
+    public void StopAttack()
+    {
+        if (_hand.IsHoldingItem)
+        {
+            //check weapon and stop attack
+        }
+    }
+
+    void TryCraft()
+    {
+        CraftingStation station = CheckCraftingTable();
+        if (station != null)
+        {
+            station.Craft();
+        }
+    }
+
+    CraftingStation CheckCraftingTable()
+    {
+        Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, _interactDistance, _craftingTableMask);
+        if (hit.transform != null)
+        {
+            return hit.transform.GetComponent<CraftingStation>();
+        }
+        return null;
     }
 
     void OnDrawGizmos()
