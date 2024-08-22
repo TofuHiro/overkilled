@@ -220,7 +220,7 @@ GameObject:
   - component: {fileID: 1679494080450844484}
   - component: {fileID: 7133096852087040465}
   - component: {fileID: -7530823088849068425}
-  - component: {fileID: 8595189604730308103}
+  - component: {fileID: 603802173482470881}
   m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
@@ -348,15 +348,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _interactDistance: 1
-  _unarmedLayerMask:
+  _itemLayerMask:
     serializedVersion: 2
-    m_Bits: 320
-  _armedLayerMask:
-    serializedVersion: 2
-    m_Bits: 256
-  _craftingTableMask:
-    serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 65
 --- !u!114 &1679494080450844484
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -424,19 +418,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dropThrowForce: 5
---- !u!114 &8595189604730308103
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2362187312934505796}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0cf607d63fcf12e46b0f4811c8d3f3b8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _rotationSpeed: 1000
 --- !u!1 &3835431091541041786
 GameObject:
   m_ObjectHideFlags: 0

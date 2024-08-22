@@ -38,8 +38,7 @@ public class PlayerController : MonoBehaviour
         _input.Player.Sprint.started += ToggleSprint;
         _input.Player.Sprint.canceled += ToggleSprint;
         _input.Player.Use.performed += Interact;
-        _input.Player.Fire.started += Attack;
-        _input.Player.Fire.canceled += Attack;
+
     }
 
     void OnDisable()
@@ -48,8 +47,7 @@ public class PlayerController : MonoBehaviour
         _input.Player.Sprint.started -= ToggleSprint;
         _input.Player.Sprint.canceled -= ToggleSprint;
         _input.Player.Use.performed -= Interact;
-        _input.Player.Fire.started -= Attack;
-        _input.Player.Fire.canceled -= Attack;
+
     }
 
     void Update()
@@ -87,18 +85,6 @@ public class PlayerController : MonoBehaviour
         if (context.performed)
         {
             _interaction.Interact();
-        }
-    }
-
-    void Attack(InputAction.CallbackContext context)
-    {
-        if (context.started)
-        {
-            _interaction.StartAttack();
-        }
-        else if (context.canceled)
-        {
-            _interaction.StopAttack();
         }
     }
 }

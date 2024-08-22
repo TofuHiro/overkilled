@@ -1,4 +1,3 @@
-using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -32,18 +31,6 @@ public class CounterTop : MonoBehaviour, IInteractable
         }
     }
 
-    public int ItemsOnCounter
-    {
-        get
-        {
-            int i = 0;
-            foreach (ItemHolder holder in _holders)
-                if (holder.IsOccupied)
-                    i++;
-            return i;
-        }
-    }
-
     void Start()
     {
         _holders = _itemHoldersParent.GetComponentsInChildren<ItemHolder>();
@@ -54,7 +41,7 @@ public class CounterTop : MonoBehaviour, IInteractable
         }
     }
 
-    public virtual void Interact(PlayerInteraction player)
+    public void Interact(PlayerInteraction player)
     {
         PlayerHand hand = player.GetComponent<PlayerHand>();
 
