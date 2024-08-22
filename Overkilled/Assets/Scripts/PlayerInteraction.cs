@@ -93,6 +93,6 @@ public class PlayerInteraction : MonoBehaviour
     void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
-        Gizmos.DrawLine(transform.position, transform.forward * _interactDistance);    
+        Gizmos.DrawLine(transform.position, transform.position + transform.forward * _interactDistance);    
     }
 }

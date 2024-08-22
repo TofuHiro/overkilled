@@ -7,14 +7,13 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerRotation))]
 [RequireComponent(typeof(PlayerStamina))]
 [RequireComponent(typeof(PlayerInteraction))]
-[RequireComponent(typeof(ItemHolder))]
+[RequireComponent(typeof(PlayerHand))]
 public class PlayerController : MonoBehaviour
 {
     PlayerMotor _motor;
     PlayerRotation _rotation;
     PlayerStamina _stamina;
     PlayerInteraction _interaction;
-    ItemHolder _hands;
 
     PlayerInput _input;
 
@@ -29,7 +28,6 @@ public class PlayerController : MonoBehaviour
         _rotation = GetComponent<PlayerRotation>();
         _stamina = GetComponent<PlayerStamina>();
         _interaction = GetComponent<PlayerInteraction>();
-        _hands = GetComponent<ItemHolder>();
     }
 
     void OnEnable()
