@@ -125,7 +125,7 @@ CapsuleCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6982079906923042587}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 5e6f0d14e64e2df41bee056166112c24, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -180,3 +180,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ba5b3bae480c5d488a54a439cc58e7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _projectileSO: {fileID: 11400000, guid: 3c9b40b9fa5857b46941490f952a2ad4, type: 2}

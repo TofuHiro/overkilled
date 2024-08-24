@@ -4,32 +4,21 @@ using UnityEngine;
 
 public class ExplosiveProjectile : Projectile
 {
-    float _explosionDamage;
-    float _explosionForce;
-    float _explosionRadius;
-    bool _explodeOnContact;
-    float _explosionFuse;
+    ExplosiveProjectileSO _explosiveProjectile;
 
     float _timer = 0f;
 
-    public override void InitProjectile(float damage, float knockbackForce, Vector3 forward, float velocity, bool gravity, bool pointCollision)
+    void Awake()
     {
-        base.InitProjectile(damage, knockbackForce, forward, velocity, gravity, pointCollision);
-    }
+        _explosiveProjectile = (ExplosiveProjectileSO)_projectileSO;
 
-    public void InitProjectile(float damage, float knockbackForce, Vector3 forward, float velocity, bool gravity, bool pointCollision, float explosionDamage, float explosionForce, float explosionRadius, bool explodeOnContact, float explosionFuse)
-    {
-        InitProjectile(damage, knockbackForce, forward, velocity, gravity, pointCollision);
-        _explosionDamage = explosionDamage;
-        _explosionForce = explosionForce;
-        _explosionRadius = explosionRadius;
-        _explodeOnContact = explodeOnContact;
-        _explosionFuse = explosionFuse;
+        if (_explosiveProjectile.GetType() != typeof(ExplosiveProjectileSO))
+            Debug.LogWarning("Warning. Incorrect WeaponSO type assigned to weapon " + name);
     }
 
     protected override void FixedUpdate()
     {
-        if (!_explodeOnContact)
+        if (!_explosiveProjectile.explodeOnContact)
             return;
 
         base.FixedUpdate();
@@ -40,7 +29,7 @@ public class ExplosiveProjectile : Projectile
         if (_isFired)
         {
             _timer += Time.deltaTime;
-            if (_timer >= _explosionFuse)
+            if (_timer >= _explosiveProjectile.explosionFuse)
             {
                 Explode();
             }
@@ -49,7 +38,7 @@ public class ExplosiveProjectile : Projectile
 
     protected override void OnCollisionEnter(Collision collision)
     {
-        if (!_explodeOnContact)
+        if (!_explosiveProjectile.explodeOnContact)
             return;
 
         base.OnCollisionEnter(collision);
@@ -61,17 +50,17 @@ public class ExplosiveProjectile : Projectile
 
     void Explode()
     {
-        Collider[] colliders =  Physics.OverlapSphere(transform.position, _explosionRadius);
+        Collider[] colliders =  Physics.OverlapSphere(transform.position, _explosiveProjectile.explosionRadius);
 
         foreach (Collider collider in colliders)
         {
             IDamagable damagable = collider.GetComponent<IDamagable>();
             if (damagable != null)
-                damagable.TakeDamage(_explosionDamage);
+                damagable.TakeDamage(_explosiveProjectile.explosionDamage);
 
             Rigidbody rb = collider.GetComponent<Rigidbody>();
             if (rb != null)
-                rb.AddExplosionForce(_explosionForce, transform.position, _explosionRadius, 0f, ForceMode.Impulse);
+                rb.AddExplosionForce(_explosiveProjectile.explosionForce, transform.position, _explosiveProjectile.explosionRadius, 0f, ForceMode.Impulse);
         }
 
         Destroy(gameObject);
