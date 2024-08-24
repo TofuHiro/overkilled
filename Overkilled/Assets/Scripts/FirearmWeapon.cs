@@ -43,33 +43,8 @@ public class FirearmWeapon : Weapon
         float spread = Random.Range(-_aimConeAngle / 2f, _aimConeAngle / 2f);
         Quaternion rotation = Quaternion.Euler(_projectileExit.rotation.eulerAngles + (Vector3.up * spread));
 
-        if (_firearmSO.useExplosion)
-        {
-            ExplosiveProjectile projectile = Instantiate(_firearmSO.projectile, _projectileExit.position, rotation).GetComponent<ExplosiveProjectile>();
-            projectile.InitProjectile(
-                _firearmSO.damage, 
-                _firearmSO.knockbackForce, 
-                projectile.transform.forward, 
-                _firearmSO.projectileVelocity, 
-                _firearmSO.projectileGravity,
-                _firearmSO.pointCollision,
-                _firearmSO.explosionDamage,
-                _firearmSO.explosionForce,
-                _firearmSO.explosionRadius,
-                _firearmSO.explodeOnContact,
-                _firearmSO.explosionFuse);
-        }
-        else
-        {
-            Projectile projectile = Instantiate(_firearmSO.projectile, _projectileExit.position, rotation).GetComponent<Projectile>();
-            projectile.InitProjectile(
-                _firearmSO.damage, 
-                _firearmSO.knockbackForce,
-                projectile.transform.forward, 
-                _firearmSO.projectileVelocity, 
-                _firearmSO.projectileGravity,
-                _firearmSO.pointCollision);
-        }
+        Projectile projectile = Instantiate(_firearmSO.projectile.prefab, _projectileExit.position, rotation).GetComponent<Projectile>();
+        projectile.InitProjectile(_firearmSO.damage, _firearmSO.knockbackForce, projectile.transform.forward);
     }
 
     public override void SetSecondaryAttackState(bool state)

@@ -5,6 +5,8 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class Projectile : MonoBehaviour
 {
+    [SerializeField] protected ProjectileSO _projectileSO;
+
     Rigidbody _rb;
     float _damage;
     float _knockbackForce;
@@ -13,14 +15,14 @@ public class Projectile : MonoBehaviour
     protected bool _isFired = false;
     Vector3 _prevPosition, _directionOfTravel;
 
-    public virtual void InitProjectile(float damage, float knockbackForce, Vector3 forward, float velocity, bool gravity, bool pointCollision)
+    public virtual void InitProjectile(float damage, float knockbackForce, Vector3 forward)
     {
         _damage = damage;
         _knockbackForce = knockbackForce;
         _rb = GetComponent<Rigidbody>();
-        _rb.useGravity = gravity;
-        _rb.velocity = forward * velocity;
-        _pointCollision = pointCollision;
+        _rb.useGravity = _projectileSO.projectileGravity;
+        _rb.velocity = forward * _projectileSO.projectileVelocity;
+        _pointCollision = _projectileSO.pointCollision;
 
         _isFired = true;
         _prevPosition = transform.position;
