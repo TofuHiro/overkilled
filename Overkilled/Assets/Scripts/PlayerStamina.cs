@@ -14,8 +14,7 @@ public class PlayerStamina : MonoBehaviour
         get { return _currentStamina; }
         set
         {
-            _currentStamina = value;
-            Mathf.Clamp(_currentStamina, 0f, _maxStamina);
+            _currentStamina = Mathf.Clamp(value, 0f, _maxStamina);
 
             if (_currentStamina <= 0f)
                 SetSprint(false);
