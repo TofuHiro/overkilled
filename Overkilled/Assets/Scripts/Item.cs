@@ -11,10 +11,10 @@ public class Item : MonoBehaviour, IInteractable
 
     public void Interact(PlayerInteraction player)
     {
-        ItemHolder holder = player.GetComponent<ItemHolder>();
-        if (holder != null)
+        PlayerHand hand = player.GetComponent<PlayerHand>();
+        if (hand != null)
         {
-            holder.SetItem(this);
+            hand.SetItem(this);
         }
     }
 }
