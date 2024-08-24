@@ -51,24 +51,19 @@ public class PlayerInteraction : MonoBehaviour
             _hoveredInteract.Interact(this);
     }
 
-    public void StartAttack()
+    public void SetAttackState(bool state)
     {
         if (_hand.IsHoldingItem)
-        {
-            //check weapon and start attack
-        }
+            _hand.SetAttackState(state);
         else
-        {
-            TryCraft();
-        }
+            if (state)
+                TryCraft();
     }
 
-    public void StopAttack()
+    public void SetSecondaryAttackState(bool state)
     {
         if (_hand.IsHoldingItem)
-        {
-            //check weapon and stop attack
-        }
+            _hand.SetSecondaryAttackState(state);
     }
 
     void TryCraft()

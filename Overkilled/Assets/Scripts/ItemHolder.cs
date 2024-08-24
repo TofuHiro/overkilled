@@ -47,7 +47,7 @@ public class ItemHolder : MonoBehaviour
         if (state == true)
         {
             _currentItem.transform.position = _holdPosition.transform.position;
-            _currentItem.transform.rotation = Quaternion.Euler(_lockRotation);
+            _currentItem.transform.localRotation = Quaternion.Euler(_lockRotation);
             _currentItem.transform.localScale *= _itemShrinkfactor;
         }
         else

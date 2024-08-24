@@ -38,6 +38,8 @@ public class PlayerController : MonoBehaviour
         _input.Player.Use.performed += Interact;
         _input.Player.Fire.started += Attack;
         _input.Player.Fire.canceled += Attack;
+        _input.Player.AltFire.started += SecondaryAttack;
+        _input.Player.AltFire.canceled += SecondaryAttack;
     }
 
     void OnDisable()
@@ -48,6 +50,8 @@ public class PlayerController : MonoBehaviour
         _input.Player.Use.performed -= Interact;
         _input.Player.Fire.started -= Attack;
         _input.Player.Fire.canceled -= Attack;
+        _input.Player.AltFire.started -= SecondaryAttack;
+        _input.Player.AltFire.canceled -= SecondaryAttack;
     }
 
     void Update()
@@ -91,12 +95,16 @@ public class PlayerController : MonoBehaviour
     void Attack(InputAction.CallbackContext context)
     {
         if (context.started)
-        {
-            _interaction.StartAttack();
-        }
+            _interaction.SetAttackState(true);
         else if (context.canceled)
-        {
-            _interaction.StopAttack();
-        }
+            _interaction.SetAttackState(false);
+    }
+
+    void SecondaryAttack(InputAction.CallbackContext context)
+    {
+        if (context.started)
+            _interaction.SetSecondaryAttackState(true);
+        else if (context.canceled)
+            _interaction.SetSecondaryAttackState(false);
     }
 }
