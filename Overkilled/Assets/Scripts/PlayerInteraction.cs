@@ -1,13 +1,15 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerInteraction : MonoBehaviour
 {
+    [Tooltip("Maximum distance player can interact within")]
     [SerializeField] float _interactDistance = 1f;
+    [Tooltip("Layer mask to use when player is not holding anything")]
     [SerializeField] LayerMask _unarmedLayerMask;
+    [Tooltip("Layer mask to use when player is holding something")]
     [SerializeField] LayerMask _armedLayerMask;
-    [SerializeField] LayerMask _craftingTableMask;
+    [Tooltip("Layer mask of counters")]
+    [SerializeField] LayerMask _counterMask;
 
     IInteractable _hoveredInteract;
     PlayerHand _hand;
@@ -77,7 +79,7 @@ public class PlayerInteraction : MonoBehaviour
 
     CraftingStation CheckCraftingTable()
     {
-        Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, _interactDistance, _craftingTableMask);
+        Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, _interactDistance, _counterMask);
         if (hit.transform != null)
         {
             return hit.transform.GetComponent<CraftingStation>();

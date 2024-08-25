@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -15,6 +13,12 @@ public class Projectile : MonoBehaviour
     protected bool _isFired = false;
     Vector3 _prevPosition, _directionOfTravel;
 
+    /// <summary>
+    /// Initialize this projectile with base stats
+    /// </summary>
+    /// <param name="damage">The collision damage of this projectile</param>
+    /// <param name="knockbackForce">Force applied upon collision</param>
+    /// <param name="forward">The direction this projectile to be fired towards</param>
     public virtual void InitProjectile(float damage, float knockbackForce, Vector3 forward)
     {
         _damage = damage;

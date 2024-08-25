@@ -1,12 +1,12 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI;
 
 [RequireComponent(typeof(PlayerMotor))]
 public class PlayerStamina : MonoBehaviour
 {
+    [Tooltip("Maximum stamina (seconds) this player can have")]
     [SerializeField] float _maxStamina = 5f;
+    [Tooltip("The time delay required after using stamina before recharging")]
     [SerializeField] float _staminaRegenDelay = 2f;
 
     public float CurrentStamina
@@ -33,6 +33,10 @@ public class PlayerStamina : MonoBehaviour
         CurrentStamina = _maxStamina;
     }
 
+    /// <summary>
+    /// Set this player's sprint state
+    /// </summary>
+    /// <param name="state"></param>
     public void SetSprint(bool state)
     {
         _isSprinting = state;

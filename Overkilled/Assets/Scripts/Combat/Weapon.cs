@@ -4,12 +4,16 @@ using UnityEngine;
 
 public class Weapon : MonoBehaviour
 {
+    [Tooltip("Ensure that the type of this ScriptableObject matches the type of weapon")]
     [SerializeField] protected WeaponSO _weaponSO;
 
     protected bool _isAttacking = false, _isSecondaryAttacking;
     float _nextTimeToAttack = 0f;
     float _timer = 0f;
 
+    /// <summary>
+    /// Current durability of this weapon
+    /// </summary>
     public int Durability
     {
         get { return _durability; } 

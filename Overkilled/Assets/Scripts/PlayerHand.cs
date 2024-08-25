@@ -1,11 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
-using TMPro.EditorUtilities;
 using UnityEngine;
 
 [RequireComponent(typeof(ItemHolder))]
 public class PlayerHand : MonoBehaviour
 {
+    [Tooltip("Force applied to objects when dropping them")]
     [SerializeField] float _dropThrowForce = 5f;
     public bool IsHoldingItem { get { return _holder.IsOccupied; } }
 
@@ -38,8 +36,15 @@ public class PlayerHand : MonoBehaviour
         return _holder.GetItem();
     }
 
+    /// <summary>
+    /// Assigns a new item to the player's hand
+    /// </summary>
+    /// <param name="newItem"></param>
     public void SetItem(Item newItem)
     {
+        if (IsHoldingItem)
+            return;
+
         _holder.SetItem(newItem);
 
         _currentWeapon = newItem.GetComponent<Weapon>();
@@ -47,24 +52,30 @@ public class PlayerHand : MonoBehaviour
             _currentWeapon.OnPickup();
     }
 
+    /// <summary>
+    /// Drop item the player is currently holding and apply a throwing force
+    /// </summary>
     public void DropItem()
     {
         Item item = _holder.GetItem();
         ReleaseItem();
         item.GetComponent<Rigidbody>().AddForce(transform.forward * _dropThrowForce, ForceMode.Impulse);
-
-        if (_currentWeapon != null)
-        {
-            _currentWeapon.OnDrop();
-            _currentWeapon = null;
-        }
     }
 
+    /// <summary>
+    /// Releases item from the players hand. Player will no longer hold anything
+    /// </summary>
     public void ReleaseItem()
     {
         if (_holder.GetItem() == null)
             return;
 
         _holder.SetItem(null);
+
+        if (_currentWeapon != null)
+        {
+            _currentWeapon.OnDrop();
+            _currentWeapon = null;
+        }
     }
 }

@@ -1,14 +1,20 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "New Recipe", menuName = "Items/New Recipe")]
 public class CraftRecipeSO : ScriptableObject
 {
+    [Tooltip("The product item that this recipe will grant")]
     public ItemSO product;
+    [Tooltip("The ingredient items required to craft the product")]
     public ItemSO[] ingredients;
+    [Tooltip("The base time required to craft this recipe")]
     public float craftTime;
 
+    /// <summary>
+    /// Checks whether the given set of items can be used to craft this recipe
+    /// </summary>
+    /// <param name="holders">The set of ingredient items to check with</param>
+    /// <returns>Returns true if the recipe can be craft with the given set of items</returns>
     public bool CheckValidRecipe(ItemHolder[] holders)
     {
         //tracking checked items to avoid duplicates matching

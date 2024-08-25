@@ -1,13 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMotor : MonoBehaviour
 {
+    [Tooltip("Force applied to rigidbody for movement. Adjust drag to fine tune movement and friction")]
     [SerializeField] float _moveForce = 200f;
+    [Tooltip("Multiplier applied to movement when sprinting")]
     [SerializeField] float _sprintMultiplier = 1.4f;
      
     Rigidbody _rb;

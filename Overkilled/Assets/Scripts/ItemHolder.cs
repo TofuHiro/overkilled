@@ -1,13 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ItemHolder : MonoBehaviour
 {
+    [Tooltip("The position to hold items at")]
     [SerializeField] Transform _holdPosition;
+    [Tooltip("The multiplying factor to apply to objects when being held")]
     [SerializeField] float _itemShrinkfactor = 1f;
+    [Tooltip("The rotation to set to objects when being held")]
     [SerializeField] Vector3 _lockRotation = Vector3.zero;
-
+    
+    /// <summary>
+    /// Whether this holder is currently holding an object
+    /// </summary>
     public bool IsOccupied { get; private set; } = false;
 
     Item _currentItem;
@@ -15,8 +19,17 @@ public class ItemHolder : MonoBehaviour
     Collider[] _currentColliders;
 
     public Item GetItem() { return _currentItem; }
+
+    /// <summary>
+    /// The position of where the item is held at
+    /// </summary>
+    /// <returns></returns>
     public Vector3 GetHoldPosition() { return _holdPosition.position; }
 
+    /// <summary>
+    /// Assigns a new item to this holder, locking it into place
+    /// </summary>
+    /// <param name="item"></param>
     public void SetItem(Item item)
     {
         if (item != null)

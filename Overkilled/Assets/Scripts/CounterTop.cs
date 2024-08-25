@@ -1,10 +1,8 @@
-using JetBrains.Annotations;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CounterTop : MonoBehaviour, IInteractable
 {
+    [Tooltip("Parent transform for set of Itemholders")]
     [SerializeField] Transform _itemHoldersParent;
 
     protected ItemHolder[] _holders;
@@ -32,6 +30,9 @@ public class CounterTop : MonoBehaviour, IInteractable
         }
     }
 
+    /// <summary>
+    /// Returns the number of items on this counter
+    /// </summary>
     public int ItemsOnCounter
     {
         get
@@ -53,7 +54,7 @@ public class CounterTop : MonoBehaviour, IInteractable
             Debug.LogError("Error. No item holders found under item holders parent of counter " + name);
         }
     }
-
+    
     public virtual void Interact(PlayerInteraction player)
     {
         PlayerHand hand = player.GetComponent<PlayerHand>();

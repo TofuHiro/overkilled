@@ -1,9 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class FirearmWeapon : Weapon
 {
+    [Tooltip("The point where projectiles are fired from. Ensure the Z axis points forward")]
     [SerializeField] Transform _projectileExit;
 
     FirearmSO _firearmSO;

@@ -1,10 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CraftingStation : CounterTop
 {
+    [Tooltip("The set of recipes this crafting station will allow crafting for")]
     [SerializeField] RecipeSetSO _recipeSet;
+    [Tooltip("For dev. Products spawn at the first item holder in the hierachy. Assign this for a visual reference of where that will be on the table")]
     [SerializeField] ItemHolder _firstItemHolder;
 
     CraftRecipeSO _validRecipe;
@@ -30,6 +30,9 @@ public class CraftingStation : CounterTop
         }    
     }
 
+    /// <summary>
+    /// Start or speed up crafting at this station
+    /// </summary>
     public void Craft()
     {
         if (_validRecipe != null)

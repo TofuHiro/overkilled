@@ -1,10 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Transactions;
 using UnityEngine;
 
 public class MeleeWeapon : Weapon
 {
+    [Tooltip("The center point to check for attack collisions")]
     [SerializeField] Transform _swingPoint;
 
     MeleeSO _meleeSO;

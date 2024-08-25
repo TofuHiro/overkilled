@@ -1,9 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MaterialBox : CounterTop
 {
+    [Tooltip("The source object to spawn from this box")]
     [SerializeField] GameObject _materialPrefab;
 
     protected override void TakeFromEmptyCounter(PlayerHand hand)
