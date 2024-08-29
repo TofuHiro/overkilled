@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ad8e9bb888cfbe4d8d6022de45b002d, type: 3}
   m_Name: Test Bullet
   m_EditorClassIdentifier: 
-  prefab: {fileID: 0}
-  projectileVelocity: 0
-  pointCollision: 0
+  prefab: {fileID: 4099469462748987046, guid: e8f29bd13a94ad94fa4d46d47bafee1b, type: 3}
+  projectileVelocity: 50
+  pointCollision: 1
   projectileGravity: 0

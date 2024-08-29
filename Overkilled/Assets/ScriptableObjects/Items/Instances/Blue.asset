@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Blue
   m_EditorClassIdentifier: 
   name: Blue
-  prefabReference: {fileID: 7455143148118062530, guid: 0bd049c7697e14343863af4802397b20,
+  prefabReference: {fileID: 2219047373913409566, guid: 61161e8fbce1a184293a0181e2407993,
     type: 3}
   icon: {fileID: 21300000, guid: dfb10e88c14f84641b8714f6a3317b21, type: 3}

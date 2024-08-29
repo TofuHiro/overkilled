@@ -15,4 +15,4 @@ MonoBehaviour:
   name: Test Gun
   prefabReference: {fileID: 2779402030940936745, guid: bba482ca690799a42a4b921ba06c7227,
     type: 3}
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: cc27e95868ab32345b74b8338c01ebed, type: 3}

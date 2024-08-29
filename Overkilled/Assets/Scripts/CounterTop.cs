@@ -45,7 +45,7 @@ public class CounterTop : MonoBehaviour, IInteractable
         }
     }
 
-    void Start()
+    protected virtual void Start()
     {
         _holders = _itemHoldersParent.GetComponentsInChildren<ItemHolder>();
         _itemHolderCount = _holders.Length;
@@ -113,5 +113,21 @@ public class CounterTop : MonoBehaviour, IInteractable
                 return i;
 
         return -1;
+    }
+
+    protected void ReleaseAllItems()
+    {
+        for (int i = 0; i < _holders.Length; i++)
+        {
+            ReleaseItem(i);
+        }
+    }
+
+    void ReleaseItem(int index)
+    {
+        if (_holders[index].IsOccupied)
+            _holders[index].SetItem(null);
+        else
+            Debug.Log("Nothing to release");
     }
 }

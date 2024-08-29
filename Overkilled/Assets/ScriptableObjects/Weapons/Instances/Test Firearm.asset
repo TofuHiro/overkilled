@@ -17,17 +17,7 @@ MonoBehaviour:
   attackFrequency: 0.3
   durability: 20
   semiAutomatic: 1
-  projectile: {fileID: 4099469462748987046, guid: e8f29bd13a94ad94fa4d46d47bafee1b,
-    type: 3}
+  projectile: {fileID: 11400000, guid: e2118ffc5966e8f4f869281aa08fe860, type: 2}
   numberOfProjectiles: 1
-  projectileVelocity: 50
-  projectileGravity: 0
-  pointCollision: 1
   normalAimConeAngle: 40
   accurateAimConeAngle: 5
-  useExplosion: 0
-  explosionDamage: 0
-  explosionRadius: 0
-  explosionForce: 0
-  explodeOnContact: 0
-  explosionFuse: 0

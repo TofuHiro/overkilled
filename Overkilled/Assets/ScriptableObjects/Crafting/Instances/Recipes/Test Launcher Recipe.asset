@@ -12,6 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2968c2005bd1c7e4f8879ba5024652ee, type: 3}
   m_Name: Test Launcher Recipe
   m_EditorClassIdentifier: 
-  product: {fileID: 0}
-  ingredients: []
-  craftTime: 0
+  product: {fileID: 11400000, guid: 94d8a058a02eb864e9321a54b310221f, type: 2}
+  ingredients:
+  - {fileID: 11400000, guid: c281faaa89360044ebcd3111aefaeb8b, type: 2}
+  - {fileID: 11400000, guid: c281faaa89360044ebcd3111aefaeb8b, type: 2}
+  - {fileID: 11400000, guid: c281faaa89360044ebcd3111aefaeb8b, type: 2}
+  - {fileID: 11400000, guid: c281faaa89360044ebcd3111aefaeb8b, type: 2}
+  craftTime: 10

@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Red
   m_EditorClassIdentifier: 
   name: Red
-  prefabReference: {fileID: 650471661259654611, guid: e2d666e87373d81498a7172c65dc70fe,
+  prefabReference: {fileID: 2219047373913409566, guid: 20c28654591fa0f499306dc06a8b602a,
     type: 3}
   icon: {fileID: 21300000, guid: 2864a51fef567574b99f4f0851c13353, type: 3}

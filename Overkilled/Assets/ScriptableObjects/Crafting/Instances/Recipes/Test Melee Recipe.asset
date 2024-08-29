@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2968c2005bd1c7e4f8879ba5024652ee, type: 3}
   m_Name: Test Melee Recipe
   m_EditorClassIdentifier: 
-  product: {fileID: 0}
-  ingredients: []
-  craftTime: 0
+  product: {fileID: 11400000, guid: 1268e68befd50b341ad4243ac5f3493b, type: 2}
+  ingredients:
+  - {fileID: 11400000, guid: c281faaa89360044ebcd3111aefaeb8b, type: 2}
+  - {fileID: 11400000, guid: b0bb3fddda4437a4ca89a4bbd0ffe4ca, type: 2}
+  craftTime: 10
