@@ -15,4 +15,4 @@ MonoBehaviour:
   name: Test Melee
   prefabReference: {fileID: 1511602027102645527, guid: f1c88d3ce78024047b42bfb502c79afb,
     type: 3}
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 90335e5423c010749a50f906b965fa54, type: 3}

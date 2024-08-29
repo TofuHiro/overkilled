@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: Test Weapon Set
   recipes:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: f02952e9096a2a548abab4bf65481b5c, type: 2}
+  - {fileID: 11400000, guid: 122ec5fbd90606e40a1d832e822d4f39, type: 2}
+  - {fileID: 11400000, guid: 9803dc3062ba0ab478f77e407591eccf, type: 2}

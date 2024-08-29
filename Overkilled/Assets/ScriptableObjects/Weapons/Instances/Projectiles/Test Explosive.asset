@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd5cb800f2a6f944a84cb537611cf88f, type: 3}
   m_Name: Test Explosive
   m_EditorClassIdentifier: 
-  prefab: {fileID: 0}
-  projectileVelocity: 0
+  prefab: {fileID: 6982079906923042587, guid: 4c32daa3b7f7d1442ba9cf639965d2f3, type: 3}
+  projectileVelocity: 12
   pointCollision: 0
-  projectileGravity: 0
-  explosionDamage: 0
-  explosionRadius: 0
-  explosionForce: 0
+  projectileGravity: 1
+  explosionDamage: 50
+  explosionRadius: 5
+  explosionForce: 40
   explodeOnContact: 0
-  explosionFuse: 0
+  explosionFuse: 3

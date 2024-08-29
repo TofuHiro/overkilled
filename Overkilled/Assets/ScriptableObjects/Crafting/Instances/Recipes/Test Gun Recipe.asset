@@ -12,6 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2968c2005bd1c7e4f8879ba5024652ee, type: 3}
   m_Name: Test Gun Recipe
   m_EditorClassIdentifier: 
-  product: {fileID: 0}
-  ingredients: []
-  craftTime: 0
+  product: {fileID: 11400000, guid: 12b6bd0505f01614fa495cb3631694f9, type: 2}
+  ingredients:
+  - {fileID: 11400000, guid: c281faaa89360044ebcd3111aefaeb8b, type: 2}
+  - {fileID: 11400000, guid: 4e88f74650e21a9419ab52e5662d69fe, type: 2}
+  - {fileID: 11400000, guid: 4e88f74650e21a9419ab52e5662d69fe, type: 2}
+  craftTime: 10
