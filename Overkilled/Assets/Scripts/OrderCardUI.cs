@@ -5,9 +5,13 @@ using UnityEngine.UI;
 
 public class OrderCardUI : MonoBehaviour
 {
+    [Tooltip("The main body transform of the card to enable/disable")]
     [SerializeField] RectTransform _card;
+    [Tooltip("The image holding the product sprite")]
     [SerializeField] Image _productImage;
+    [Tooltip("The images holding the ingredient sprites")]
     [SerializeField] Image[] _ingredientsImages;
+    [Tooltip("The slider displaying the timer")]
     [SerializeField] Slider _timeSlider;
 
     public bool Active { get; private set; }
@@ -18,11 +22,19 @@ public class OrderCardUI : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// Set the timer slider value
+    /// </summary>
+    /// <param name="time"></param>
     public void SetTimer(float time)
     {
         _timeSlider.value = time;
     }
 
+    /// <summary>
+    /// Display information of a given order
+    /// </summary>
+    /// <param name="order"></param>
     public void SetOrder(OrderSO order)
     {
         if (order == null)

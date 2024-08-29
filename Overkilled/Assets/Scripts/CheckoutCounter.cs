@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 public class CheckoutCounter : CounterTop
 {
     OrderSystem _orderSystem;
@@ -22,7 +18,7 @@ public class CheckoutCounter : CounterTop
         if (!_orderSystem.CheckForOrder(item)) 
             return;
 
-        //Money
+        //Money based on weapon durability
         Weapon weapon = hand.GetItem().GetComponent<Weapon>();
         float durabilityFactor = 1f;
 
@@ -33,8 +29,9 @@ public class CheckoutCounter : CounterTop
         //Placing logic
         base.Interact(player);
 
-        //Pack and send away?
+        //Pack and send away? To update
         Destroy(_holders[0].GetItem().gameObject, 2f);//
+
         ReleaseAllItems();
     }
 }

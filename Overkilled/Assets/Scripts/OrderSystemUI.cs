@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class OrderSystemUI : MonoBehaviour
 {
+    [Tooltip("Parent transform holding the order cards")]
     [SerializeField] RectTransform _orderCardsHolder;
 
     OrderCardUI[] _cards;
@@ -19,7 +20,11 @@ public class OrderSystemUI : MonoBehaviour
         _orderSystem.OnOrderCreate += UpdateUI;
         _orderSystem.OnOrderComplete += UpdateUI;
         _orderSystem.OnOrderFail += UpdateUI;
-        _orderSystem.OnOrderTimeTick += SetTimers;
+    }
+
+    void Update()
+    {
+        SetTimers();        
     }
 
     void OnDisable()
@@ -27,20 +32,24 @@ public class OrderSystemUI : MonoBehaviour
         _orderSystem.OnOrderCreate -= UpdateUI;
         _orderSystem.OnOrderComplete -= UpdateUI;
         _orderSystem.OnOrderFail -= UpdateUI;
-        _orderSystem.OnOrderTimeTick -= SetTimers;
     }
 
     void UpdateUI()
     {
-        OrderSO[] orders = _orderSystem.GetActiveOrders();
+        ActiveOrder[] orders = _orderSystem.GetActiveOrders();
         for (int i = 0; i < orders.Length; i++)
-            _cards[i].SetOrder(orders[i]);
+            _cards[i].SetOrder(orders[i].Order);
     }
 
     void SetTimers()
     {
-        float[] timers = _orderSystem.GetActiveOrdersTimers();
-        for (int i = 0; i < timers.Length; i++)
-            _cards[i].SetTimer(timers[i]);
+        ActiveOrder[] orders = _orderSystem.GetActiveOrders();
+        for (int i = 0; i < orders.Length; i++)
+        {
+            if (!orders[i].Active)
+                continue;
+
+            _cards[i].SetTimer(orders[i].Timer);
+        }
     }
 }
