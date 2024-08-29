@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class BankUI : MonoBehaviour
 {
+    [Tooltip("TMP Text component displaying the balance")]
     [SerializeField] TMP_Text _balanceText;
 
     Bank _bank;
