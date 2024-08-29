@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
+using System.Linq;
 using UnityEngine;
 
 public class OrderSystem : MonoBehaviour
 {
+    [Tooltip("Recipe sets to pull orders from. Preset sets for testing")]
     [SerializeField] List<RecipeSetSO> _activeRecipeSets;
+    [Tooltip("The maximum number of active orders allowed at once")]
     [SerializeField] int _maxActiveOrders = 5;
 
     public static OrderSystem Instance;
@@ -15,20 +17,20 @@ public class OrderSystem : MonoBehaviour
     public event OrderSystemAction OnOrderCreate;
     public event OrderSystemAction OnOrderComplete;
     public event OrderSystemAction OnOrderFail;
-    public event OrderSystemAction OnOrderTimeTick;
 
     Bank _bank;
-    OrderSO[] _activeOrders;
-    float[] _orderTimers;
+    ActiveOrder[] _activeOrders;
 
     void Awake()
     {
         if (_activeRecipeSets == null)
             _activeRecipeSets = new List<RecipeSetSO>();
 
+        _activeOrders = new ActiveOrder[_maxActiveOrders];
+        for (int i = 0; i < _activeOrders.Length; i++)
+            _activeOrders[i] = new ActiveOrder();
+
         _bank = Bank.Instance;
-        _activeOrders = new OrderSO[_maxActiveOrders];
-        _orderTimers = new float[_maxActiveOrders];
 
         if (Instance != null && Instance != this)
         {
@@ -41,46 +43,70 @@ public class OrderSystem : MonoBehaviour
 
     void Update()
     {
-        TickOrderTime();
-
-        for (int i = 0; i < _orderTimers.Length; i++)
-        {
-            if (_activeOrders[i] == null)
-                continue;
-
-            if (_orderTimers[i] <= 0f)
-                FailOrder(i);
-        }
+        TickOrderTimes();
+        FailCheckOrders();
     }
 
+    /// <summary>
+    /// Adds a recipe set to create orders from
+    /// </summary>
+    /// <param name="recipeSet"></param>
     public void AddRecipeSet(RecipeSetSO recipeSet) => _activeRecipeSets.Add(recipeSet);
+
+    /// <summary>
+    /// Removes a recipe set to use to create orders from
+    /// </summary>
+    /// <param name="recipeSetSO"></param>
     public void RemoveRecipeSet(RecipeSetSO recipeSetSO)
     {
         if (_activeRecipeSets.Contains(recipeSetSO))
             _activeRecipeSets.Remove(recipeSetSO);
     }
+
+    /// <summary>
+    /// Set the active recipe sets to a predefined list of sets
+    /// </summary>
+    /// <param name="recipeSets">A list of recipe set scriptableobjects to set to</param>
     public void SetRecipeSets(List<RecipeSetSO> recipeSets) => _activeRecipeSets = recipeSets;
+
+    /// <summary>
+    /// Clear the list of active recipe sets
+    /// </summary>
     public void RemoveAllRecipeSets() => _activeRecipeSets.Clear();
-    public OrderSO[] GetActiveOrders() { return _activeOrders; }
-    public OrderSO GetFirstActiveOrder(ItemSO item)
+
+    /// <summary>
+    /// Returns an array storing the active orders
+    /// </summary>
+    /// <returns></returns>
+    public ref ActiveOrder[] GetActiveOrders() { return ref _activeOrders; }
+
+    /// <summary>
+    /// Get the first order of a specified item in the array of active orders
+    /// </summary>
+    /// <param name="item">The product item to search for in the active orders</param>
+    /// <returns></returns>
+    OrderSO GetFirstActiveOrder(ItemSO item)
     {
-        foreach (OrderSO order in _activeOrders)
+        foreach (ActiveOrder activeOrder in _activeOrders)
         {
-            if (order == null) 
+            if (!activeOrder.Active) 
                 continue;
 
-            if (order.requestedItemRecipe.product == item)
-                return order;
+            if (activeOrder.Order.requestedItemRecipe.product == item)
+                return activeOrder.Order;
         }
 
         return null;
     }
-    public ref float[] GetActiveOrdersTimers() { return ref _orderTimers; }
 
+    /// <summary>
+    /// Returns the index of the next available free slot in the array of active orders
+    /// </summary>
+    /// <returns></returns>
     int GetNextFreeOrderSlot()
     {
         for (int i = 0; i < _activeOrders.Length; i++)
-            if (_activeOrders[i] == null)
+            if (!_activeOrders[i].Active)
                 return i;
 
         return -1;
@@ -101,8 +127,9 @@ public class OrderSystem : MonoBehaviour
             if (order.requestedItemRecipe == recipe)
             {
                 int freeSlot = GetNextFreeOrderSlot();
-                _activeOrders[freeSlot] = order;
-                _orderTimers[freeSlot] = order.timeLimit;
+                _activeOrders[freeSlot].Order = order;
+                _activeOrders[freeSlot].Timer = order.timeLimit;
+                _activeOrders[freeSlot].Active = true;
                 OnOrderCreate?.Invoke();
                 return;
             }
@@ -118,11 +145,21 @@ public class OrderSystem : MonoBehaviour
         return recipe;
     }
 
+    /// <summary>
+    /// Check if there is an active order for a given item
+    /// </summary>
+    /// <param name="item"></param>
+    /// <returns></returns>
     public bool CheckForOrder(ItemSO item)
     {
         return GetFirstActiveOrder(item) != null;
     }
 
+    /// <summary>
+    /// Complete an active order for a given item
+    /// </summary>
+    /// <param name="item">The product order to fulfill</param>
+    /// <param name="durabilityFactor">The durability factor of the item to apply to the reward</param>
     public void CompleteOrder(ItemSO item, float durabilityFactor)
     {
         Debug.Log("Order completed of " + item.name);
@@ -135,9 +172,13 @@ public class OrderSystem : MonoBehaviour
         OnOrderComplete?.Invoke();
     }
 
+    /// <summary>
+    /// Fails an incomplete order and removes it from active orders
+    /// </summary>
+    /// <param name="index"></param>
     public void FailOrder(int index)
     {
-        Debug.Log("Order failed for " + _activeOrders[index].requestedItemRecipe.product.name);
+        Debug.Log("Order failed for " + _activeOrders[index].Order.requestedItemRecipe.product.name);
 
         RemoveOrder(index);
         OnOrderFail?.Invoke();
@@ -147,25 +188,34 @@ public class OrderSystem : MonoBehaviour
     {
         for (int i = 0; i < _activeOrders.Length; i++)
         {
-            if (_activeOrders[i] == order)
+            if (_activeOrders[i].Order == order)
             {
-                _activeOrders[i] = null;
+                RemoveOrder(i);
                 break;
             }
         }
     }
     void RemoveOrder(int index)
     {
-        _activeOrders[index] = null;
+        _activeOrders[index].Order = null;
+        _activeOrders[index].Timer = 0f;
+        _activeOrders[index].Active = false;
+        _activeOrders = _activeOrders.OrderBy(e => e.Active == false).ToArray();
     }
 
-    void TickOrderTime()
+    void TickOrderTimes()
     {
         for (int i = 0; i < _activeOrders.Length; i++)
-            if (_activeOrders[i] != null)
-                _orderTimers[i] -= Time.deltaTime;
+            if (_activeOrders[i].Active)
+                _activeOrders[i].Timer -= Time.deltaTime;
+    }
 
-        OnOrderTimeTick?.Invoke();
+    void FailCheckOrders()
+    {
+        for (int i = 0; i < _activeOrders.Length; i++)
+            if (_activeOrders[i].Active)
+                if (_activeOrders[i].Timer <= 0f)
+                    FailOrder(i);
     }
 
     ///////////////
