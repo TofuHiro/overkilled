@@ -15,7 +15,7 @@ public class CheckoutCounter : CounterTop
             return;
 
         ItemSO item = hand.GetItem().GetItemInfo();
-        if (!_orderSystem.CheckForOrder(item)) 
+        if (!_orderSystem.CheckActiveOrder(item)) 
             return;
 
         //Money based on weapon durability
@@ -24,7 +24,7 @@ public class CheckoutCounter : CounterTop
 
         if (weapon != null)
             durabilityFactor = (float)weapon.Durability / weapon.GetWeaponInfo().durability;
-        _orderSystem.CompleteOrder(item, durabilityFactor);
+        _orderSystem.DeliverRecipe(item, durabilityFactor);
 
         //Placing logic
         base.Interact(player);

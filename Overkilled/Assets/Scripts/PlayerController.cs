@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,7 +7,7 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerStamina))]
 [RequireComponent(typeof(PlayerInteraction))]
 [RequireComponent(typeof(PlayerHand))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     PlayerMotor _motor;
     PlayerRotation _rotation;
@@ -54,6 +55,9 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (!IsOwner) 
+            return;
+
         Movement();
         Rotation();
     }
@@ -72,6 +76,9 @@ public class PlayerController : MonoBehaviour
 
     void ToggleSprint(InputAction.CallbackContext context)
     {
+        if (!IsOwner)
+            return;
+
         if (context.started)
         {
             _stamina.SetSprint(true);
@@ -84,6 +91,9 @@ public class PlayerController : MonoBehaviour
 
     void Interact(InputAction.CallbackContext context)
     {
+        if (!IsOwner)
+            return;
+
         if (context.performed)
         {
             _interaction.Interact();
@@ -92,6 +102,9 @@ public class PlayerController : MonoBehaviour
 
     void Attack(InputAction.CallbackContext context)
     {
+        if (!IsOwner)
+            return;
+
         if (context.started)
             _interaction.SetAttackState(true);
         else if (context.canceled)
@@ -100,6 +113,9 @@ public class PlayerController : MonoBehaviour
 
     void SecondaryAttack(InputAction.CallbackContext context)
     {
+        if (!IsOwner)
+            return;
+
         if (context.started)
             _interaction.SetSecondaryAttackState(true);
         else if (context.canceled)
