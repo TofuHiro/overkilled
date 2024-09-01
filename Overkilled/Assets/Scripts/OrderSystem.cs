@@ -2,8 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Unity.Netcode;
 
-public class OrderSystem : MonoBehaviour
+public class OrderSystem : NetworkBehaviour
 {
     [Tooltip("Recipe sets to pull orders from. Preset sets for testing")]
     [SerializeField] List<RecipeSetSO> _activeRecipeSets;
@@ -44,7 +45,9 @@ public class OrderSystem : MonoBehaviour
     void Update()
     {
         TickOrderTimes();
-        FailCheckOrders();
+
+        if (IsServer)
+            FailCheckOrders();
     }
 
     /// <summary>
@@ -78,26 +81,39 @@ public class OrderSystem : MonoBehaviour
     /// Returns an array storing the active orders
     /// </summary>
     /// <returns></returns>
-    public ref ActiveOrder[] GetActiveOrders() { return ref _activeOrders; }
+    public ActiveOrder[] GetActiveOrders() { return _activeOrders; }
 
     /// <summary>
-    /// Get the first order of a specified item in the array of active orders
+    /// Get the index of the first order of a specified item in the array of active orders
     /// </summary>
     /// <param name="item">The product item to search for in the active orders</param>
-    /// <returns></returns>
-    OrderSO GetFirstActiveOrder(ItemSO item)
+    /// <returns>Returns the index of the active order for a given item in the active orders array. Returns -1 if null</returns>
+    int GetActiveOrderIndex(ItemSO item)
     {
-        foreach (ActiveOrder activeOrder in _activeOrders)
+        for (int i = 0; i < _activeOrders.Length; i++)
         {
-            if (!activeOrder.Active) 
+            if (!_activeOrders[i].Active)
                 continue;
 
-            if (activeOrder.Order.requestedItemRecipe.product == item)
-                return activeOrder.Order;
+            if (_activeOrders[i].Order.requestedItemRecipe.product == item)
+                return i;
         }
 
-        return null;
+        return -1;
     }
+
+    /// <summary>
+    /// Returns a random index for a recipe set in the active recipe set list
+    /// </summary>
+    /// <returns></returns>
+    int GetRandomRecipeSetIndex() { return Random.Range(0, _activeRecipeSets.Count); }
+
+    /// <summary>
+    /// Returns a random index for a recipe in a given recipe set
+    /// </summary>
+    /// <param name="recipeSet"></param>
+    /// <returns></returns>
+    int GetRandomRecipeIndex(RecipeSetSO recipeSet) { return Random.Range(0, recipeSet.recipes.Length); }
 
     /// <summary>
     /// Returns the index of the next available free slot in the array of active orders
@@ -112,19 +128,34 @@ public class OrderSystem : MonoBehaviour
         return -1;
     }
 
+    /// <summary>
+    /// Check if there is an active order for a given item
+    /// </summary>
+    /// <param name="item"></param>
+    /// <returns>Returns true if the item matches an active order</returns>
+    public bool CheckActiveOrder(ItemSO item)
+    {
+        if (GetActiveOrderIndex(item) == -1) 
+            return false;
+
+        return true;
+    }
+
     void CreateRandomOrder()
     {
         if (GetNextFreeOrderSlot() == -1)
             return;
-
-        CreateOrder(GetRandomRecipe());
+        
+        int recipeSetIndex = GetRandomRecipeSetIndex();
+        CreateOrderClientRpc(recipeSetIndex, GetRandomRecipeIndex(_activeRecipeSets[recipeSetIndex]));
     }
 
-    void CreateOrder(CraftRecipeSO recipe)
+    [ClientRpc]
+    void CreateOrderClientRpc(int recipeSetIndex, int recipeIndex)
     {
         foreach (OrderSO order in OrdersCatalog)
         {
-            if (order.requestedItemRecipe == recipe)
+            if (order.requestedItemRecipe == _activeRecipeSets[recipeSetIndex].recipes[recipeIndex])
             {
                 int freeSlot = GetNextFreeOrderSlot();
                 _activeOrders[freeSlot].Order = order;
@@ -135,48 +166,48 @@ public class OrderSystem : MonoBehaviour
             }
         }
 
-        Debug.LogError("Error. Recipe " + recipe.name + " is not found in orders catalog. Reload resources or create a new order for the recipe");
-    }
-
-    CraftRecipeSO GetRandomRecipe()
-    {
-        RecipeSetSO recipeSet = _activeRecipeSets[Random.Range(0, _activeRecipeSets.Count)];
-        CraftRecipeSO recipe = recipeSet.recipes[Random.Range(0, recipeSet.recipes.Length)];
-        return recipe;
+        Debug.LogError("Error. Recipe " + _activeRecipeSets[recipeIndex].name + " is not found in orders catalog. Reload resources or create a new order for the recipe");
     }
 
     /// <summary>
-    /// Check if there is an active order for a given item
+    /// Attempt to deliver an item 
     /// </summary>
     /// <param name="item"></param>
+    /// <param name="durabilityFactor"></param>
     /// <returns></returns>
-    public bool CheckForOrder(ItemSO item)
+    public void DeliverRecipe(ItemSO item, float durabilityFactor)
     {
-        return GetFirstActiveOrder(item) != null;
+        int orderIndex = GetActiveOrderIndex(item);
+        if (orderIndex == -1)
+            return;
+
+        CompleteOrderServerRpc(orderIndex, durabilityFactor);
     }
 
-    /// <summary>
-    /// Complete an active order for a given item
-    /// </summary>
-    /// <param name="item">The product order to fulfill</param>
-    /// <param name="durabilityFactor">The durability factor of the item to apply to the reward</param>
-    public void CompleteOrder(ItemSO item, float durabilityFactor)
+    [ServerRpc(RequireOwnership = false)]
+    void CompleteOrderServerRpc(int orderIndex, float durabilityFactor)
     {
-        Debug.Log("Order completed of " + item.name);
+        CompleteOrderClientRpc(orderIndex, durabilityFactor);
+    }
 
-        OrderSO order = GetFirstActiveOrder(item);
+    [ClientRpc]
+    void CompleteOrderClientRpc(int orderIndex, float durabilityFactor)
+    {
+        OrderSO order = _activeOrders[orderIndex].Order;
 
         _bank.AddMoney((int)Mathf.Max(order.minReward, order.reward * durabilityFactor));
-
         RemoveOrder(order);
         OnOrderComplete?.Invoke();
+
+        Debug.Log("Order completed of " + order.requestedItemRecipe.product.name);
     }
 
+    [ClientRpc]
     /// <summary>
     /// Fails an incomplete order and removes it from active orders
     /// </summary>
     /// <param name="index"></param>
-    public void FailOrder(int index)
+    void FailOrderClientRpc(int index)
     {
         Debug.Log("Order failed for " + _activeOrders[index].Order.requestedItemRecipe.product.name);
 
@@ -215,13 +246,18 @@ public class OrderSystem : MonoBehaviour
         for (int i = 0; i < _activeOrders.Length; i++)
             if (_activeOrders[i].Active)
                 if (_activeOrders[i].Timer <= 0f)
-                    FailOrder(i);
+                    FailOrderClientRpc(i);
     }
 
     ///////////////
     public void StartCreatingOrders()
     {
+        if (!IsServer)
+            return;
+
         Debug.Log("Starting to create orders");
         InvokeRepeating("CreateRandomOrder", 2f, 5f);
     }
+
+    
 }
