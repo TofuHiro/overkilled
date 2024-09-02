@@ -9,7 +9,7 @@ public class CraftingStation : CounterTop
     [SerializeField] ItemHolder _firstItemHolder;
 
     CraftRecipeSO _validRecipe;
-    float _craftProgress = 0f;
+    NetworkVariable<float> _craftProgress = new NetworkVariable<float>(0f);
     bool _isCrafting = false;
 
     public override void Interact(PlayerInteraction player)
@@ -32,12 +32,15 @@ public class CraftingStation : CounterTop
 
     void Update()
     {
+        if (!IsServer)
+            return;
+
         if (_isCrafting)
         {
-            _craftProgress += Time.deltaTime;
-            Debug.Log(_craftProgress);
+            _craftProgress.Value += Time.deltaTime;
+            Debug.Log(_craftProgress.Value);
 
-            if (_craftProgress >= _validRecipe.craftTime)
+            if (_craftProgress.Value >= _validRecipe.craftTime)
                 CompleteCraft();
         }    
     }
@@ -47,23 +50,12 @@ public class CraftingStation : CounterTop
     /// </summary>
     public void Craft()
     {
-        CraftServerRpc();
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    void CraftServerRpc()
-    {
-        CraftClientRpc();
-    }
-    [ClientRpc]
-    void CraftClientRpc()
-    {
         if (_validRecipe != null)
         {
             if (!_isCrafting)
-                BeginCrafting();
+                BeginCraftingServerRpc();
             else
-                SpeedUpCraft();
+                SpeedUpCraftServerRpc();
         }
         else
         {
@@ -71,7 +63,13 @@ public class CraftingStation : CounterTop
         }
     }
 
-    void BeginCrafting()
+    [ServerRpc(RequireOwnership = false)]
+    void BeginCraftingServerRpc()
+    {
+        BeginCraftingClientRpc();
+    }
+    [ClientRpc]
+    void BeginCraftingClientRpc()
     {
         _isCrafting = true;
     }
@@ -87,14 +85,15 @@ public class CraftingStation : CounterTop
         if (!_isCrafting)
             return;
 
-        _craftProgress = 0f;
-        _validRecipe = null;
+        _craftProgress.Value = 0f;
         _isCrafting = false;
+        _validRecipe = null;
     }
 
-    void SpeedUpCraft()
+    [ServerRpc(RequireOwnership = false)]
+    void SpeedUpCraftServerRpc()
     {
-        _craftProgress += .5f;
+        _craftProgress.Value += .5f;
     }
 
     void CompleteCraft()
