@@ -42,17 +42,17 @@ public class MeleeWeapon : Weapon
             IDamagable damagable = collider.GetComponent<IDamagable>();
             if (damagable != null)
             {
-                damagable.TakeDamage(_meleeSO.damage);
+                CombatManager.Instance.DamageTarget(damagable, _meleeSO.damage);
                 hit = true;
             }
 
             Rigidbody rb = collider.GetComponent<Rigidbody>();
             if (rb != null)
-                rb.AddForceAtPosition(_swingPoint.forward * _meleeSO.knockbackForce, collider.ClosestPoint(transform.position), ForceMode.Impulse);
+                CombatManager.Instance.AddHitForce(rb, _swingPoint.forward * _meleeSO.knockbackForce, collider.ClosestPoint(transform.position));
         }
 
         if (hit)
-            Durability--;
+            DecreaseDurablity(1);
     }
 
     void HeavySwing()
@@ -65,18 +65,18 @@ public class MeleeWeapon : Weapon
             IDamagable damagable = collider.GetComponent<IDamagable>();
             if (damagable != null)
             {
-                damagable.TakeDamage(_meleeSO.heavyDamage);
+                CombatManager.Instance.DamageTarget(damagable, _meleeSO.heavyDamage);
                 hit = true;
             }
 
             Rigidbody rb = collider.GetComponent<Rigidbody>();
             if (rb != null)
-                rb.AddForceAtPosition(_swingPoint.forward * _meleeSO.heavyKnockbackForce, collider.ClosestPoint(transform.position), ForceMode.Impulse);
+                CombatManager.Instance.AddHitForce(rb, _swingPoint.forward * _meleeSO.heavyKnockbackForce, collider.ClosestPoint(transform.position));
         }
 
         if (hit)
         {
-            Durability -= 2;
+            DecreaseDurablity(2);
         }
     }
 
