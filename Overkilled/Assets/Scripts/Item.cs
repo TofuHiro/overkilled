@@ -1,7 +1,8 @@
 using UnityEngine;
+using Unity.Netcode;
 
 [RequireComponent(typeof(Rigidbody))]
-public class Item : MonoBehaviour, IInteractable
+public class Item : NetworkBehaviour, IInteractable
 {
     [SerializeField] ItemSO _itemInfo;
 
@@ -14,5 +15,10 @@ public class Item : MonoBehaviour, IInteractable
         {
             hand.SetItem(this);
         }
+    }
+
+    public NetworkObject GetNetworkObject()
+    {
+        return GetComponent<NetworkObject>();
     }
 }
