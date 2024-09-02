@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Test Gun
   m_EditorClassIdentifier: 
   name: Test Gun
-  prefabReference: {fileID: 2779402030940936745, guid: bba482ca690799a42a4b921ba06c7227,
+  prefabReference: {fileID: 2483200049784949360, guid: 6f2c159298023e44d8eca255df8fbb79,
     type: 3}
   icon: {fileID: 21300000, guid: cc27e95868ab32345b74b8338c01ebed, type: 3}

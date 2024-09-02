@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Test Launcher
   m_EditorClassIdentifier: 
   name: Test Launcher
-  prefabReference: {fileID: 2779402030940936745, guid: f13e4a8517c171540bba3dbe58d4157f,
+  prefabReference: {fileID: 2483200049784949360, guid: 80a9e4465d587cd4a94d5d066067b8e7,
     type: 3}
   icon: {fileID: 21300000, guid: 9c63b51755ec8c845b857cc73a35d606, type: 3}

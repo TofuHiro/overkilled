@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 
 public class CraftingStation : CounterTop
@@ -13,8 +14,19 @@ public class CraftingStation : CounterTop
 
     public override void Interact(PlayerInteraction player)
     {
-        StopCrafting();
         base.Interact(player);
+        StopCraftingServerRpc();
+        SetValidRecipeServerRpc();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void SetValidRecipeServerRpc()
+    {
+        SetValidRecipeClientRpc();
+    }
+    [ClientRpc]
+    void SetValidRecipeClientRpc()
+    {
         _validRecipe = _recipeSet.GetValidRecipe(_holders, ItemsOnCounter);
     }
 
@@ -35,11 +47,22 @@ public class CraftingStation : CounterTop
     /// </summary>
     public void Craft()
     {
+        CraftServerRpc();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void CraftServerRpc()
+    {
+        CraftClientRpc();
+    }
+    [ClientRpc]
+    void CraftClientRpc()
+    {
         if (_validRecipe != null)
         {
-            BeginCrafting();
-
-            if (_isCrafting)
+            if (!_isCrafting)
+                BeginCrafting();
+            else
                 SpeedUpCraft();
         }
         else
@@ -50,13 +73,16 @@ public class CraftingStation : CounterTop
 
     void BeginCrafting()
     {
-        if (_isCrafting)
-            return;
-
         _isCrafting = true;
     }
 
-    void StopCrafting()
+    [ServerRpc(RequireOwnership = false)]
+    void StopCraftingServerRpc()
+    {
+        StopCraftingClientRpc();
+    }
+    [ClientRpc]
+    void StopCraftingClientRpc()
     {
         if (!_isCrafting)
             return;
@@ -74,7 +100,7 @@ public class CraftingStation : CounterTop
     void CompleteCraft()
     {
         SpawnProduct();
-        StopCrafting();
+        StopCraftingServerRpc();
     }
 
     void SpawnProduct()
@@ -86,11 +112,21 @@ public class CraftingStation : CounterTop
 
             Item item = holder.GetItem();
             holder.SetItem(null);
-            Destroy(item.gameObject);
+            DestroyIngredientServerRpc(item.GetNetworkObject());
         }
 
-        Item product = Instantiate(_validRecipe.product.prefabReference).GetComponent<Item>();
+        NetworkObject productNetworkObject = Instantiate(_validRecipe.product.prefabReference).GetComponent<NetworkObject>();
+        productNetworkObject.Spawn(true);
+
+        Item product = productNetworkObject.GetComponent<Item>();
         _holders[0].SetItem(product);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void DestroyIngredientServerRpc(NetworkObjectReference itemNetworkObjectReference)
+    {
+        itemNetworkObjectReference.TryGet(out NetworkObject itemNetworkObject);
+        Destroy(itemNetworkObject.gameObject);
     }
 
     void OnDrawGizmos()
