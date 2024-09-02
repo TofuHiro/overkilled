@@ -1174,7 +1174,7 @@ MonoBehaviour:
   _holdPosition: {fileID: 1499876774}
   _itemShrinkfactor: 0.5
   _lockRotation: {x: 0, y: 0, z: 0}
-  _useParent: 1
+  _isStatic: 1
 --- !u!1 &178340090
 GameObject:
   m_ObjectHideFlags: 0
@@ -1458,7 +1458,7 @@ MonoBehaviour:
   _holdPosition: {fileID: 306971236}
   _itemShrinkfactor: 0.5
   _lockRotation: {x: 0, y: 0, z: 0}
-  _useParent: 1
+  _isStatic: 1
 --- !u!1 &301993055
 GameObject:
   m_ObjectHideFlags: 0
@@ -2377,7 +2377,7 @@ MonoBehaviour:
   _holdPosition: {fileID: 316101245}
   _itemShrinkfactor: 0.5
   _lockRotation: {x: 0, y: 0, z: 0}
-  _useParent: 1
+  _isStatic: 1
 --- !u!1 &528037102
 GameObject:
   m_ObjectHideFlags: 0
@@ -4350,7 +4350,7 @@ MonoBehaviour:
   _holdPosition: {fileID: 1437780236}
   _itemShrinkfactor: 0.5
   _lockRotation: {x: 0, y: 0, z: 0}
-  _useParent: 1
+  _isStatic: 1
 --- !u!224 &1113939472 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4565431570637015127, guid: 9502a35ecc69ab544a53ab772533db47,
@@ -5207,7 +5207,7 @@ MonoBehaviour:
   _holdPosition: {fileID: 582488097}
   _itemShrinkfactor: 0.5
   _lockRotation: {x: 0, y: 0, z: 0}
-  _useParent: 1
+  _isStatic: 1
 --- !u!1 &1426914466
 GameObject:
   m_ObjectHideFlags: 0
@@ -6032,7 +6032,7 @@ MonoBehaviour:
   _holdPosition: {fileID: 1387297800}
   _itemShrinkfactor: 0.5
   _lockRotation: {x: 0, y: 0, z: 0}
-  _useParent: 1
+  _isStatic: 1
 --- !u!1 &1693108046
 GameObject:
   m_ObjectHideFlags: 0
@@ -6595,7 +6595,7 @@ MonoBehaviour:
   _holdPosition: {fileID: 1357336595}
   _itemShrinkfactor: 0.5
   _lockRotation: {x: 0, y: 0, z: 0}
-  _useParent: 1
+  _isStatic: 1
 --- !u!1001 &1901431235
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7174,7 +7174,7 @@ MonoBehaviour:
   _holdPosition: {fileID: 301993056}
   _itemShrinkfactor: 0.5
   _lockRotation: {x: 0, y: 0, z: 0}
-  _useParent: 1
+  _isStatic: 1
 --- !u!1 &2120456907
 GameObject:
   m_ObjectHideFlags: 0

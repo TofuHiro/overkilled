@@ -1,4 +1,5 @@
 using Unity.Netcode;
+using UnityEngine;
 
 public class CheckoutCounter : CounterTop
 {
@@ -16,8 +17,8 @@ public class CheckoutCounter : CounterTop
         if (!hand.IsHoldingItem)
             return;
 
-        ItemSO item = hand.GetItem().GetItemInfo();
-        if (!_orderSystem.CheckActiveOrder(item)) 
+        Item item = hand.GetItem();
+        if (!_orderSystem.CheckActiveOrder(item.GetItemInfo())) 
             return;
 
         //Money based on weapon durability
@@ -26,21 +27,20 @@ public class CheckoutCounter : CounterTop
 
         if (weapon != null)
             durabilityFactor = (float)weapon.Durability / weapon.GetWeaponInfo().durability;
-        _orderSystem.DeliverRecipe(item, durabilityFactor);
+        _orderSystem.DeliverRecipe(item.GetItemInfo(), durabilityFactor);
 
         //Placing logic
         base.Interact(player);
 
         //Pack and send away? To update
-        DestroyItemServerRpc(_holders[0].GetItem().GetNetworkObject());
-
-        ReleaseAllItems();
+        DestroyItemServerRpc(item.GetNetworkObject());
     }
 
     [ServerRpc(RequireOwnership = false)]
     void DestroyItemServerRpc(NetworkObjectReference itemNetworkObjectReference)
     {
         itemNetworkObjectReference.TryGet(out NetworkObject itemNetworkObject);
-        Destroy(itemNetworkObject.gameObject, 2f);
-    }
+        Destroy(itemNetworkObject.gameObject, 1f);
+        ReleaseAllItems();
+    }    
 }

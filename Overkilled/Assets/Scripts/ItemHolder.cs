@@ -70,6 +70,7 @@ public class ItemHolder : NetworkBehaviour
             _currentItem = item;
             _currentRigidbody = item.GetComponent<Rigidbody>();
             _currentColliders = item.GetComponents<Collider>();
+            _itemTransform = item.transform;
             IsOccupied = true;
             SetLockItem(true);
         }
@@ -79,13 +80,13 @@ public class ItemHolder : NetworkBehaviour
             _currentItem = null;
             _currentRigidbody = null;
             _currentColliders = null;
+            _itemTransform = null;
             IsOccupied = false;
         }
     }
 
     void SetLockItem(bool state)
     {
-        _itemTransform = _currentItem.transform;
         _currentRigidbody.isKinematic = state;
 
         foreach (Collider collider in _currentColliders)
