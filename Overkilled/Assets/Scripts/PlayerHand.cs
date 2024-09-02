@@ -1,7 +1,8 @@
+using Unity.Netcode;
 using UnityEngine;
 
 [RequireComponent(typeof(ItemHolder))]
-public class PlayerHand : MonoBehaviour
+public class PlayerHand : NetworkBehaviour
 {
     [Tooltip("Force applied to objects when dropping them")]
     [SerializeField] float _dropThrowForce = 5f;
@@ -77,5 +78,14 @@ public class PlayerHand : MonoBehaviour
             _currentWeapon.OnDrop();
             _currentWeapon = null;
         }
+    }
+
+    /// <summary>
+    /// Returns the network object of this player
+    /// </summary>
+    /// <returns></returns>
+    public NetworkObject GetNetworkObject()
+    {
+        return GetComponent<NetworkObject>();
     }
 }
