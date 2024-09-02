@@ -454,6 +454,7 @@ MonoBehaviour:
   _holdPosition: {fileID: 2474189813981053426}
   _itemShrinkfactor: 1
   _lockRotation: {x: 0, y: 0, z: 0}
+  _isStatic: 0
 --- !u!114 &5230003589712962909
 MonoBehaviour:
   m_ObjectHideFlags: 0

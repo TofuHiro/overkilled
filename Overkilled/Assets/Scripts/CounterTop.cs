@@ -1,6 +1,7 @@
 using UnityEngine;
+using Unity.Netcode;
 
-public class CounterTop : MonoBehaviour, IInteractable
+public class CounterTop : NetworkBehaviour, IInteractable
 {
     [Tooltip("Parent transform for set of Itemholders")]
     [SerializeField] Transform _itemHoldersParent;

@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 
 public class MaterialBox : CounterTop
@@ -7,7 +8,18 @@ public class MaterialBox : CounterTop
 
     protected override void TakeFromEmptyCounter(PlayerHand hand)
     {
-        Item item = Instantiate(_materialPrefab).GetComponent<Item>();
-        hand.SetItem(item);
+        SpawnItemServerRpc(hand.GetNetworkObject());
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void SpawnItemServerRpc(NetworkObjectReference handNetworkObjectReference)
+    {
+        GameObject materialTranform = Instantiate(_materialPrefab);
+        materialTranform.GetComponent<NetworkObject>().Spawn(true);
+
+        handNetworkObjectReference.TryGet(out NetworkObject handNetworkObject);
+
+        PlayerHand hand = handNetworkObject.GetComponent<PlayerHand>();
+        hand.SetItem(materialTranform.GetComponent<Item>());
     }
 }
