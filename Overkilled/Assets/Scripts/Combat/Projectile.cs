@@ -1,7 +1,8 @@
 using UnityEngine;
+using Unity.Netcode;
 
 [RequireComponent(typeof(Rigidbody))]
-public class Projectile : MonoBehaviour
+public class Projectile : NetworkBehaviour
 {
     [SerializeField] protected ProjectileSO _projectileSO;
 
@@ -21,16 +22,22 @@ public class Projectile : MonoBehaviour
     /// <param name="forward">The direction this projectile to be fired towards</param>
     public virtual void InitProjectile(float damage, float knockbackForce, Vector3 forward)
     {
+        InitProjectileServerRpc(damage, knockbackForce, forward);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void InitProjectileServerRpc(float damage, float knockbackForce, Vector3 forward)
+    {
         _damage = damage;
         _knockbackForce = knockbackForce;
         _rb = GetComponent<Rigidbody>();
         _rb.useGravity = _projectileSO.projectileGravity;
-        _rb.velocity = forward * _projectileSO.projectileVelocity;
         _pointCollision = _projectileSO.pointCollision;
 
         _isFired = true;
         _prevPosition = transform.position;
         _directionOfTravel = transform.forward;
+        _rb.AddForce(forward * _projectileSO.projectileVelocity, ForceMode.Impulse);
     }
 
     protected virtual void FixedUpdate()
@@ -61,13 +68,19 @@ public class Projectile : MonoBehaviour
     protected virtual void HitTarget(Transform target, Vector3 hitPoint)
     {
         IDamagable damagable = target.GetComponent<IDamagable>();
-        if (damagable != null) 
-            damagable.TakeDamage(_damage);
+        if (damagable != null)
+            CombatManager.Instance.DamageTarget(damagable, _damage);
 
         Rigidbody rb = target.GetComponent<Rigidbody>();
         if (rb != null)
-            rb.AddForceAtPosition(_directionOfTravel * _knockbackForce, hitPoint, ForceMode.Impulse);
+            CombatManager.Instance.AddHitForce(rb, _directionOfTravel * _knockbackForce, hitPoint);
 
+       DespawnProjectileServerRpc();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    protected void DespawnProjectileServerRpc()
+    {
         Destroy(gameObject);
     }
 }

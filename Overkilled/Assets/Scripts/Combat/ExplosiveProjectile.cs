@@ -54,13 +54,13 @@ public class ExplosiveProjectile : Projectile
         {
             IDamagable damagable = collider.GetComponent<IDamagable>();
             if (damagable != null)
-                damagable.TakeDamage(_explosiveProjectile.explosionDamage);
+                CombatManager.Instance.DamageTarget(damagable, _explosiveProjectile.explosionDamage);
 
             Rigidbody rb = collider.GetComponent<Rigidbody>();
             if (rb != null)
-                rb.AddExplosionForce(_explosiveProjectile.explosionForce, transform.position, _explosiveProjectile.explosionRadius, 0f, ForceMode.Impulse);
+                CombatManager.Instance.AddExplosiveForce(rb, _explosiveProjectile.explosionForce, transform.position, _explosiveProjectile.explosionRadius);
         }
 
-        Destroy(gameObject);
+        DespawnProjectileServerRpc();
     }
 }
