@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
-public class Weapon : MonoBehaviour
+public abstract class Weapon : NetworkBehaviour
 {
     [Tooltip("Ensure that the type of this ScriptableObject matches the type of weapon")]
     [SerializeField] protected WeaponSO _weaponSO;
@@ -14,22 +15,32 @@ public class Weapon : MonoBehaviour
     /// <summary>
     /// Current durability of this weapon
     /// </summary>
-    public int Durability
-    {
-        get { return _durability; } 
-        protected set
-        {
-            _durability = Mathf.Clamp(value, 0, _weaponSO.durability);
-        }
+    public int Durability { 
+        get 
+        { 
+            return _durability.Value; 
+        } 
     }
-    private int _durability;
+
+    NetworkVariable<int> _durability = new NetworkVariable<int>(0);
 
     public WeaponSO GetWeaponInfo() { return _weaponSO; }
+
+    protected void DecreaseDurablity(int amount)
+    {
+        DecreaseDurabilityServerRpc(amount);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void DecreaseDurabilityServerRpc(int amount)
+    {
+        _durability.Value = Mathf.Clamp(Durability - amount, 0, _weaponSO.durability);
+    }
 
     void Start()
     {
         SetNextTimeAttack(_weaponSO.attackFrequency);
-        Durability = _weaponSO.durability;
+        _durability.Value = _weaponSO.durability;
     }
 
     void Update()

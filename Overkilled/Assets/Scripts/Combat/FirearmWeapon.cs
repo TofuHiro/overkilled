@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 
 public class FirearmWeapon : Weapon
@@ -29,7 +30,7 @@ public class FirearmWeapon : Weapon
             n++;
         }
 
-        Durability--;
+        DecreaseDurablity(1);
     }
 
     void SetAccuracy(float angle)
@@ -39,10 +40,19 @@ public class FirearmWeapon : Weapon
 
     void ShootProjectile()
     {
+        ShootProjectileServerRpc();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void ShootProjectileServerRpc()
+    {
         float spread = Random.Range(-_aimConeAngle / 2f, _aimConeAngle / 2f);
         Quaternion rotation = Quaternion.Euler(_projectileExit.rotation.eulerAngles + (Vector3.up * spread));
 
-        Projectile projectile = Instantiate(_firearmSO.projectile.prefab, _projectileExit.position, rotation).GetComponent<Projectile>();
+        NetworkObject projectileNetworkObject = Instantiate(_firearmSO.projectile.prefab, _projectileExit.position, rotation).GetComponent<NetworkObject>();
+        projectileNetworkObject.Spawn(true);
+
+        Projectile projectile = projectileNetworkObject.GetComponent<Projectile>();
         projectile.InitProjectile(_firearmSO.damage, _firearmSO.knockbackForce, projectile.transform.forward);
     }
 

@@ -1,9 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
-public class Box : MonoBehaviour, IDamagable
+public class Box : NetworkBehaviour, IDamagable
 {
+    NetworkObject networkObject;
+
     public float Health
     {
         get { return _health; }
@@ -17,10 +20,16 @@ public class Box : MonoBehaviour, IDamagable
     void Start()
     {
         _health = 100f;
+        networkObject = GetComponent<NetworkObject>();
     }
 
     public void TakeDamage(float damage)
     {
         Health -= damage;
+    }
+
+    public NetworkObject GetNetworkObject()
+    {
+        return networkObject;
     }
 }
