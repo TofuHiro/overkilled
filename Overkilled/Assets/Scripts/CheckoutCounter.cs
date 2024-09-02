@@ -1,3 +1,5 @@
+using Unity.Netcode;
+
 public class CheckoutCounter : CounterTop
 {
     OrderSystem _orderSystem;
@@ -30,8 +32,15 @@ public class CheckoutCounter : CounterTop
         base.Interact(player);
 
         //Pack and send away? To update
-        Destroy(_holders[0].GetItem().gameObject, 2f);//
+        DestroyItemServerRpc(_holders[0].GetItem().GetNetworkObject());
 
         ReleaseAllItems();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void DestroyItemServerRpc(NetworkObjectReference itemNetworkObjectReference)
+    {
+        itemNetworkObjectReference.TryGet(out NetworkObject itemNetworkObject);
+        Destroy(itemNetworkObject.gameObject, 2f);
     }
 }
