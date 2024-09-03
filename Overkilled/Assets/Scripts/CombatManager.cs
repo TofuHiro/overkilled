@@ -59,7 +59,9 @@ public class CombatManager : MonoBehaviour
     [ServerRpc(RequireOwnership = false)]
     void AddExplosiveForceServerRpc(NetworkObjectReference targetNetworkObjectReference, float explosiveForce, Vector3 explosionPosition, float explosionRadius)
     {
+        targetNetworkObjectReference.TryGet(out NetworkObject targetNetworkObject);
+        Rigidbody rigidbody = targetNetworkObject.GetComponent<Rigidbody>();
 
-        GetComponent<Rigidbody>().AddExplosionForce(explosiveForce, explosionPosition, explosionRadius, 0f, ForceMode.Impulse);
+        rigidbody.AddExplosionForce(explosiveForce, explosionPosition, explosionRadius, 0f, ForceMode.Impulse);
     }
 }
