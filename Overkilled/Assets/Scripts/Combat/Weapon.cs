@@ -57,8 +57,11 @@ public abstract class Weapon : NetworkBehaviour
         _isAttacking = state;
     }
 
-    protected virtual void Attack()
+    public virtual void Attack()
     {
+        if (_timer < _nextTimeToAttack)
+            return;
+
         if (Durability > 0)
         {
             if (_weaponSO.semiAutomatic)

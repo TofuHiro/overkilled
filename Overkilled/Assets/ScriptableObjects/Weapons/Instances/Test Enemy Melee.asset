@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a980ecafa527bfb4abd65fa6c0a20878, type: 3}
-  m_Name: Test Melee
+  m_Name: Test Enemy Melee
   m_EditorClassIdentifier: 
   damage: 20
-  knockbackForce: 20
+  knockbackForce: 10
   attackFrequency: 0.5
-  durability: 15
+  durability: 1000
   semiAutomatic: 0
   areaOfAttack: {x: 2, y: 1, z: 1}
   heavyKnockbackForce: 14

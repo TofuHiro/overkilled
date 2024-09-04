@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using Unity.Netcode;
+using UnityEngine;
 
-public class Box : ObjectHealth, IDamagable
+public class EnemyHealth : ObjectHealth
 {
     public override void Die()
     {

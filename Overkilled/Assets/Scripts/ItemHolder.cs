@@ -1,5 +1,4 @@
 using Unity.Netcode;
-using UnityEditor;
 using UnityEngine;
 
 public class ItemHolder : NetworkBehaviour

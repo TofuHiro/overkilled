@@ -11,7 +11,7 @@ public class PlayerHand : NetworkBehaviour
     ItemHolder _holder;
     Weapon _currentWeapon;
 
-    void Start()
+    void Awake()
     {
         _holder = GetComponent<ItemHolder>();
     }
@@ -49,8 +49,7 @@ public class PlayerHand : NetworkBehaviour
         _holder.SetItem(newItem);
 
         _currentWeapon = newItem.GetComponent<Weapon>();
-        if (_currentWeapon != null )
-            _currentWeapon.OnPickup();
+        _currentWeapon?.OnPickup();
     }
 
     /// <summary>
