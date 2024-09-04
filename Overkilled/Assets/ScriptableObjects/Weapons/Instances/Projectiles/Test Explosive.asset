@@ -16,8 +16,8 @@ MonoBehaviour:
   projectileVelocity: 12
   pointCollision: 0
   projectileGravity: 1
-  explosionDamage: 50
-  explosionRadius: 5
-  explosionForce: 40
+  explosionDamage: 40
+  explosionRadius: 7
+  explosionForce: 60
   explodeOnContact: 0
   explosionFuse: 3

@@ -7,18 +7,33 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerStamina))]
 [RequireComponent(typeof(PlayerInteraction))]
 [RequireComponent(typeof(PlayerHand))]
+[RequireComponent(typeof(PlayerHealth))]
 public class PlayerController : NetworkBehaviour
 {
     PlayerMotor _motor;
     PlayerRotation _rotation;
     PlayerStamina _stamina;
     PlayerInteraction _interaction;
+    PlayerHealth _health;
 
     PlayerInput _input;
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        PlayerList.AddPlayer(gameObject);
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        base.OnNetworkDespawn();
+        PlayerList.RemovePlayer(gameObject);
+    }
 
     void Awake()
     {
         _input = new PlayerInput();
+        
     }
 
     void Start()
@@ -27,6 +42,7 @@ public class PlayerController : NetworkBehaviour
         _rotation = GetComponent<PlayerRotation>();
         _stamina = GetComponent<PlayerStamina>();
         _interaction = GetComponent<PlayerInteraction>();
+        _health = GetComponent<PlayerHealth>();
     }
 
     void OnEnable()

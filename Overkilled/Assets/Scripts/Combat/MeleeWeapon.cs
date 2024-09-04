@@ -15,7 +15,7 @@ public class MeleeWeapon : Weapon
             Debug.LogWarning("Warning. Incorrect WeaponSO type assigned to weapon " + name);
     }
 
-    protected override void Attack()
+    public override void Attack()
     {
         base.Attack();
         if (Durability <= 0)
