@@ -208,7 +208,7 @@ PrefabInstance:
     - target: {fileID: -7167979865124790912, guid: 0bd049c7697e14343863af4802397b20,
         type: 3}
       propertyPath: GlobalObjectIdHash
-      value: 2220005764
+      value: 3054707571
       objectReference: {fileID: 0}
     - target: {fileID: 2838319782873247267, guid: 0bd049c7697e14343863af4802397b20,
         type: 3}
@@ -305,6 +305,12 @@ PrefabInstance:
       propertyPath: m_Name
       value: Test Melee
       objectReference: {fileID: 0}
+    - target: {fileID: 9020134229258740602, guid: 0bd049c7697e14343863af4802397b20,
+        type: 3}
+      propertyPath: _itemSO
+      value: 
+      objectReference: {fileID: 11400000, guid: 1268e68befd50b341ad4243ac5f3493b,
+        type: 2}
     - target: {fileID: 9020134229258740602, guid: 0bd049c7697e14343863af4802397b20,
         type: 3}
       propertyPath: _itemInfo

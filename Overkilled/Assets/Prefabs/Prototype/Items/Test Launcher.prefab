@@ -291,7 +291,7 @@ PrefabInstance:
     - target: {fileID: -7167979865124790912, guid: 0bd049c7697e14343863af4802397b20,
         type: 3}
       propertyPath: GlobalObjectIdHash
-      value: 1037738476
+      value: 496242832
       objectReference: {fileID: 0}
     - target: {fileID: 2838319782873247267, guid: 0bd049c7697e14343863af4802397b20,
         type: 3}
@@ -381,8 +381,14 @@ PrefabInstance:
     - target: {fileID: 7455143148118062530, guid: 0bd049c7697e14343863af4802397b20,
         type: 3}
       propertyPath: m_Name
-      value: Test Launcherr
+      value: Test Launcher
       objectReference: {fileID: 0}
+    - target: {fileID: 9020134229258740602, guid: 0bd049c7697e14343863af4802397b20,
+        type: 3}
+      propertyPath: _itemSO
+      value: 
+      objectReference: {fileID: 11400000, guid: 94d8a058a02eb864e9321a54b310221f,
+        type: 2}
     - target: {fileID: 9020134229258740602, guid: 0bd049c7697e14343863af4802397b20,
         type: 3}
       propertyPath: _itemInfo

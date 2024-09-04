@@ -91,6 +91,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -7167979865124790912, guid: 0bd049c7697e14343863af4802397b20,
+        type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 3875906441
+      objectReference: {fileID: 0}
     - target: {fileID: 2838319782873247267, guid: 0bd049c7697e14343863af4802397b20,
         type: 3}
       propertyPath: m_Size.x
@@ -161,6 +166,12 @@ PrefabInstance:
       propertyPath: m_Name
       value: Purple Cube
       objectReference: {fileID: 0}
+    - target: {fileID: 9020134229258740602, guid: 0bd049c7697e14343863af4802397b20,
+        type: 3}
+      propertyPath: _itemSO
+      value: 
+      objectReference: {fileID: 11400000, guid: c281faaa89360044ebcd3111aefaeb8b,
+        type: 2}
     - target: {fileID: 9020134229258740602, guid: 0bd049c7697e14343863af4802397b20,
         type: 3}
       propertyPath: _itemInfo

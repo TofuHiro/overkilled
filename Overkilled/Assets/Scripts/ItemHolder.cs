@@ -23,6 +23,10 @@ public class ItemHolder : NetworkBehaviour
     Rigidbody _currentRigidbody;
     Collider[] _currentColliders;
 
+    /// <summary>
+    /// Get the current item thats being held
+    /// </summary>
+    /// <returns></returns>
     public Item GetItem() { return _currentItem; }
 
     /// <summary>

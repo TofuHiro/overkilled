@@ -23,6 +23,9 @@ public class EnemyController : NetworkBehaviour
     [Tooltip("The weapon this enemy starts with")]
     [SerializeField] Weapon _weapon;
 
+    /// <summary>
+    /// Whether if this enemy currently has a target or not
+    /// </summary>
     public bool HasTarget { get { return _targetFinder.ClosestPlayer != null; } }
 
     public EnemyStateMachine StateMachine { get; private set; }
@@ -67,6 +70,10 @@ public class EnemyController : NetworkBehaviour
         StateMachine.CurrentEnemyState.AnimationTriggerEvent(triggerType);
     }
 
+    /// <summary>
+    /// Check if this enemy is within range to attack or not
+    /// </summary>
+    /// <returns>Returns true if this enemy is within range to perform an attack</returns>
     public bool CheckCanAttack()
     {
         float dist = Vector3.Distance(_targetFinder.ClosestPlayer.transform.position, transform.position);
@@ -76,12 +83,18 @@ public class EnemyController : NetworkBehaviour
             return false;
     }
 
+    /// <summary>
+    /// Set this enemy to target the closest player and move towards it
+    /// </summary>
     public void TargetPlayer()
     {
         _movement.SetTarget(_targetFinder.ClosestPlayer.transform);
         _rotation.SetLookDirection(_movement.GetDirection());
     }
 
+    /// <summary>
+    /// Trigger an attack
+    /// </summary>
     public void Attack()
     {
         _movement.Stop();

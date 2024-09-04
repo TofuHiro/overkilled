@@ -9,6 +9,9 @@ public class CounterTop : NetworkBehaviour, IInteractable
     protected ItemHolder[] _holders;
     int _itemHolderCount;
 
+    /// <summary>
+    /// Whether this counter is currently full or not
+    /// </summary>
     public bool CounterIsFull
     {
         get
@@ -20,6 +23,9 @@ public class CounterTop : NetworkBehaviour, IInteractable
         }
     }
 
+    /// <summary>
+    /// Whether this counter is empty or not
+    /// </summary>
     public bool CounterIsEmpty
     {
         get

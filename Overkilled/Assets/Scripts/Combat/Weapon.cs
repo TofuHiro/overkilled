@@ -15,14 +15,7 @@ public abstract class Weapon : NetworkBehaviour
     /// <summary>
     /// Current durability of this weapon
     /// </summary>
-    public int Durability { 
-        get 
-        { 
-            return _durability.Value; 
-        } 
-    }
-
-    NetworkVariable<int> _durability = new NetworkVariable<int>(0);
+    public int Durability { get; private set; }
 
     public WeaponSO GetWeaponInfo() { return _weaponSO; }
 
@@ -34,13 +27,18 @@ public abstract class Weapon : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     void DecreaseDurabilityServerRpc(int amount)
     {
-        _durability.Value = Mathf.Clamp(Durability - amount, 0, _weaponSO.durability);
+        DecreaseDurabilityClientRpc(amount);
+    }
+    [ClientRpc]
+    void DecreaseDurabilityClientRpc(int amount)
+    {
+        Durability = Mathf.Clamp(Durability - amount, 0, _weaponSO.durability);
     }
 
     void Start()
     {
         SetNextTimeAttack(_weaponSO.attackFrequency);
-        _durability.Value = _weaponSO.durability;
+        Durability = _weaponSO.durability;
     }
 
     void Update()

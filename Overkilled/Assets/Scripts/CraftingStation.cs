@@ -9,9 +9,9 @@ public class CraftingStation : CounterTop
     [SerializeField] ItemHolder _firstItemHolder;
 
     NetworkVariable<float> _craftProgress = new NetworkVariable<float>(0f);
-    NetworkVariable<bool> _isCrafting = new NetworkVariable<bool>(false);
-    NetworkVariable<bool> _hasValidRecipe = new NetworkVariable<bool>(false);
     CraftRecipeSO _validRecipe;
+    bool _isCrafting;
+    bool _hasValidRecipe;
 
     public override void Interact(PlayerInteraction player)
     {
@@ -30,7 +30,7 @@ public class CraftingStation : CounterTop
     {
         _validRecipe = _recipeSet.GetValidRecipe(_holders, ItemsOnCounter);
         if (_validRecipe != null )
-            _hasValidRecipe.Value = true;
+            _hasValidRecipe = true;
     }
 
     void Update()
@@ -38,7 +38,7 @@ public class CraftingStation : CounterTop
         if (!IsServer)
             return;
 
-        if (_isCrafting.Value)
+        if (_isCrafting)
         {
             _craftProgress.Value += Time.deltaTime;
             Debug.Log(_craftProgress.Value);
@@ -53,9 +53,9 @@ public class CraftingStation : CounterTop
     /// </summary>
     public void Craft()
     {
-        if (_hasValidRecipe.Value)
+        if (_hasValidRecipe)
         {
-            if (!_isCrafting.Value)
+            if (!_isCrafting)
                 BeginCraftingServerRpc();
             else
                 SpeedUpCraftServerRpc();
@@ -69,18 +69,29 @@ public class CraftingStation : CounterTop
     [ServerRpc(RequireOwnership = false)]
     void BeginCraftingServerRpc()
     {
-        _isCrafting.Value = true;
+        BeginCraftingClientRpc();
+    }
+    [ClientRpc]
+    void BeginCraftingClientRpc()
+    {
+        _isCrafting = true;
     }
 
     [ServerRpc(RequireOwnership = false)]
     void StopCraftingServerRpc()
     {
-        if (!_isCrafting.Value)
+        if (!_isCrafting)
             return;
 
         _craftProgress.Value = 0f;
-        _isCrafting.Value = false;
-        _hasValidRecipe.Value = false;
+
+        StopCraftingClientRpc();
+    }
+    [ClientRpc]
+    void StopCraftingClientRpc()
+    {
+        _isCrafting = false;
+        _hasValidRecipe = false;
         _validRecipe = null;
     }
 
