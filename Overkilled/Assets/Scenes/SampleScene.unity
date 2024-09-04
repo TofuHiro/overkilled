@@ -1670,8 +1670,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _camera: {fileID: 330585545}
-  _offsetMultiplier: 0.3
   _smoothTime: 0.8
+  _useFocusMode: 0
+  _offsetMultiplier: 0.3
+  _playerStartPosition: {x: 0, y: 0, z: 0}
+  _panOutMultiplier: 0.5
 --- !u!1001 &353344257
 PrefabInstance:
   m_ObjectHideFlags: 0

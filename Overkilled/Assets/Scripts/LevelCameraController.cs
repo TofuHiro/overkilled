@@ -1,20 +1,52 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 public class LevelCameraController : MonoBehaviour
 {
     [Tooltip("The camera to offset")]
     [SerializeField] Camera _camera;
-    [Tooltip("The multiplier applied to camera offset")]
-    [SerializeField] float _offsetMultiplier;
     [Tooltip("The smooth time for camera movement")]
     [SerializeField] float _smoothTime;
+    [Tooltip("Whether to use camera follow focus mode or fix mode")]
+    [SerializeField] bool _useFocusMode = true;
+
+    [Header("Focus Mode Settings")]
+    [Tooltip("The multiplier applied to camera offset")]
+    [SerializeField] float _offsetMultiplier;
+
+    [Header("Fixed Mode Settings")]
+    [Tooltip("The position to calculate pan out offsets with the player positions from")]
+    [SerializeField] Vector3 _playerStartPosition;
+    [Tooltip("The multiplier applied to pan out offsets")]
+    [SerializeField] float _panOutMultiplier;
 
     GameObject[] _players;
     Vector3 _startOffset;
     Vector3 _avgPlayerPos = Vector3.zero;
     Vector3 _velocity = Vector3.zero;
+    float _furthestPlayerDist = 0f;
+
+    /// <summary>
+    /// Set the camera zoom mode. If true, camera is set to focus follow mode. If false, camera is set to fixed pan out mode
+    /// </summary>
+    /// <param name="state"></param>
+    public void SetFocusMode(bool state)
+    {
+        SetFocusModeServerRpc(state);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void SetFocusModeServerRpc(bool state)
+    {
+        SetFocusModeClientRpc(state);
+    }
+    [ClientRpc]
+    void SetFocusModeClientRpc(bool state)
+    {
+        _useFocusMode = state;
+    }
 
     void Start()
     {
@@ -22,6 +54,8 @@ public class LevelCameraController : MonoBehaviour
 
         PlayerList.OnPlayerListUpdate += SetPlayers;
         SetPlayers();
+
+        SetFocusMode(_useFocusMode);
     }
 
     void SetPlayers()
@@ -34,8 +68,16 @@ public class LevelCameraController : MonoBehaviour
         if (_players == null || _players.Length == 0)
             return;
 
-        SetAvgPlayerPosition();
-        MoveCamera();
+        if (_useFocusMode)
+        {
+            SetAvgPlayerPosition();
+            MoveCamera();
+        }
+        else
+        {
+            SetFurthestPlayerDistance();
+            PanCamera();
+        }
     }
 
     void SetAvgPlayerPosition()
@@ -50,5 +92,23 @@ public class LevelCameraController : MonoBehaviour
     void MoveCamera()
     {
         _camera.transform.position = Vector3.SmoothDamp(_camera.transform.position, _startOffset + (_avgPlayerPos * _offsetMultiplier), ref _velocity, _smoothTime);
+    }
+
+    void SetFurthestPlayerDistance()
+    {
+        _furthestPlayerDist = Vector3.Distance(_playerStartPosition, _players[0].transform.position);
+        for (int i = 1; i < _players.Length; i++)
+        {
+            float distance = Vector3.Distance(_playerStartPosition, _players[i].transform.position);
+            if (distance > _furthestPlayerDist)
+            {
+                _furthestPlayerDist = distance;
+            }
+        }
+    }
+
+    void PanCamera()
+    {
+        _camera.transform.position = Vector3.SmoothDamp(_camera.transform.position, _startOffset + (-_camera.transform.forward * _furthestPlayerDist * _panOutMultiplier), ref _velocity, _smoothTime);
     }
 }
