@@ -6321,13 +6321,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 576d7552c3396d249a93cfd8cb0dab22, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _activeRecipeSets:
-  - {fileID: 11400000, guid: 829a2854cf621f24087d35482a213bf9, type: 2}
-  _maxActiveOrders: 5
-  OrdersCatalog:
+  _ordersCatalog:
   - {fileID: 11400000, guid: f72bed3916a7b0840a75dcbf92736568, type: 2}
   - {fileID: 11400000, guid: fdf04c9ec9572874a8405051d2ed674f, type: 2}
   - {fileID: 11400000, guid: a0d4307cd9c0b6a4b97c1b528b2c9d14, type: 2}
+  _maxActiveOrders: 5
 --- !u!114 &1693108049
 MonoBehaviour:
   m_ObjectHideFlags: 0
