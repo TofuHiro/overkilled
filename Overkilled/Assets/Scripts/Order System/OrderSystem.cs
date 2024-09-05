@@ -6,13 +6,12 @@ using Unity.Netcode;
 
 public class OrderSystem : NetworkBehaviour
 {
-    [Tooltip("Recipe sets to pull orders from. Preset sets for testing")]
-    [SerializeField] List<RecipeSetSO> _activeRecipeSets;
+    [Tooltip("Orders to create from")]
+    [SerializeField] OrderSO[] _ordersCatalog;
     [Tooltip("The maximum number of active orders allowed at once")]
     [SerializeField] int _maxActiveOrders = 5;
 
     public static OrderSystem Instance;
-    public OrderSO[] OrdersCatalog;
 
     public delegate void OrderSystemAction();
     public event OrderSystemAction OnOrderCreate;
@@ -24,9 +23,6 @@ public class OrderSystem : NetworkBehaviour
 
     void Awake()
     {
-        if (_activeRecipeSets == null)
-            _activeRecipeSets = new List<RecipeSetSO>();
-
         _activeOrders = new ActiveOrder[_maxActiveOrders];
         for (int i = 0; i < _activeOrders.Length; i++)
             _activeOrders[i] = new ActiveOrder();
@@ -51,31 +47,10 @@ public class OrderSystem : NetworkBehaviour
     }
 
     /// <summary>
-    /// Adds a recipe set to create orders from
+    /// Set the order catalog to pull orders from
     /// </summary>
-    /// <param name="recipeSet"></param>
-    public void AddRecipeSet(RecipeSetSO recipeSet) => _activeRecipeSets.Add(recipeSet);
-
-    /// <summary>
-    /// Removes a recipe set to use to create orders from
-    /// </summary>
-    /// <param name="recipeSetSO"></param>
-    public void RemoveRecipeSet(RecipeSetSO recipeSetSO)
-    {
-        if (_activeRecipeSets.Contains(recipeSetSO))
-            _activeRecipeSets.Remove(recipeSetSO);
-    }
-
-    /// <summary>
-    /// Set the active recipe sets to a predefined list of sets
-    /// </summary>
-    /// <param name="recipeSets">A list of recipe set scriptableobjects to set to</param>
-    public void SetRecipeSets(List<RecipeSetSO> recipeSets) => _activeRecipeSets = recipeSets;
-
-    /// <summary>
-    /// Clear the list of active recipe sets
-    /// </summary>
-    public void RemoveAllRecipeSets() => _activeRecipeSets.Clear();
+    /// <param name="orders"></param>
+    public void SetOrderCatalog(OrderSO[] orders) => _ordersCatalog = orders;
 
     /// <summary>
     /// Returns an array storing the active orders
@@ -103,17 +78,10 @@ public class OrderSystem : NetworkBehaviour
     }
 
     /// <summary>
-    /// Returns a random index for a recipe set in the active recipe set list
+    /// Returns a random order from the order catalog
     /// </summary>
     /// <returns></returns>
-    int GetRandomRecipeSetIndex() { return Random.Range(0, _activeRecipeSets.Count); }
-
-    /// <summary>
-    /// Returns a random index for a recipe in a given recipe set
-    /// </summary>
-    /// <param name="recipeSet"></param>
-    /// <returns></returns>
-    int GetRandomRecipeIndex(RecipeSetSO recipeSet) { return Random.Range(0, recipeSet.recipes.Length); }
+    OrderSO GetRandomOrder() { return _ordersCatalog[Random.Range(0, _ordersCatalog.Length)]; }
 
     /// <summary>
     /// Returns the index of the next available free slot in the array of active orders
@@ -141,32 +109,45 @@ public class OrderSystem : NetworkBehaviour
         return true;
     }
 
+    public void StartCreatingOrders(float createRate)
+    {
+        if (!IsServer)
+            return;
+
+        Debug.Log("Starting to create orders");
+        InvokeRepeating("CreateRandomOrder", 2f, createRate);
+    }
+
     void CreateRandomOrder()
     {
         if (GetNextFreeOrderSlot() == -1)
             return;
         
-        int recipeSetIndex = GetRandomRecipeSetIndex();
-        CreateOrderClientRpc(recipeSetIndex, GetRandomRecipeIndex(_activeRecipeSets[recipeSetIndex]));
+        OrderSO order = GetRandomOrder();
+        CreateOrderClientRpc(GetIndexFromOrder(order));
+    }
+
+    int GetIndexFromOrder(OrderSO order)
+    {
+        for (int i = 0; i < _ordersCatalog.Length; i++)
+        {
+            if (_ordersCatalog[i] == order)
+                return i;
+        }
+
+        Debug.LogError("Error. Could not find order " + order.name + ". Ensure that the order is set in the order catalog.");
+        return -1;
     }
 
     [ClientRpc]
-    void CreateOrderClientRpc(int recipeSetIndex, int recipeIndex)
+    void CreateOrderClientRpc(int orderIndex)
     {
-        foreach (OrderSO order in OrdersCatalog)
-        {
-            if (order.requestedItemRecipe == _activeRecipeSets[recipeSetIndex].recipes[recipeIndex])
-            {
-                int freeSlot = GetNextFreeOrderSlot();
-                _activeOrders[freeSlot].Order = order;
-                _activeOrders[freeSlot].Timer = order.timeLimit;
-                _activeOrders[freeSlot].Active = true;
-                OnOrderCreate?.Invoke();
-                return;
-            }
-        }
-
-        Debug.LogError("Error. Recipe " + _activeRecipeSets[recipeIndex].name + " is not found in orders catalog. Reload resources or create a new order for the recipe");
+        OrderSO order = _ordersCatalog[orderIndex];
+        int freeSlot = GetNextFreeOrderSlot();
+        _activeOrders[freeSlot].Order = order;
+        _activeOrders[freeSlot].Timer = order.timeLimit;
+        _activeOrders[freeSlot].Active = true;
+        OnOrderCreate?.Invoke();
     }
 
     /// <summary>
@@ -247,17 +228,5 @@ public class OrderSystem : NetworkBehaviour
             if (_activeOrders[i].Active)
                 if (_activeOrders[i].Timer <= 0f)
                     FailOrderClientRpc(i);
-    }
-
-    ///////////////
-    public void StartCreatingOrders()
-    {
-        if (!IsServer)
-            return;
-
-        Debug.Log("Starting to create orders");
-        InvokeRepeating("CreateRandomOrder", 2f, 5f);
-    }
-
-    
+    }    
 }
