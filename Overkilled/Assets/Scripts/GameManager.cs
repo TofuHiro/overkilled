@@ -16,20 +16,27 @@ namespace SurvivalGame
         public bool GameStarting { get { return _currentGameState.Value == GameState.StartingGame; } }
         public bool GameStarted { get { return _currentGameState.Value == GameState.GameStarted; } }
         public bool GameEnded { get { return _currentGameState.Value == GameState.GameEnded; } }
+        public bool IsGamePaused { get { return _isGamePaused.Value; } }
         public Grade LevelGrade { get; private set; }
 
         public delegate void GameInitialize(LevelPreset preset);
         public static event GameInitialize OnGameInitialize;
         public static event Action OnGameStateChange;
-        public static event Action OnGamePause;
-        public static event Action OnGameUnpause;
         public static event Action OnLocalPlayerReady;
+        public static event Action OnLocalGamePause;
+        public static event Action OnLocalGameUnpause;
+        public static event Action OnMultiplayerGamePause;
+        public static event Action OnMultiplayerGameUnpause;
 
         Dictionary<ulong, bool> _playerReadyDictionary;
+        Dictionary<ulong, bool> _playerPausedDictionary;
+
         NetworkVariable<GameState> _currentGameState = new NetworkVariable<GameState>();
         NetworkVariable<float> _countdownTimer = new NetworkVariable<float>();
         NetworkVariable<float> _gameTimer = new NetworkVariable<float>();
-        bool _isLocalPlayerReady = false;
+        NetworkVariable<bool> _isGamePaused = new NetworkVariable<bool>(false);
+
+        bool _isLocalPlayerReady = false, _isLocalPlayerPaused = false;
 
         void Awake()
         {
@@ -42,6 +49,7 @@ namespace SurvivalGame
             Instance = this;
 
             _playerReadyDictionary = new Dictionary<ulong, bool>();
+            _playerPausedDictionary = new Dictionary<ulong, bool>();
 
             OnGameStateChange += CalculateGrade;
         }
@@ -49,8 +57,8 @@ namespace SurvivalGame
         public override void OnNetworkSpawn()
         {
             InitializeLevel();
-
             _currentGameState.OnValueChanged += OnStateChange;
+            _isGamePaused.OnValueChanged += OnGamePausedChange;
         }
 
         void OnStateChange(GameState previousValue, GameState newValue)
@@ -58,14 +66,30 @@ namespace SurvivalGame
             OnGameStateChange?.Invoke();
         }
 
+        void OnGamePausedChange(bool previousValue, bool newValue)
+        {
+            if (_isGamePaused.Value)
+            {
+                OnMultiplayerGamePause?.Invoke();
+                Time.timeScale = 0f;
+            }
+            else
+            {
+                OnMultiplayerGameUnpause?.Invoke();
+                Time.timeScale = 1f;
+            }
+        }
+
         void Start()
         {
             PlayerController.OnPlayerInteractInput += SetLocalPlayerReady;
+            PlayerController.OnPlayerPauseInput += TogglePauseGame;
         }
 
         void OnDisable()
         {
             PlayerController.OnPlayerInteractInput -= SetLocalPlayerReady;
+            PlayerController.OnPlayerPauseInput -= TogglePauseGame;
         }
 
         void Update()
@@ -87,8 +111,6 @@ namespace SurvivalGame
                     _gameTimer.Value -= Time.deltaTime;
                     if (_gameTimer.Value <= 0f)
                         _currentGameState.Value = GameState.GameEnded;
-                    break;
-                case GameState.GamePaused:
                     break;
                 case GameState.GameEnded:
                     break;
@@ -119,9 +141,9 @@ namespace SurvivalGame
         {
             _playerReadyDictionary[serverRpcParams.Receive.SenderClientId] = true;
             bool allPlayersReady = true;
-            foreach (NetworkClient networkClient in NetworkManager.Singleton.ConnectedClientsList)
+            foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
             {
-                if (!_playerReadyDictionary.ContainsKey(networkClient.ClientId) || !_playerReadyDictionary[networkClient.ClientId])
+                if (!_playerReadyDictionary.ContainsKey(clientId) || !_playerReadyDictionary[clientId])
                 {
                     allPlayersReady = false;
                     break;
@@ -151,6 +173,51 @@ namespace SurvivalGame
                 LevelGrade = Grade.OneStar;
             else
                 LevelGrade = Grade.NoStars;
+        }
+
+        void TogglePauseGame()
+        {
+            _isLocalPlayerPaused = !_isLocalPlayerPaused;
+            if (_isLocalPlayerPaused)
+            {
+                PauseGameServerRpc();
+                OnLocalGamePause?.Invoke();
+            }
+            else
+            {
+                UnpauseGameServerRpc();
+                OnLocalGameUnpause?.Invoke();
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        void PauseGameServerRpc(ServerRpcParams serverRpcParams = default)
+        {
+            _playerPausedDictionary[serverRpcParams.Receive.SenderClientId] = true;
+
+            TestPauseGame();
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        void UnpauseGameServerRpc(ServerRpcParams serverRpcParams = default)
+        {
+            _playerPausedDictionary[serverRpcParams.Receive.SenderClientId] = false;
+
+            TestPauseGame();
+        }
+
+        void TestPauseGame()
+        {
+            foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
+            {
+                if (_playerPausedDictionary.ContainsKey(clientId) && _playerPausedDictionary[clientId])
+                {
+                    _isGamePaused.Value = true;
+                    return;
+                }
+            }
+
+            _isGamePaused.Value = false;
         }
     }
 }

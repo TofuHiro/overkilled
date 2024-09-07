@@ -5,11 +5,21 @@ using UnityEngine;
 
 public class TutorialUI : MonoBehaviour
 {
-    void Awake()
+    void Start()
     {
         GameManager.OnLocalPlayerReady += Hide;
 
         Show();
+    }
+
+    void OnEnable()
+    {
+        GameManager.OnLocalPlayerReady += Hide;
+    }
+
+    void OnDisable()
+    {
+        GameManager.OnLocalPlayerReady -= Hide;
     }
 
     void Show()

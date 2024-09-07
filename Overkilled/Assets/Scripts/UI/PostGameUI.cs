@@ -16,6 +16,18 @@ public class PostGameUI : MonoBehaviour
         Hide();
     }
 
+    void OnEnable()
+    {
+        GameManager.OnGameStateChange += UpdateUI;
+        GameManager.OnGameStateChange += ShowOnGameEnd;
+    }
+
+    void OnDisable()
+    {
+        GameManager.OnGameStateChange -= UpdateUI;
+        GameManager.OnGameStateChange -= ShowOnGameEnd;
+    }
+
     void UpdateUI()
     {
         _gradeText.text = GetGradeText(GameManager.Instance.LevelGrade);

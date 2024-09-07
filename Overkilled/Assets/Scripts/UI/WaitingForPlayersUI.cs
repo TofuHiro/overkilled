@@ -5,12 +5,24 @@ using UnityEngine;
 
 public class WaitingForPlayersUI : MonoBehaviour
 {
-    void Awake()
+    void Start()
     {
         GameManager.OnLocalPlayerReady += Show;
         GameManager.OnGameStateChange += HideOnCountdown;
 
         Hide();
+    }
+
+    void OnEnable()
+    {
+        GameManager.OnLocalPlayerReady += Show;
+        GameManager.OnGameStateChange += HideOnCountdown;
+    }
+
+    void OnDisable()
+    {
+        GameManager.OnLocalPlayerReady -= Show;
+        GameManager.OnGameStateChange -= HideOnCountdown;
     }
 
     void HideOnCountdown()

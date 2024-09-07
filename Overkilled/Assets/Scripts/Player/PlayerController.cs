@@ -13,6 +13,7 @@ public class PlayerController : NetworkBehaviour
 {
     public delegate void PlayerInputAction();
     public static event PlayerInputAction OnPlayerInteractInput;
+    public static event PlayerInputAction OnPlayerPauseInput;
 
     PlayerMotor _motor;
     PlayerRotation _rotation;
@@ -42,8 +43,8 @@ public class PlayerController : NetworkBehaviour
 
         GameManager.OnGameStateChange += FreezePlayer;
         GameManager.OnGameStateChange += UnfreezePlayer;
-        GameManager.OnGamePause += FreezePlayer;
-        GameManager.OnGameUnpause += UnfreezePlayer;
+        GameManager.OnLocalGamePause += FreezePlayer;
+        GameManager.OnLocalGameUnpause += UnfreezePlayer;
     }
 
     void Start()
@@ -65,6 +66,7 @@ public class PlayerController : NetworkBehaviour
         _input.Player.Fire.canceled += Attack;
         _input.Player.AltFire.started += SecondaryAttack;
         _input.Player.AltFire.canceled += SecondaryAttack;
+        _input.Player.Pause.performed += Pause;
     }
 
     void OnDisable()
@@ -77,11 +79,12 @@ public class PlayerController : NetworkBehaviour
         _input.Player.Fire.canceled -= Attack;
         _input.Player.AltFire.started -= SecondaryAttack;
         _input.Player.AltFire.canceled -= SecondaryAttack;
+        _input.Player.Pause.performed -= Pause;
 
         GameManager.OnGameStateChange -= FreezePlayer;
         GameManager.OnGameStateChange -= UnfreezePlayer;
-        GameManager.OnGamePause -= FreezePlayer;
-        GameManager.OnGameUnpause -= UnfreezePlayer;
+        GameManager.OnLocalGamePause -= FreezePlayer;
+        GameManager.OnLocalGameUnpause -= UnfreezePlayer;
     }
 
     void FreezePlayer()
@@ -194,5 +197,13 @@ public class PlayerController : NetworkBehaviour
         {
             _interaction.SetSecondaryAttackState(false);
         }
+    }
+
+    void Pause(InputAction.CallbackContext context)
+    {
+        if (!IsOwner)
+            return;
+
+        OnPlayerPauseInput?.Invoke();
     }
 }
