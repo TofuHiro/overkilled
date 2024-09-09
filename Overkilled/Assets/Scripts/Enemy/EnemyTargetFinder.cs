@@ -30,6 +30,11 @@ public class EnemyTargetFinder : MonoBehaviour
         SetPlayerReferences();
     }
 
+    void OnDestroy()
+    {
+        PlayerList.OnPlayerListUpdate -= SetPlayerReferences;
+    }
+
     void Update()
     {
         _pollTimer += Time.deltaTime;

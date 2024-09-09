@@ -41,6 +41,13 @@ public class OrderSystem : NetworkBehaviour
         GameManager.OnGameStateChange += StopCreatingOrders;
     }
 
+    public override void OnDestroy()
+    {
+        GameManager.OnGameInitialize -= Initialize;
+        GameManager.OnGameStateChange -= StartCreatingOrders;
+        GameManager.OnGameStateChange -= StopCreatingOrders;
+    }
+
     void Update()
     {
         if (GameManager.Instance.GameEnded)

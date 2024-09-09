@@ -11,7 +11,7 @@ public class BankUI : MonoBehaviour
         Bank.OnBalanceChange += UpdateUI;
     }
 
-    void OnDisable()
+    void OnDestroy()
     {
         Bank.OnBalanceChange -= UpdateUI;
     }

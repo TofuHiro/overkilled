@@ -27,6 +27,11 @@ public class HostDisconnectUI : MonoBehaviour
         Hide();
     }
 
+    void OnDestroy()
+    {
+        MultiplayerManager.OnDisconnect -= Show;
+    }
+
     void Show()
     {
         gameObject.SetActive(true);

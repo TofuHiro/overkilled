@@ -27,7 +27,7 @@ public class OrderSystemUI : MonoBehaviour
         SetTimers();        
     }
 
-    void OnDisable()
+    void OnDestroy()
     {
         _orderSystem.OnOrderCreate -= UpdateUI;
         _orderSystem.OnOrderComplete -= UpdateUI;
