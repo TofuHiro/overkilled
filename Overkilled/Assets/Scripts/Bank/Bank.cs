@@ -1,35 +1,28 @@
 using System;
-using UnityEngine;
 
-public class Bank : MonoBehaviour
+public static class Bank
 {
-    public static Bank Instance;
-
-    public event Action OnBalanceChange;
+    public static event Action OnBalanceChange;
     
-    public int Balance { get; private set; } = 0;
+    public static int Balance { get; private set; }
 
-    void Awake()
+    public static void ResetStaticData()
     {
-        if (Instance != null && Instance != this)
-        {
-            Debug.LogWarning("Warning. Multiple instances of Bank found. Destroying " + name);
-            Destroy(Instance);
-        }
-
-        Instance = this;
+        OnBalanceChange = null;
+        ResetBalance();
     }
 
-    void Start()
+    public static void ResetBalance()
     {
-        SetMoney(0);
+        Balance = 0;
+        OnBalanceChange?.Invoke();
     }
 
     /// <summary>
     /// Set the shared balance to a number
     /// </summary>
     /// <param name="number"></param>
-    public void SetMoney(int number)
+    public static void SetMoney(int number)
     {
         Balance = number;
         OnBalanceChange?.Invoke();
@@ -39,7 +32,7 @@ public class Bank : MonoBehaviour
     /// Add an amount to the current balance
     /// </summary>
     /// <param name="amount"></param>
-    public void AddMoney(int amount) 
+    public static void AddMoney(int amount) 
     { 
         Balance += amount;
         OnBalanceChange?.Invoke();
@@ -49,7 +42,7 @@ public class Bank : MonoBehaviour
     /// Remove an amount to the current balance
     /// </summary>
     /// <param name="amount"></param>
-    public void RemoveMoney(int amount) 
+    public static void RemoveMoney(int amount) 
     { 
         Balance -= amount;
         OnBalanceChange?.Invoke();

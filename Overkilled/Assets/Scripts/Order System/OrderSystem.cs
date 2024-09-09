@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Unity.Netcode;
+using SurvivalGame;
 
 public class OrderSystem : NetworkBehaviour
 {
@@ -18,16 +19,14 @@ public class OrderSystem : NetworkBehaviour
     public event OrderSystemAction OnOrderComplete;
     public event OrderSystemAction OnOrderFail;
 
-    Bank _bank;
     ActiveOrder[] _activeOrders;
+    float _createRate;
 
     void Awake()
     {
         _activeOrders = new ActiveOrder[_maxActiveOrders];
         for (int i = 0; i < _activeOrders.Length; i++)
             _activeOrders[i] = new ActiveOrder();
-
-        _bank = Bank.Instance;
 
         if (Instance != null && Instance != this)
         {
@@ -36,21 +35,30 @@ public class OrderSystem : NetworkBehaviour
         }
 
         Instance = this;
+
+        GameManager.OnGameInitialize += Initialize;
+        GameManager.OnGameStateChange += StartCreatingOrders;
+        GameManager.OnGameStateChange += StopCreatingOrders;
     }
 
     void Update()
     {
+        if (GameManager.Instance.GameEnded)
+            return;
+
         TickOrderTimes();
 
         if (IsServer)
             FailCheckOrders();
     }
 
-    /// <summary>
-    /// Set the order catalog to pull orders from
-    /// </summary>
-    /// <param name="orders"></param>
-    public void SetOrderCatalog(OrderSO[] orders) => _ordersCatalog = orders;
+    void Initialize(LevelPreset preset)
+    {
+        SetOrderCatalog(preset.orders);
+        _createRate = preset.orderCreationRate;
+    }
+
+    void SetOrderCatalog(OrderSO[] orders) => _ordersCatalog = orders;
 
     /// <summary>
     /// Returns an array storing the active orders
@@ -109,13 +117,28 @@ public class OrderSystem : NetworkBehaviour
         return true;
     }
 
-    public void StartCreatingOrders(float createRate)
+    void StartCreatingOrders()
     {
         if (!IsServer)
             return;
 
-        Debug.Log("Starting to create orders");
-        InvokeRepeating("CreateRandomOrder", 2f, createRate);
+        if (GameManager.Instance.GameStarted)
+        {
+            Debug.Log("Starting to create orders");
+            InvokeRepeating("CreateRandomOrder", 2f, _createRate);
+        }
+    }
+
+    void StopCreatingOrders()
+    {
+        if (!IsServer)
+            return;
+
+        if (GameManager.Instance.GameEnded)
+        {
+            Debug.Log("Stopped creating orders");
+            CancelInvoke("CreateRandomOrder");
+        }
     }
 
     void CreateRandomOrder()
@@ -176,7 +199,7 @@ public class OrderSystem : NetworkBehaviour
     {
         OrderSO order = _activeOrders[orderIndex].Order;
 
-        _bank.AddMoney((int)Mathf.Max(order.minReward, order.reward * durabilityFactor));
+        Bank.AddMoney((int)Mathf.Max(order.minReward, order.reward * durabilityFactor));
         RemoveOrder(order);
         OnOrderComplete?.Invoke();
 

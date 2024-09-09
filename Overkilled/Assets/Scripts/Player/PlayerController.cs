@@ -1,3 +1,4 @@
+using SurvivalGame;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -10,6 +11,10 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerHealth))]
 public class PlayerController : NetworkBehaviour
 {
+    public delegate void PlayerInputAction();
+    public static event PlayerInputAction OnPlayerInteractInput;
+    public static event PlayerInputAction OnPlayerPauseInput;
+
     PlayerMotor _motor;
     PlayerRotation _rotation;
     PlayerStamina _stamina;
@@ -18,22 +23,28 @@ public class PlayerController : NetworkBehaviour
 
     PlayerInput _input;
 
+    bool _canMove;
+
     public override void OnNetworkSpawn()
     {
-        base.OnNetworkSpawn();
         PlayerList.AddPlayer(gameObject);
+
+        FreezePlayer();
     }
 
     public override void OnNetworkDespawn()
     {
-        base.OnNetworkDespawn();
         PlayerList.RemovePlayer(gameObject);
     }
 
     void Awake()
     {
         _input = new PlayerInput();
-        
+
+        GameManager.OnGameStateChange += FreezePlayer;
+        GameManager.OnGameStateChange += UnfreezePlayer;
+        GameManager.OnLocalGamePause += FreezePlayer;
+        GameManager.OnLocalGameUnpause += UnfreezePlayer;
     }
 
     void Start()
@@ -55,6 +66,7 @@ public class PlayerController : NetworkBehaviour
         _input.Player.Fire.canceled += Attack;
         _input.Player.AltFire.started += SecondaryAttack;
         _input.Player.AltFire.canceled += SecondaryAttack;
+        _input.Player.Pause.performed += Pause;
     }
 
     void OnDisable()
@@ -67,6 +79,28 @@ public class PlayerController : NetworkBehaviour
         _input.Player.Fire.canceled -= Attack;
         _input.Player.AltFire.started -= SecondaryAttack;
         _input.Player.AltFire.canceled -= SecondaryAttack;
+        _input.Player.Pause.performed -= Pause;
+
+        GameManager.OnGameStateChange -= FreezePlayer;
+        GameManager.OnGameStateChange -= UnfreezePlayer;
+        GameManager.OnLocalGamePause -= FreezePlayer;
+        GameManager.OnLocalGameUnpause -= UnfreezePlayer;
+    }
+
+    void FreezePlayer()
+    {
+        if (GameManager.Instance.GameEnded)
+        {
+            _canMove = false;
+        }
+    }
+    
+    void UnfreezePlayer()
+    {
+        if (GameManager.Instance.GameStarted)
+        {
+            _canMove = true;
+        }
     }
 
     void Update()
@@ -80,29 +114,39 @@ public class PlayerController : NetworkBehaviour
 
     void Movement()
     {
-        Vector2 input = _input.Player.Move.ReadValue<Vector2>();
-        _motor.SetDirection(input);
+        if (_canMove)
+        {
+            Vector2 input = _input.Player.Move.ReadValue<Vector2>();
+            _motor.SetDirection(input);
+        }
+        else
+        {
+            _motor.SetDirection(Vector2.zero);
+        }
     } 
 
     void Rotation()
     {
-        Vector2 input = _input.Player.Move.ReadValue<Vector2>();
-        _rotation.SetLookDirection(input);
+        if (_canMove)
+        {
+            Vector2 input = _input.Player.Move.ReadValue<Vector2>();
+            _rotation.SetLookDirection(input);
+        }
+        else
+        {
+            _rotation.SetLookDirection(Vector2.zero);
+        }
     }
 
     void ToggleSprint(InputAction.CallbackContext context)
     {
-        if (!IsOwner)
+        if (!IsOwner || !_canMove)
             return;
 
         if (context.started)
-        {
             _stamina.SetSprint(true);
-        }
         else if (context.canceled)
-        {
             _stamina.SetSprint(false);
-        }
     }
 
     void Interact(InputAction.CallbackContext context)
@@ -112,7 +156,10 @@ public class PlayerController : NetworkBehaviour
 
         if (context.performed)
         {
-            _interaction.Interact();
+            OnPlayerInteractInput?.Invoke();
+
+            if (_canMove)
+                _interaction.Interact();
         }
     }
 
@@ -121,10 +168,17 @@ public class PlayerController : NetworkBehaviour
         if (!IsOwner)
             return;
 
-        if (context.started)
-            _interaction.SetAttackState(true);
-        else if (context.canceled)
+        if (_canMove)
+        {
+            if (context.started)
+                _interaction.SetAttackState(true);
+            else if (context.canceled)
+                _interaction.SetAttackState(false);
+        }
+        else
+        {
             _interaction.SetAttackState(false);
+        }
     }
 
     void SecondaryAttack(InputAction.CallbackContext context)
@@ -132,9 +186,24 @@ public class PlayerController : NetworkBehaviour
         if (!IsOwner)
             return;
 
-        if (context.started)
-            _interaction.SetSecondaryAttackState(true);
-        else if (context.canceled)
+        if (_canMove)
+        {
+            if (context.started)
+                _interaction.SetSecondaryAttackState(true);
+            else if (context.canceled)
+                _interaction.SetSecondaryAttackState(false);
+        }
+        else
+        {
             _interaction.SetSecondaryAttackState(false);
+        }
+    }
+
+    void Pause(InputAction.CallbackContext context)
+    {
+        if (!IsOwner)
+            return;
+
+        OnPlayerPauseInput?.Invoke();
     }
 }

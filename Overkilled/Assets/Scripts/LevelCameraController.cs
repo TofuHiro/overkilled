@@ -1,3 +1,4 @@
+using SurvivalGame;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -28,13 +29,14 @@ public class LevelCameraController : MonoBehaviour
     Vector3 _velocity = Vector3.zero;
     float _furthestPlayerDist = 0f;
 
-    /// <summary>
-    /// Set the camera zoom mode. If true, camera is set to focus follow mode. If false, camera is set to fixed pan out mode
-    /// </summary>
-    /// <param name="state"></param>
-    public void SetFocusMode(bool state)
+    void Awake()
     {
-        SetFocusModeServerRpc(state);
+        GameManager.OnGameInitialize += Initialize;
+    }
+
+    void Initialize(LevelPreset preset)
+    {
+        SetFocusModeServerRpc(preset.useCameraFocusMode);
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -54,8 +56,6 @@ public class LevelCameraController : MonoBehaviour
 
         PlayerList.OnPlayerListUpdate += SetPlayers;
         SetPlayers();
-
-        SetFocusMode(_useFocusMode);
     }
 
     void SetPlayers()
