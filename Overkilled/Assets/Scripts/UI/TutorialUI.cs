@@ -12,12 +12,7 @@ public class TutorialUI : MonoBehaviour
         Show();
     }
 
-    void OnEnable()
-    {
-        GameManager.OnLocalPlayerReady += Hide;
-    }
-
-    void OnDisable()
+    void OnDestroy()
     {
         GameManager.OnLocalPlayerReady -= Hide;
     }

@@ -13,13 +13,7 @@ public class WaitingForPlayersUI : MonoBehaviour
         Hide();
     }
 
-    void OnEnable()
-    {
-        GameManager.OnLocalPlayerReady += Show;
-        GameManager.OnGameStateChange += HideOnCountdown;
-    }
-
-    void OnDisable()
+    void OnDestroy()
     {
         GameManager.OnLocalPlayerReady -= Show;
         GameManager.OnGameStateChange -= HideOnCountdown;

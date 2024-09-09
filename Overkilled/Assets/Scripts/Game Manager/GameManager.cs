@@ -12,7 +12,7 @@ namespace SurvivalGame
         [SerializeField] float _gameStartCountdownTime = 3f;
 
         public static GameManager Instance { get; private set; }
-
+        
         public bool GameStarting { get { return _currentGameState.Value == GameState.StartingGame; } }
         public bool GameStarted { get { return _currentGameState.Value == GameState.GameStarted; } }
         public bool GameEnded { get { return _currentGameState.Value == GameState.GameEnded; } }
@@ -27,6 +27,7 @@ namespace SurvivalGame
         public static event Action OnLocalGameUnpause;
         public static event Action OnMultiplayerGamePause;
         public static event Action OnMultiplayerGameUnpause;
+        public static event Action OnDisconnect;
 
         Dictionary<ulong, bool> _playerReadyDictionary;
         Dictionary<ulong, bool> _playerPausedDictionary;
@@ -37,6 +38,7 @@ namespace SurvivalGame
         NetworkVariable<bool> _isGamePaused = new NetworkVariable<bool>(false);
 
         bool _isLocalPlayerReady = false, _isLocalPlayerPaused = false;
+        bool _autoTestGamePausedState, _autoTestGameReadyStart;
 
         void Awake()
         {
@@ -59,6 +61,41 @@ namespace SurvivalGame
             InitializeLevel();
             _currentGameState.OnValueChanged += OnStateChange;
             _isGamePaused.OnValueChanged += OnGamePausedChange;
+
+            NetworkManager.Singleton.OnConnectionEvent += OnDisconnectEvent;
+            NetworkManager.Singleton.OnConnectionEvent += TestPauseOnPlayerDisconnect;
+            NetworkManager.Singleton.OnConnectionEvent += TestPlayersReadyOnPlayerDisconnect;
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            _currentGameState.OnValueChanged -= OnStateChange;
+            _isGamePaused.OnValueChanged -= OnGamePausedChange;
+
+            NetworkManager.Singleton.OnConnectionEvent -= OnDisconnectEvent;
+            NetworkManager.Singleton.OnConnectionEvent -= TestPauseOnPlayerDisconnect;
+            NetworkManager.Singleton.OnConnectionEvent -= TestPlayersReadyOnPlayerDisconnect;
+        }
+
+        void OnDisconnectEvent(NetworkManager manager, ConnectionEventData data)
+        {
+            if (data.EventType == ConnectionEvent.ClientDisconnected && data.ClientId == NetworkManager.Singleton.LocalClientId)
+                OnDisconnect?.Invoke();
+        }
+    
+        void TestPauseOnPlayerDisconnect(NetworkManager manager, ConnectionEventData data)
+        {
+            if (data.EventType == ConnectionEvent.ClientDisconnected)
+                _autoTestGamePausedState = true;
+        }
+
+        void TestPlayersReadyOnPlayerDisconnect(NetworkManager manager, ConnectionEventData data)
+        {
+            if (_currentGameState.Value != GameState.WaitingForPlayers)
+                return;
+
+            if (data.EventType == ConnectionEvent.ClientDisconnected)
+                _autoTestGameReadyStart = true;
         }
 
         void OnStateChange(GameState previousValue, GameState newValue)
@@ -117,6 +154,20 @@ namespace SurvivalGame
             }
         }
 
+        void LateUpdate()
+        {
+            if (_autoTestGameReadyStart)
+            {
+                _autoTestGameReadyStart = false;
+                TestReadyToStartGame();
+            }
+            if (_autoTestGamePausedState)
+            {
+                _autoTestGamePausedState = false;
+                TestPauseGame();
+            }
+        }
+
         void InitializeLevel()
         {
             Bank.ResetBalance();
@@ -140,6 +191,12 @@ namespace SurvivalGame
         void SetPlayerReadyServerRpc(ServerRpcParams serverRpcParams = default)
         {
             _playerReadyDictionary[serverRpcParams.Receive.SenderClientId] = true;
+           
+            TestReadyToStartGame();
+        }
+
+        void TestReadyToStartGame()
+        {
             bool allPlayersReady = true;
             foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
             {
@@ -175,8 +232,11 @@ namespace SurvivalGame
                 LevelGrade = Grade.NoStars;
         }
 
-        void TogglePauseGame()
+        public void TogglePauseGame()
         {
+            if (_currentGameState.Value != GameState.GameStarted)
+                return;
+
             _isLocalPlayerPaused = !_isLocalPlayerPaused;
             if (_isLocalPlayerPaused)
             {
@@ -210,6 +270,7 @@ namespace SurvivalGame
         {
             foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
             {
+                Debug.Log(clientId);
                 if (_playerPausedDictionary.ContainsKey(clientId) && _playerPausedDictionary[clientId])
                 {
                     _isGamePaused.Value = true;

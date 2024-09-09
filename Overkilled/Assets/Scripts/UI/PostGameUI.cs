@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class PostGameUI : MonoBehaviour
 {
+    [Tooltip("Text displaying the final grade")]
     [SerializeField] TMP_Text _gradeText;
 
     void Start()
@@ -16,13 +17,7 @@ public class PostGameUI : MonoBehaviour
         Hide();
     }
 
-    void OnEnable()
-    {
-        GameManager.OnGameStateChange += UpdateUI;
-        GameManager.OnGameStateChange += ShowOnGameEnd;
-    }
-
-    void OnDisable()
+    void OnDestroy()
     {
         GameManager.OnGameStateChange -= UpdateUI;
         GameManager.OnGameStateChange -= ShowOnGameEnd;
@@ -30,7 +25,8 @@ public class PostGameUI : MonoBehaviour
 
     void UpdateUI()
     {
-        _gradeText.text = GetGradeText(GameManager.Instance.LevelGrade);
+        if (GameManager.Instance.GameEnded)
+            _gradeText.text = GetGradeText(GameManager.Instance.LevelGrade);
     }
 
     //Temp
