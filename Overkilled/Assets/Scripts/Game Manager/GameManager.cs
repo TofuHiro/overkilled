@@ -9,14 +9,34 @@ namespace SurvivalGame
     public class GameManager : NetworkBehaviour
     {
         [SerializeField] LevelPreset _levelPreset;
+        [Tooltip("The count down timer when the game is starting")]
         [SerializeField] float _gameStartCountdownTime = 3f;
 
         public static GameManager Instance { get; private set; }
-        
+
+        /// <summary>
+        /// Returns true if the game is starting or counting down to start
+        /// </summary>
         public bool GameStarting { get { return _currentGameState.Value == GameState.StartingGame; } }
+        
+        /// <summary>
+        /// Returns true if the game has started
+        /// </summary>
         public bool GameStarted { get { return _currentGameState.Value == GameState.GameStarted; } }
+
+        /// <summary>
+        /// Returns true if the game has ended
+        /// </summary>
         public bool GameEnded { get { return _currentGameState.Value == GameState.GameEnded; } }
+
+        /// <summary>
+        /// Returns true if the game is currently paused
+        /// </summary>
         public bool IsGamePaused { get { return _isGamePaused.Value; } }
+
+        /// <summary>
+        /// The final grade given after the game has ended
+        /// </summary>
         public Grade LevelGrade { get; private set; }
 
         public delegate void GameInitialize(LevelPreset preset);
@@ -77,6 +97,18 @@ namespace SurvivalGame
             NetworkManager.Singleton.OnConnectionEvent -= TestPlayersReadyOnPlayerDisconnect;
         }
 
+        void Start()
+        {
+            PlayerController.OnPlayerInteractInput += SetLocalPlayerReady;
+            PlayerController.OnPlayerPauseInput += TogglePauseGame;
+        }
+
+        void OnDisable()
+        {
+            PlayerController.OnPlayerInteractInput -= SetLocalPlayerReady;
+            PlayerController.OnPlayerPauseInput -= TogglePauseGame;
+        }
+
         void OnDisconnectEvent(NetworkManager manager, ConnectionEventData data)
         {
             if (data.EventType == ConnectionEvent.ClientDisconnected && data.ClientId == NetworkManager.Singleton.LocalClientId)
@@ -115,18 +147,6 @@ namespace SurvivalGame
                 OnMultiplayerGameUnpause?.Invoke();
                 Time.timeScale = 1f;
             }
-        }
-
-        void Start()
-        {
-            PlayerController.OnPlayerInteractInput += SetLocalPlayerReady;
-            PlayerController.OnPlayerPauseInput += TogglePauseGame;
-        }
-
-        void OnDisable()
-        {
-            PlayerController.OnPlayerInteractInput -= SetLocalPlayerReady;
-            PlayerController.OnPlayerPauseInput -= TogglePauseGame;
         }
 
         void Update()
@@ -270,7 +290,6 @@ namespace SurvivalGame
         {
             foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
             {
-                Debug.Log(clientId);
                 if (_playerPausedDictionary.ContainsKey(clientId) && _playerPausedDictionary[clientId])
                 {
                     _isGamePaused.Value = true;
