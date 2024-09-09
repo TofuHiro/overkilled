@@ -36,5 +36,6 @@ public class CheckoutCounter : CounterTop
 
         //Pack and send away? To update
         _multiplayerManager.DestroyItem(item.gameObject, 1f);
-    }  
+        _holders[0].SetItem(null);
+    }
 }
