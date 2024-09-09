@@ -14,10 +14,12 @@ namespace SurvivalGame
 
         public static GameManager Instance { get; private set; }
 
+        public bool IsWaiting { get { return _currentGameState.Value == GameState.WaitingForPlayers; } }
+
         /// <summary>
         /// Returns true if the game is starting or counting down to start
         /// </summary>
-        public bool GameStarting { get { return _currentGameState.Value == GameState.StartingGame; } }
+        public bool IsStarting { get { return _currentGameState.Value == GameState.StartingGame; } }
         
         /// <summary>
         /// Returns true if the game has started
@@ -32,7 +34,7 @@ namespace SurvivalGame
         /// <summary>
         /// Returns true if the game is currently paused
         /// </summary>
-        public bool IsGamePaused { get { return _isGamePaused.Value; } }
+        public bool IsPaused { get { return _isGamePaused.Value; } }
 
         /// <summary>
         /// The final grade given after the game has ended
@@ -147,6 +149,30 @@ namespace SurvivalGame
                 OnMultiplayerGameUnpause?.Invoke();
                 Time.timeScale = 1f;
             }
+        }
+
+        public void StartHost()
+        {
+            NetworkManager.Singleton.ConnectionApprovalCallback += SetConnectionApproval;
+            NetworkManager.Singleton.StartHost();
+        }
+
+        void SetConnectionApproval(NetworkManager.ConnectionApprovalRequest request, NetworkManager.ConnectionApprovalResponse response)
+        {
+            if (IsWaiting)
+            {
+                response.Approved = true;
+                response.CreatePlayerObject = true;
+            }
+            else
+            {
+                response.Approved = false;
+            }
+        }
+
+        public void StartClient()
+        { 
+            NetworkManager.Singleton.StartClient();
         }
 
         void Update()

@@ -21,7 +21,7 @@ public class WaitingForPlayersUI : MonoBehaviour
 
     void HideOnCountdown()
     {
-        if (GameManager.Instance.GameStarting)
+        if (GameManager.Instance.IsStarting)
         {
             Hide();
         }
