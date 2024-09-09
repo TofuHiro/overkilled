@@ -22,6 +22,11 @@ public class PlayerHand : NetworkBehaviour
         NetworkManager.Singleton.OnConnectionEvent += DropItemOnDisconnect;
     }
 
+    public override void OnNetworkDespawn()
+    {
+        NetworkManager.Singleton.OnConnectionEvent -= DropItemOnDisconnect;
+    }
+
     private void DropItemOnDisconnect(NetworkManager manager, ConnectionEventData data)
     {
         if (!IsHoldingItem)

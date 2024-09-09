@@ -30,34 +30,7 @@ public class PlayerController : NetworkBehaviour
         PlayerList.AddPlayer(gameObject);
 
         FreezePlayer();
-    }
 
-    public override void OnNetworkDespawn()
-    {
-        PlayerList.RemovePlayer(gameObject);
-    }
-
-    void Awake()
-    {
-        _input = new PlayerInput();
-
-        GameManager.OnGameStateChange += FreezePlayer;
-        GameManager.OnGameStateChange += UnfreezePlayer;
-        GameManager.OnLocalGamePause += FreezePlayer;
-        GameManager.OnLocalGameUnpause += UnfreezePlayer;
-    }
-
-    void Start()
-    {
-        _motor = GetComponent<PlayerMotor>();
-        _rotation = GetComponent<PlayerRotation>();
-        _stamina = GetComponent<PlayerStamina>();
-        _interaction = GetComponent<PlayerInteraction>();
-        _health = GetComponent<PlayerHealth>();
-    }
-
-    void OnEnable()
-    {
         _input.Player.Enable();
         _input.Player.Sprint.started += ToggleSprint;
         _input.Player.Sprint.canceled += ToggleSprint;
@@ -67,10 +40,17 @@ public class PlayerController : NetworkBehaviour
         _input.Player.AltFire.started += SecondaryAttack;
         _input.Player.AltFire.canceled += SecondaryAttack;
         _input.Player.Pause.performed += Pause;
+
+        GameManager.OnGameStateChange += FreezePlayer;
+        GameManager.OnGameStateChange += UnfreezePlayer;
+        GameManager.OnLocalGamePause += FreezePlayer;
+        GameManager.OnLocalGameUnpause += UnfreezePlayer;
     }
 
-    void OnDisable()
+    public override void OnNetworkDespawn()
     {
+        PlayerList.RemovePlayer(gameObject);
+
         _input.Player.Disable();
         _input.Player.Sprint.started -= ToggleSprint;
         _input.Player.Sprint.canceled -= ToggleSprint;
@@ -85,6 +65,20 @@ public class PlayerController : NetworkBehaviour
         GameManager.OnGameStateChange -= UnfreezePlayer;
         GameManager.OnLocalGamePause -= FreezePlayer;
         GameManager.OnLocalGameUnpause -= UnfreezePlayer;
+    }
+
+    void Awake()
+    {
+        _input = new PlayerInput();
+    }
+
+    void Start()
+    {
+        _motor = GetComponent<PlayerMotor>();
+        _rotation = GetComponent<PlayerRotation>();
+        _stamina = GetComponent<PlayerStamina>();
+        _interaction = GetComponent<PlayerInteraction>();
+        _health = GetComponent<PlayerHealth>();
     }
 
     void FreezePlayer()
