@@ -1,3 +1,4 @@
+using SurvivalGame;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -11,8 +12,8 @@ public class NetworkButtons : MonoBehaviour
 
     void Awake()
     {
-        _hostButton.onClick.AddListener(() => { NetworkManager.Singleton.StartHost(); });
-        _clientButton.onClick.AddListener(() => { NetworkManager.Singleton.StartClient(); });
+        _hostButton.onClick.AddListener(() => { GameManager.Instance.StartHost(); });
+        _clientButton.onClick.AddListener(() => { GameManager.Instance.StartClient(); });
 
     }
 }
