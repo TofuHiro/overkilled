@@ -1,6 +1,7 @@
 using SurvivalGame;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class HostDisconnectUI : MonoBehaviour
@@ -13,7 +14,7 @@ public class HostDisconnectUI : MonoBehaviour
         _quitButton.onClick.AddListener(() => 
         {
             NetworkManager.Singleton.Shutdown();
-            //Load menu
+            SceneManager.LoadScene(Loader.Scene.MainMenuScene.ToString());
         });
     }
 
