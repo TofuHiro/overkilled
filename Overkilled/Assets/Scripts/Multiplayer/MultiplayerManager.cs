@@ -2,14 +2,19 @@ using SurvivalGame;
 using System;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MultiplayerManager : NetworkBehaviour
 {
+    const int MAX_PLAYER_COUNT = 4;
+
     [SerializeField] NetworkPrefabsList _networkPrefabsList;
 
     public static MultiplayerManager Instance { get; private set; }
 
     public static event Action OnDisconnect;
+    public static event Action OnTryingToJoinGame;
+    public static event Action OnFailedToJoinGame;
 
     NetworkObject _previousSpawnedObject;
 
@@ -22,6 +27,7 @@ public class MultiplayerManager : NetworkBehaviour
         }
 
         Instance = this;
+        DontDestroyOnLoad(gameObject);
     }
 
     public override void OnNetworkSpawn()
@@ -42,20 +48,35 @@ public class MultiplayerManager : NetworkBehaviour
 
     void SetConnectionApproval(NetworkManager.ConnectionApprovalRequest request, NetworkManager.ConnectionApprovalResponse response)
     {
-        if (GameManager.Instance.IsWaiting)
-        {
-            response.Approved = true;
-            response.CreatePlayerObject = true;
-        }
-        else
+        if (SceneManager.GetActiveScene().name != Loader.Scene.CharacterSelectScene.ToString())
         {
             response.Approved = false;
+            response.Reason = "Game has already started";
+            return;
         }
+        
+        if (NetworkManager.Singleton.ConnectedClientsIds.Count >= MAX_PLAYER_COUNT)
+        {
+            response.Approved = false;
+            response.Reason = "Lobby is full";
+            return;
+        }
+
+        response.Approved = true;
     }
 
     public void StartClient()
     {
+        OnTryingToJoinGame?.Invoke();
+
+        NetworkManager.Singleton.OnConnectionEvent += FailToJoin;
         NetworkManager.Singleton.StartClient();
+    }
+
+    void FailToJoin(NetworkManager manager, ConnectionEventData data)
+    {
+        if (data.EventType == ConnectionEvent.ClientDisconnected && data.ClientId == NetworkManager.Singleton.LocalClientId)
+            OnFailedToJoinGame?.Invoke();
     }
 
     void OnDisconnectEvent(NetworkManager manager, ConnectionEventData data)

@@ -8,6 +8,7 @@ namespace SurvivalGame
 {
     public class GameManager : NetworkBehaviour
     {
+        [SerializeField] GameObject _playerPrefab;
         [SerializeField] LevelPreset _levelPreset;
         [Tooltip("The count down timer when the game is starting")]
         [SerializeField] float _gameStartCountdownTime = 3f;
@@ -83,8 +84,21 @@ namespace SurvivalGame
             _currentGameState.OnValueChanged += OnStateChange;
             _isGamePaused.OnValueChanged += OnGamePausedChange;
 
-            NetworkManager.Singleton.OnConnectionEvent += TestPauseOnPlayerDisconnect;
-            NetworkManager.Singleton.OnConnectionEvent += TestPlayersReadyOnPlayerDisconnect;
+            if (IsServer)
+            {
+                NetworkManager.Singleton.OnConnectionEvent += TestPauseOnPlayerDisconnect;
+                NetworkManager.Singleton.OnConnectionEvent += TestPlayersReadyOnPlayerDisconnect;
+                NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += SpawnPlayers;
+            }
+        }
+
+        void SpawnPlayers(string sceneName, UnityEngine.SceneManagement.LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
+        {
+            foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
+            {
+                GameObject playerObject = Instantiate(_playerPrefab);
+                playerObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
+            }
         }
 
         public override void OnNetworkDespawn()
@@ -92,8 +106,12 @@ namespace SurvivalGame
             _currentGameState.OnValueChanged -= OnStateChange;
             _isGamePaused.OnValueChanged -= OnGamePausedChange;
 
-            NetworkManager.Singleton.OnConnectionEvent -= TestPauseOnPlayerDisconnect;
-            NetworkManager.Singleton.OnConnectionEvent -= TestPlayersReadyOnPlayerDisconnect;
+            if (IsServer)
+            {
+                NetworkManager.Singleton.OnConnectionEvent -= TestPauseOnPlayerDisconnect;
+                NetworkManager.Singleton.OnConnectionEvent -= TestPlayersReadyOnPlayerDisconnect;
+                NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= SpawnPlayers;
+            }
         }
 
         void Start()
