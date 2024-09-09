@@ -75,12 +75,6 @@ public class Projectile : NetworkBehaviour
         if (rb != null)
             CombatManager.Instance.AddHitForce(rb, _directionOfTravel * _knockbackForce, hitPoint);
 
-       DespawnProjectileServerRpc();
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    protected void DespawnProjectileServerRpc()
-    {
-        Destroy(gameObject);
+        MultiplayerManager.Instance.DestroyItem(gameObject);
     }
 }

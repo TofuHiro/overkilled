@@ -7,18 +7,16 @@ public class EnemySpawner : MonoBehaviour
 {
     [SerializeField] GameObject _enemyPrefab;
 
-    public void Spawn()
+    MultiplayerManager _multiplayerManager;
+
+    void Start()
     {
-        SpawnServerRpc();
+        _multiplayerManager = MultiplayerManager.Instance;
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    void SpawnServerRpc()
+    public void Spawn()
     {
-        EnemyController enemy = Instantiate(_enemyPrefab, transform.position, transform.rotation).GetComponentInChildren<EnemyController>();
-        NetworkObject networkObject = enemy.GetNetworkObject();
-
-        networkObject.Spawn(true);
+        _multiplayerManager.SpawnItem(_enemyPrefab, transform.position, transform.rotation);
     }
 
     void OnDrawGizmos()

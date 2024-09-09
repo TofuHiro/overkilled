@@ -61,6 +61,6 @@ public class ExplosiveProjectile : Projectile
                 CombatManager.Instance.AddExplosiveForce(rb, _explosiveProjectile.explosionForce, transform.position, _explosiveProjectile.explosionRadius);
         }
 
-        DespawnProjectileServerRpc();
+        MultiplayerManager.Instance.DestroyItem(gameObject);
     }
 }

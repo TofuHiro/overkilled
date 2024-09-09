@@ -49,7 +49,6 @@ namespace SurvivalGame
         public static event Action OnLocalGameUnpause;
         public static event Action OnMultiplayerGamePause;
         public static event Action OnMultiplayerGameUnpause;
-        public static event Action OnDisconnect;
 
         Dictionary<ulong, bool> _playerReadyDictionary;
         Dictionary<ulong, bool> _playerPausedDictionary;
@@ -84,7 +83,6 @@ namespace SurvivalGame
             _currentGameState.OnValueChanged += OnStateChange;
             _isGamePaused.OnValueChanged += OnGamePausedChange;
 
-            NetworkManager.Singleton.OnConnectionEvent += OnDisconnectEvent;
             NetworkManager.Singleton.OnConnectionEvent += TestPauseOnPlayerDisconnect;
             NetworkManager.Singleton.OnConnectionEvent += TestPlayersReadyOnPlayerDisconnect;
         }
@@ -94,7 +92,6 @@ namespace SurvivalGame
             _currentGameState.OnValueChanged -= OnStateChange;
             _isGamePaused.OnValueChanged -= OnGamePausedChange;
 
-            NetworkManager.Singleton.OnConnectionEvent -= OnDisconnectEvent;
             NetworkManager.Singleton.OnConnectionEvent -= TestPauseOnPlayerDisconnect;
             NetworkManager.Singleton.OnConnectionEvent -= TestPlayersReadyOnPlayerDisconnect;
         }
@@ -109,12 +106,6 @@ namespace SurvivalGame
         {
             PlayerController.OnPlayerInteractInput -= SetLocalPlayerReady;
             PlayerController.OnPlayerPauseInput -= TogglePauseGame;
-        }
-
-        void OnDisconnectEvent(NetworkManager manager, ConnectionEventData data)
-        {
-            if (data.EventType == ConnectionEvent.ClientDisconnected && data.ClientId == NetworkManager.Singleton.LocalClientId)
-                OnDisconnect?.Invoke();
         }
     
         void TestPauseOnPlayerDisconnect(NetworkManager manager, ConnectionEventData data)
@@ -149,30 +140,6 @@ namespace SurvivalGame
                 OnMultiplayerGameUnpause?.Invoke();
                 Time.timeScale = 1f;
             }
-        }
-
-        public void StartHost()
-        {
-            NetworkManager.Singleton.ConnectionApprovalCallback += SetConnectionApproval;
-            NetworkManager.Singleton.StartHost();
-        }
-
-        void SetConnectionApproval(NetworkManager.ConnectionApprovalRequest request, NetworkManager.ConnectionApprovalResponse response)
-        {
-            if (IsWaiting)
-            {
-                response.Approved = true;
-                response.CreatePlayerObject = true;
-            }
-            else
-            {
-                response.Approved = false;
-            }
-        }
-
-        public void StartClient()
-        { 
-            NetworkManager.Singleton.StartClient();
         }
 
         void Update()

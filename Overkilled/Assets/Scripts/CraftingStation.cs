@@ -8,6 +8,7 @@ public class CraftingStation : CounterTop
     [Tooltip("For dev. Products spawn at the first item holder in the hierachy. Assign this for a visual reference of where that will be on the table")]
     [SerializeField] ItemHolder _firstItemHolder;
 
+    MultiplayerManager _multiplayerManager;
     NetworkVariable<float> _craftProgress = new NetworkVariable<float>(0f);
     CraftRecipeSO _validRecipe;
     bool _isCrafting;
@@ -31,6 +32,13 @@ public class CraftingStation : CounterTop
         _validRecipe = _recipeSet.GetValidRecipe(_holders, ItemsOnCounter);
         if (_validRecipe != null )
             _hasValidRecipe = true;
+    }
+
+    protected override void Start()
+    {
+        base.Start();
+
+        _multiplayerManager = MultiplayerManager.Instance;
     }
 
     void Update()
@@ -116,21 +124,12 @@ public class CraftingStation : CounterTop
 
             Item item = holder.GetItem();
             holder.SetItem(null);
-            DestroyIngredientServerRpc(item.GetNetworkObject());
+            _multiplayerManager.DestroyItem(item.gameObject);
         }
-
-        NetworkObject productNetworkObject = Instantiate(_validRecipe.product.prefabReference).GetComponent<NetworkObject>();
-        productNetworkObject.Spawn(true);
-
+        
+        NetworkObject productNetworkObject = _multiplayerManager.SpawnItem(_validRecipe.product.prefabReference);
         Item product = productNetworkObject.GetComponent<Item>();
         _holders[0].SetItem(product);
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    void DestroyIngredientServerRpc(NetworkObjectReference itemNetworkObjectReference)
-    {
-        itemNetworkObjectReference.TryGet(out NetworkObject itemNetworkObject);
-        Destroy(itemNetworkObject.gameObject);
     }
 
     void OnDrawGizmos()
