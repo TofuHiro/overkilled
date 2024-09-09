@@ -4,11 +4,13 @@ using UnityEngine;
 public class CheckoutCounter : CounterTop
 {
     OrderSystem _orderSystem;
+    MultiplayerManager _multiplayerManager;
 
     protected override void Start()
     {
         base.Start();
         _orderSystem = OrderSystem.Instance;
+        _multiplayerManager = MultiplayerManager.Instance;
     }
 
     public override void Interact(PlayerInteraction player)
@@ -33,14 +35,6 @@ public class CheckoutCounter : CounterTop
         base.Interact(player);
 
         //Pack and send away? To update
-        DestroyItemServerRpc(item.GetNetworkObject());
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    void DestroyItemServerRpc(NetworkObjectReference itemNetworkObjectReference)
-    {
-        itemNetworkObjectReference.TryGet(out NetworkObject itemNetworkObject);
-        Destroy(itemNetworkObject.gameObject, 1f);
-        ReleaseAllItems();
-    }    
+        _multiplayerManager.DestroyItem(item.gameObject, 1f);
+    }  
 }

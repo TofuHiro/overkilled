@@ -6,20 +6,17 @@ public class MaterialBox : CounterTop
     [Tooltip("The source object to spawn from this box")]
     [SerializeField] GameObject _materialPrefab;
 
-    protected override void TakeFromEmptyCounter(PlayerHand hand)
+    MultiplayerManager _multiplayerManager;
+
+    protected override void Start()
     {
-        SpawnItemServerRpc(hand.GetNetworkObject());
+        base.Start();
+
+        _multiplayerManager = MultiplayerManager.Instance;
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    void SpawnItemServerRpc(NetworkObjectReference handNetworkObjectReference)
+    protected override void TakeFromEmptyCounter(PlayerHand hand)
     {
-        GameObject materialTranform = Instantiate(_materialPrefab);
-        materialTranform.GetComponent<NetworkObject>().Spawn(true);
-
-        handNetworkObjectReference.TryGet(out NetworkObject handNetworkObject);
-
-        PlayerHand hand = handNetworkObject.GetComponent<PlayerHand>();
-        hand.SetItem(materialTranform.GetComponent<Item>());
+        _multiplayerManager.SpawnItem(_materialPrefab, hand);
     }
 }

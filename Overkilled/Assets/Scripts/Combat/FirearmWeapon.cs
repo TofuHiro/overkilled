@@ -6,6 +6,7 @@ public class FirearmWeapon : Weapon
     [Tooltip("The point where projectiles are fired from. Ensure the Z axis points forward")]
     [SerializeField] Transform _projectileExit;
 
+    MultiplayerManager _multiplayerManager;
     FirearmSO _firearmSO;
     float _aimConeAngle;
 
@@ -15,6 +16,11 @@ public class FirearmWeapon : Weapon
 
         if (_firearmSO.GetType() != typeof(FirearmSO))
             Debug.LogWarning("Warning. Incorrect WeaponSO type assigned to weapon " + name);
+    }
+
+    void Start()
+    {
+        _multiplayerManager = MultiplayerManager.Instance;
     }
 
     public override void Attack()
@@ -49,9 +55,7 @@ public class FirearmWeapon : Weapon
         float spread = Random.Range(-_aimConeAngle / 2f, _aimConeAngle / 2f);
         Quaternion rotation = Quaternion.Euler(_projectileExit.rotation.eulerAngles + (Vector3.up * spread));
 
-        NetworkObject projectileNetworkObject = Instantiate(_firearmSO.projectile.prefab, _projectileExit.position, rotation).GetComponent<NetworkObject>();
-        projectileNetworkObject.Spawn(true);
-
+        NetworkObject projectileNetworkObject = _multiplayerManager.SpawnItem(_firearmSO.projectile.prefab, _projectileExit.position, rotation);
         Projectile projectile = projectileNetworkObject.GetComponent<Projectile>();
         projectile.InitProjectile(_firearmSO.damage, _firearmSO.knockbackForce, projectile.transform.forward);
     }

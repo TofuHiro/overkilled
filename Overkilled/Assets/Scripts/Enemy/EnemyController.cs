@@ -100,9 +100,4 @@ public class EnemyController : NetworkBehaviour
         _movement.Stop();
         _weapon.Attack();
     }
-
-    public NetworkObject GetNetworkObject()
-    {
-        return _networkObject;
-    }
 }
