@@ -1,6 +1,7 @@
 using SurvivalGame;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class PauseScreenUI : MonoBehaviour
@@ -27,7 +28,7 @@ public class PauseScreenUI : MonoBehaviour
         _quitButton.onClick.AddListener(() => 
         {
             NetworkManager.Singleton.Shutdown();
-            //Load menu
+            SceneManager.LoadScene(Loader.Scene.MainMenuScene.ToString());
         });
     }
 
