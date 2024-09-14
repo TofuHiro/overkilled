@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -9,6 +10,7 @@ public struct PlayerData : IEquatable<PlayerData>, INetworkSerializable
     private const int NUM_OF_PLAYER_MODELS = 3;
 
     public ulong clientId;
+    public FixedString64Bytes playerId;
 
     public int PlayerModelId
     {
@@ -27,12 +29,16 @@ public struct PlayerData : IEquatable<PlayerData>, INetworkSerializable
 
     public bool Equals(PlayerData other)
     {
-        return clientId == other.clientId && PlayerModelId == other.PlayerModelId;
+        return 
+            clientId == other.clientId && 
+            PlayerModelId == other.PlayerModelId &&
+            playerId == other.playerId;
     }
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         serializer.SerializeValue(ref clientId);
         serializer.SerializeValue(ref _playerModelId);
+        serializer.SerializeValue(ref playerId);
     }
 }

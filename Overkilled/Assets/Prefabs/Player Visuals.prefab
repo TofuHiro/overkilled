@@ -46,9 +46,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _playerModels:
-  - {fileID: 474728373632158370}
-  - {fileID: 5991966629784364010}
-  - {fileID: 5701975586149400769}
+  - {fileID: 3785850813690106559}
+  - {fileID: 1933611157591897177}
+  - {fileID: 3170719765796897050}
 --- !u!1 &474728373632158370
 GameObject:
   m_ObjectHideFlags: 0

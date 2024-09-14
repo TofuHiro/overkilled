@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class PlayerVisuals : MonoBehaviour
 {
-    [SerializeField] GameObject[] _playerModels;
+    [SerializeField] PlayerModel[] _playerModels;
 
     int _currentIndex;
 
     public void SetPlayerModel(int modelIndex)
     {
-        _playerModels[_currentIndex].SetActive(false);
-        _playerModels[modelIndex].SetActive(true);
+        _playerModels[_currentIndex].Hide(); ;
+        _playerModels[modelIndex].Show();
 
         _currentIndex = modelIndex;
     }

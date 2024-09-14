@@ -8,12 +8,12 @@ public class PlayerModel : MonoBehaviour
 
     public PlayerModelSO GetPlayerModelSO() { return _playerModelSO; }
 
-    void Show()
+    public void Show()
     {
         gameObject.SetActive(true);
     }
 
-    void Hide()
+    public void Hide()
     {
         gameObject.SetActive(false);
     }

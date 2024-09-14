@@ -1,19 +1,19 @@
 using SurvivalGame;
 using System;
 using Unity.Netcode;
+using Unity.Services.Authentication;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class MultiplayerManager : NetworkBehaviour
 {
-    const int MAX_PLAYER_COUNT = 4;
+    public const int MAX_PLAYER_COUNT = 4;
 
     [SerializeField] NetworkPrefabsList _networkPrefabsList;
 
     public static MultiplayerManager Instance { get; private set; }
 
     public static event Action OnDisconnect;
-    public static event Action OnKick;
     public static event Action OnTryingToJoinGame;
     public static event Action OnFailedToJoinGame;
     public static event Action OnPlayerDataNetworkListChange;
@@ -45,7 +45,7 @@ public class MultiplayerManager : NetworkBehaviour
     {
         NetworkManager.Singleton.ConnectionApprovalCallback += SetConnectionApproval;
         NetworkManager.Singleton.OnConnectionEvent += AddPlayerToNetworkList;
-        NetworkManager.Singleton.OnConnectionEvent += ServerOnClientDisconnect;
+        NetworkManager.Singleton.OnConnectionEvent += Server_OnClientDisconnect;
         NetworkManager.Singleton.StartHost();
     }
 
@@ -72,9 +72,11 @@ public class MultiplayerManager : NetworkBehaviour
     {
         if (data.EventType == ConnectionEvent.ClientConnected)
             _playerDataNetworkList.Add(new PlayerData { clientId = data.ClientId });
+
+        SetPlayerIdServerRpc(AuthenticationService.Instance.PlayerId);
     }
 
-    void ServerOnClientDisconnect(NetworkManager manager, ConnectionEventData data)
+    void Server_OnClientDisconnect(NetworkManager manager, ConnectionEventData data)
     {
         if (data.EventType == ConnectionEvent.ClientDisconnected)
             RemovePlayerData(data.ClientId);
@@ -96,12 +98,13 @@ public class MultiplayerManager : NetworkBehaviour
     {
         OnTryingToJoinGame?.Invoke();
 
-        NetworkManager.Singleton.OnConnectionEvent += FailToJoin;
-        NetworkManager.Singleton.OnConnectionEvent += OnDisconnectEvent;
+        NetworkManager.Singleton.OnConnectionEvent += Client_FailToJoin;
+        NetworkManager.Singleton.OnConnectionEvent += Client_OnDisconnectEvent;
+        NetworkManager.Singleton.OnConnectionEvent += Client_OnConnectEvent;
         NetworkManager.Singleton.StartClient();
     }
 
-    void FailToJoin(NetworkManager manager, ConnectionEventData data)
+    void Client_FailToJoin(NetworkManager manager, ConnectionEventData data)
     {
         if (data.EventType == ConnectionEvent.ClientDisconnected && data.ClientId == NetworkManager.Singleton.LocalClientId)
         {
@@ -109,11 +112,19 @@ public class MultiplayerManager : NetworkBehaviour
         }
     }
 
-    void OnDisconnectEvent(NetworkManager manager, ConnectionEventData data)
+    void Client_OnDisconnectEvent(NetworkManager manager, ConnectionEventData data)
     {
         if (data.EventType == ConnectionEvent.ClientDisconnected && data.ClientId == NetworkManager.Singleton.LocalClientId)
         {
             OnDisconnect?.Invoke();
+        }
+    }
+
+    void Client_OnConnectEvent(NetworkManager manager, ConnectionEventData data)
+    {
+        if (data.EventType == ConnectionEvent.ClientDisconnected && data.ClientId == NetworkManager.Singleton.LocalClientId)
+        {
+            SetPlayerIdServerRpc(AuthenticationService.Instance.PlayerId);
         }
     }
 
@@ -127,6 +138,8 @@ public class MultiplayerManager : NetworkBehaviour
     {
         return index < _playerDataNetworkList.Count;
     }
+
+    #region Player Data
 
     public int GetPlayerDataIndexFromClientId(ulong clientId)
     {
@@ -174,6 +187,19 @@ public class MultiplayerManager : NetworkBehaviour
 
         _playerDataNetworkList[playerDataIndex] = playerData;
     }
+
+    [ServerRpc(RequireOwnership = false)]
+    void SetPlayerIdServerRpc(string playerId, ServerRpcParams serverRpcParams = default)
+    {
+        int playerDataIndex = GetPlayerDataIndexFromClientId(serverRpcParams.Receive.SenderClientId);
+        PlayerData playerData = _playerDataNetworkList[playerDataIndex];
+
+        playerData.playerId = playerId;
+
+       _playerDataNetworkList[playerDataIndex] = playerData;
+    }
+
+    #endregion
 
     #region Item Spawning
 
