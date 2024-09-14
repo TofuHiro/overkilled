@@ -6,6 +6,7 @@ using Unity.Services.Core;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameLobby : MonoBehaviour
 {
@@ -72,6 +73,8 @@ public class GameLobby : MonoBehaviour
         if (!AuthenticationService.Instance.IsSignedIn)
             return;
         if (_joinedLobby != null)
+            return;
+        if (SceneManager.GetActiveScene().name != Loader.Scene.LobbyScene.ToString())
             return;
 
         _listLobbiesTimer += Time.deltaTime;

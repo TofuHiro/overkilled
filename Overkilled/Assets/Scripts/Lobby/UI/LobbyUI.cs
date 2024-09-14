@@ -59,6 +59,11 @@ public class LobbyUI : MonoBehaviour
         UpdateLobbyList(new List<Lobby>());
     }
 
+    void OnDestroy()
+    {
+        GameLobby.Instance.OnLobbyListChanged -= GameLobby_OnLobbyListChanged;        
+    }
+
     void GameLobby_OnLobbyListChanged(List<Lobby> lobbyList)
     {
         UpdateLobbyList(lobbyList);
