@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class LobbyUI : MonoBehaviour
 {
     [SerializeField] Button _mainMenuButton;
+    [SerializeField] TMP_InputField _playerNameInputField; 
     [Header("Create Game")]
     [SerializeField] Button _createGameButton;
     [Tooltip("Lobby Create UI instance to show when selecting create game")]
@@ -19,12 +20,16 @@ public class LobbyUI : MonoBehaviour
     [Header("Lobby")]
     [SerializeField] Transform _lobbyContainer;
     [SerializeField] Transform _lobbyTemplate;
-    [SerializeField] Button _refreshListButton;
 
     List<ActiveLobbyUI> _instantiatedLobbyTemplates;
 
     void Awake()
     {
+        _playerNameInputField.onValueChanged.AddListener((string newText) =>
+        {
+            MultiplayerManager.Instance.SetPlayerName(newText);
+        });
+
         _mainMenuButton.onClick.AddListener(() =>
         {
             Loader.LoadScene(Loader.Scene.MainMenuScene);
@@ -45,17 +50,14 @@ public class LobbyUI : MonoBehaviour
             GameLobby.Instance.JoinLobbyWithCode(_joinCodeInputField.text);
         });
 
-        _refreshListButton.onClick.AddListener(() =>
-        {
-            GameLobby.Instance.ListLobbies();
-        });
-
         _instantiatedLobbyTemplates = new List<ActiveLobbyUI>();
     }
 
     void Start()
     {
         GameLobby.Instance.OnLobbyListChanged += GameLobby_OnLobbyListChanged;
+
+        _playerNameInputField.text = MultiplayerManager.Instance.GetPlayerName();
         UpdateLobbyList(new List<Lobby>());
     }
 

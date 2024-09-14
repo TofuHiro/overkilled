@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,6 +11,8 @@ public class CharacterSelectPlayer : MonoBehaviour
     [SerializeField] int _playerIndex;
     [Tooltip("The ready text to show")]
     [SerializeField] GameObject _readyObject;
+    [Tooltip("The player name text")]
+    [SerializeField] TMP_Text _playerNameText;
     [Tooltip("The player visuals to update on this character")]
     [SerializeField] PlayerVisuals _playerVisuals;
     [Tooltip("The kick button to kick this character player")]
@@ -49,6 +52,7 @@ public class CharacterSelectPlayer : MonoBehaviour
             
             _readyObject.SetActive(CharacterSelectReady.Instance.IsPlayerReady(playerData.clientId));
             _playerVisuals.SetPlayerModel(playerData.PlayerModelId);
+            _playerNameText.text = playerData.playerName.ToString();
 
             Show();
         }

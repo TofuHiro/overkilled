@@ -18,7 +18,10 @@ public class LobbyCreateUI : MonoBehaviour
     {
         _createLobbyButton.onClick.AddListener(() =>
         {
-            GameLobby.Instance.CreateLobby(_lobbyNameInputField.text, _privateLobbyToggle.isOn);
+            string lobbyName = _lobbyNameInputField.text;
+            if (string.IsNullOrWhiteSpace(lobbyName))
+                lobbyName = "Lobby Name";
+            GameLobby.Instance.CreateLobby(lobbyName, _privateLobbyToggle.isOn);
         });
         _exitButton.onClick.AddListener(() =>
         {

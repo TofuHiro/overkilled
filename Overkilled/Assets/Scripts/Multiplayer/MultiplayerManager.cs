@@ -8,18 +8,20 @@ using UnityEngine.SceneManagement;
 public class MultiplayerManager : NetworkBehaviour
 {
     public const int MAX_PLAYER_COUNT = 4;
+    const string PLAYER_PREFS_PLAYER_NAME_MULTIPLAYER = "PlayerNameMultiplayer";
 
     [SerializeField] NetworkPrefabsList _networkPrefabsList;
 
     public static MultiplayerManager Instance { get; private set; }
 
-    public static event Action OnDisconnect;
+    public static event Action OnLocalDisconnect;
     public static event Action OnTryingToJoinGame;
     public static event Action OnFailedToJoinGame;
     public static event Action OnPlayerDataNetworkListChange;
 
     NetworkList<PlayerData> _playerDataNetworkList;
     NetworkObject _previousSpawnedObject;
+    string _playerName;
 
     void Awake()
     {
@@ -32,8 +34,20 @@ public class MultiplayerManager : NetworkBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
+        _playerName = PlayerPrefs.GetString(PLAYER_PREFS_PLAYER_NAME_MULTIPLAYER, "PlayerName" + UnityEngine.Random.Range(0, 1000).ToString());
         _playerDataNetworkList = new NetworkList<PlayerData>();
         _playerDataNetworkList.OnListChanged += PlayerDataNetworkList_OnListChanged;
+    }
+
+    public string GetPlayerName()
+    {
+        return _playerName;
+    }
+
+    public void SetPlayerName(string newName)
+    {
+        _playerName = newName;
+        PlayerPrefs.SetString(PLAYER_PREFS_PLAYER_NAME_MULTIPLAYER, _playerName);////
     }
 
     void PlayerDataNetworkList_OnListChanged(NetworkListEvent<PlayerData> changeEvent)
@@ -71,9 +85,15 @@ public class MultiplayerManager : NetworkBehaviour
     void AddPlayerToNetworkList(NetworkManager manager, ConnectionEventData data)
     {
         if (data.EventType == ConnectionEvent.ClientConnected)
-            _playerDataNetworkList.Add(new PlayerData { clientId = data.ClientId });
+        {
+            _playerDataNetworkList.Add(new PlayerData
+            {
+                clientId = data.ClientId
+            });
 
-        SetPlayerIdServerRpc(AuthenticationService.Instance.PlayerId);
+            SetPlayerIdServerRpc(AuthenticationService.Instance.PlayerId);
+            SetPlayerNameServerRpc(GetPlayerName());
+        }
     }
 
     void Server_OnClientDisconnect(NetworkManager manager, ConnectionEventData data)
@@ -99,7 +119,7 @@ public class MultiplayerManager : NetworkBehaviour
         OnTryingToJoinGame?.Invoke();
 
         NetworkManager.Singleton.OnConnectionEvent += Client_FailToJoin;
-        NetworkManager.Singleton.OnConnectionEvent += Client_OnDisconnectEvent;
+        NetworkManager.Singleton.OnConnectionEvent += Client_OnLocalDisconnectEvent;
         NetworkManager.Singleton.OnConnectionEvent += Client_OnConnectEvent;
         NetworkManager.Singleton.StartClient();
     }
@@ -112,19 +132,20 @@ public class MultiplayerManager : NetworkBehaviour
         }
     }
 
-    void Client_OnDisconnectEvent(NetworkManager manager, ConnectionEventData data)
+    void Client_OnLocalDisconnectEvent(NetworkManager manager, ConnectionEventData data)
     {
         if (data.EventType == ConnectionEvent.ClientDisconnected && data.ClientId == NetworkManager.Singleton.LocalClientId)
         {
-            OnDisconnect?.Invoke();
+            OnLocalDisconnect?.Invoke();
         }
     }
 
     void Client_OnConnectEvent(NetworkManager manager, ConnectionEventData data)
     {
-        if (data.EventType == ConnectionEvent.ClientDisconnected && data.ClientId == NetworkManager.Singleton.LocalClientId)
+        if (data.EventType == ConnectionEvent.ClientConnected)
         {
             SetPlayerIdServerRpc(AuthenticationService.Instance.PlayerId);
+            SetPlayerNameServerRpc(GetPlayerName());
         }
     }
 
@@ -197,6 +218,17 @@ public class MultiplayerManager : NetworkBehaviour
         playerData.playerId = playerId;
 
        _playerDataNetworkList[playerDataIndex] = playerData;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void SetPlayerNameServerRpc(string playerName, ServerRpcParams serverRpcParams = default)
+    {
+        int playerDataIndex = GetPlayerDataIndexFromClientId(serverRpcParams.Receive.SenderClientId);
+        PlayerData playerData = _playerDataNetworkList[playerDataIndex];
+
+        playerData.playerName = playerName;
+
+        _playerDataNetworkList[playerDataIndex] = playerData;
     }
 
     #endregion

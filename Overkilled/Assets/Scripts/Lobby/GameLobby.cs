@@ -52,7 +52,7 @@ public class GameLobby : MonoBehaviour
             InitializationOptions options = new InitializationOptions();
             options.SetProfile(UnityEngine.Random.Range(0, 10000).ToString());////
 
-            await UnityServices.InitializeAsync();
+            await UnityServices.InitializeAsync(options);
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
         }
     }
@@ -149,13 +149,7 @@ public class GameLobby : MonoBehaviour
             CreateLobbyOptions options = new CreateLobbyOptions
             {
                 IsPrivate = isPrivate,
-                Player = new Player
-                {
-                    Data = new Dictionary<string, PlayerDataObject>
-                    {
-                        { "PlayerName" , new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, "Name") }
-                    }
-                }
+                
             };
 
             _joinedLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, MultiplayerManager.MAX_PLAYER_COUNT, options);
