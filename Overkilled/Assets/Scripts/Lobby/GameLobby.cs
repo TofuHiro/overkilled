@@ -185,7 +185,10 @@ public class GameLobby : MonoBehaviour
 
             string relayJoinCode = _joinedLobby.Data[KEY_RELAY_JOIN_CODE].Value;
             JoinAllocation joinAllocation = await JoinRelay(relayJoinCode);
-            NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(joinAllocation, "dtls"));
+
+            UnityTransport transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+            RelayServerData relayServerData = new RelayServerData(joinAllocation, "dtls");
+            transport.SetRelayServerData(relayServerData);
 
             MultiplayerManager.Instance.StartClient();
         }
@@ -206,7 +209,10 @@ public class GameLobby : MonoBehaviour
 
             string relayJoinCode = _joinedLobby.Data[KEY_RELAY_JOIN_CODE].Value;
             JoinAllocation joinAllocation = await JoinRelay(relayJoinCode);
-            NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(joinAllocation, "dtls"));
+
+            UnityTransport transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+            RelayServerData relayServerData = new RelayServerData(joinAllocation, "dtls");
+            transport.SetRelayServerData(relayServerData);
 
             MultiplayerManager.Instance.StartClient();
         }
@@ -227,7 +233,10 @@ public class GameLobby : MonoBehaviour
 
             string relayJoinCode = _joinedLobby.Data[KEY_RELAY_JOIN_CODE].Value;
             JoinAllocation joinAllocation = await JoinRelay(relayJoinCode);
-            NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(joinAllocation, "dtls"));
+
+            UnityTransport transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+            RelayServerData relayServerData = new RelayServerData(joinAllocation, "dtls");
+            transport.SetRelayServerData(relayServerData);
 
             MultiplayerManager.Instance.StartClient();
         }
@@ -250,6 +259,7 @@ public class GameLobby : MonoBehaviour
             try
             {
                 await LobbyService.Instance.DeleteLobbyAsync(_joinedLobby.Id);
+
                 _joinedLobby = null;
             }
             catch (LobbyServiceException e)
@@ -265,7 +275,16 @@ public class GameLobby : MonoBehaviour
         {
             try
             {
-                await LobbyService.Instance.RemovePlayerAsync(_joinedLobby.Id, AuthenticationService.Instance.PlayerId);
+                if (IsLobbyHost())
+                {
+                    await LobbyService.Instance.DeleteLobbyAsync(_joinedLobby.Id);
+                }
+                else
+                {
+                    await LobbyService.Instance.RemovePlayerAsync(_joinedLobby.Id, AuthenticationService.Instance.PlayerId);
+                }
+
+                _joinedLobby = null;
             }
             catch (LobbyServiceException e)
             {
