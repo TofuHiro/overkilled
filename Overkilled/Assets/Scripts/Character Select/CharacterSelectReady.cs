@@ -105,8 +105,6 @@ public class CharacterSelectReady : NetworkBehaviour
     {
         foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
         {
-            Debug.Log(clientId);
-            Debug.Log(NetworkManager.Singleton.ConnectedClientsIds.Count);
             if (!_playerReadyDictionary.ContainsKey(clientId) || !_playerReadyDictionary[clientId])
             {
                 _allPlayersReady = false;
