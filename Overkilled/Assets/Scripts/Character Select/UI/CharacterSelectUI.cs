@@ -9,6 +9,7 @@ using UnityEngine.UI;
 public class CharacterSelectUI : MonoBehaviour
 {
     [SerializeField] Button _readyButton;
+    [SerializeField] Button _startButton;
     [SerializeField] Button _mainMenuButton;
     [SerializeField] TMP_Text _lobbyCodeText;
 
@@ -16,7 +17,12 @@ public class CharacterSelectUI : MonoBehaviour
     {
         _readyButton.onClick.AddListener(() => 
         {
-            CharacterSelectReady.Instance.SetPlayerReady();
+            CharacterSelectReady.Instance.TogglePlayerReady();
+        });
+
+        _startButton.onClick.AddListener(() =>
+        {
+            CharacterSelectReady.Instance.StartGame();
         });
 
         _mainMenuButton.onClick.AddListener(() =>
@@ -29,6 +35,8 @@ public class CharacterSelectUI : MonoBehaviour
 
     void Start()
     {
+        _startButton.gameObject.SetActive(NetworkManager.Singleton.IsServer);
+
         Lobby lobby = GameLobby.Instance.GetLobby();
         _lobbyCodeText.text = "Lobby Code: " + lobby.LobbyCode;
     }

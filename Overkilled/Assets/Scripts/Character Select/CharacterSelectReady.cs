@@ -6,11 +6,17 @@ using UnityEngine;
 
 public class CharacterSelectReady : NetworkBehaviour
 {
+    const float READY_TOGGLE_COOLDOWN = 1f;
+
     public static CharacterSelectReady Instance;
 
     public event Action OnPlayerReadyChange;
 
     Dictionary<ulong, bool> _playerReadyDictionary;
+
+    float _readyToggleCooldownTimer;
+    bool _allPlayersReady;
+    bool _checkPlayerReadySwitch;
 
     void Awake()
     {
@@ -25,9 +31,59 @@ public class CharacterSelectReady : NetworkBehaviour
         _playerReadyDictionary = new Dictionary<ulong, bool>();    
     }
 
-    public void SetPlayerReady()
+    void Start()
     {
-        SetPlayerReadyServerRpc();
+        if (IsServer)
+        {
+            NetworkManager.Singleton.OnConnectionEvent += Network_OnConnectionEvent;
+            _playerReadyDictionary.Add(NetworkManager.ServerClientId, false);
+        }
+    }
+
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+        NetworkManager.Singleton.OnConnectionEvent -= Network_OnConnectionEvent;
+    }
+
+    void Update()
+    {
+        if (_readyToggleCooldownTimer < READY_TOGGLE_COOLDOWN)
+        {
+            _readyToggleCooldownTimer += Time.deltaTime;
+        }
+    }
+
+    void Network_OnConnectionEvent(NetworkManager manager, ConnectionEventData data)
+    {
+        if (data.EventType == ConnectionEvent.ClientConnected)
+        {
+            _playerReadyDictionary.Add(data.ClientId, false);
+            _allPlayersReady = false;
+        }
+        else if (data.EventType == ConnectionEvent.ClientDisconnected)
+        {
+            _playerReadyDictionary.Remove(data.ClientId);
+            _checkPlayerReadySwitch = true;
+        }
+    }
+
+    void LateUpdate()
+    {
+        if (_checkPlayerReadySwitch)
+        {
+            CheckPlayerReady();
+            _checkPlayerReadySwitch = false;
+        }
+    }
+
+    public void TogglePlayerReady()
+    {
+        if (_readyToggleCooldownTimer < READY_TOGGLE_COOLDOWN)
+            return;
+
+        TogglePlayerReadyServerRpc();
+        _readyToggleCooldownTimer = 0f;
     }
 
     /// <summary>
@@ -35,32 +91,43 @@ public class CharacterSelectReady : NetworkBehaviour
     /// </summary>
     /// <param name="serverRpcParams"></param>
     [ServerRpc(RequireOwnership = false)]
-    void SetPlayerReadyServerRpc(ServerRpcParams serverRpcParams = default)
+    void TogglePlayerReadyServerRpc(ServerRpcParams serverRpcParams = default)
     {
-        _playerReadyDictionary[serverRpcParams.Receive.SenderClientId] = true;
-        SetPlayerReadyClientRpc(serverRpcParams.Receive.SenderClientId);
+        bool state = !_playerReadyDictionary[serverRpcParams.Receive.SenderClientId];
 
-        bool allPlayersReady = true;
+        _playerReadyDictionary[serverRpcParams.Receive.SenderClientId] = state;
+        SetPlayerReadyClientRpc(state, serverRpcParams.Receive.SenderClientId);
+
+        CheckPlayerReady();
+    }
+
+    void CheckPlayerReady()
+    {
         foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
         {
             if (!_playerReadyDictionary.ContainsKey(clientId) || !_playerReadyDictionary[clientId])
             {
-                allPlayersReady = false;
-                break;
+                _allPlayersReady = false;
+                return;
             }
         }
 
-        if (allPlayersReady)
-        {
-            GameLobby.Instance.DeleteLobby();
-            Loader.LoadSceneNetwork(Loader.Scene.GameScene);
-        }
+        _allPlayersReady = true;
+    }
+
+    public void StartGame()
+    {
+        if (!_allPlayersReady)
+            return;
+
+        GameLobby.Instance.DeleteLobby();
+        Loader.LoadSceneNetwork(Loader.Scene.GameScene);
     }
 
     [ClientRpc]
-    void SetPlayerReadyClientRpc(ulong clientId)
+    void SetPlayerReadyClientRpc(bool state, ulong clientId)
     {
-        _playerReadyDictionary[clientId] = true;
+        _playerReadyDictionary[clientId] = state;
 
         OnPlayerReadyChange?.Invoke();
     }
