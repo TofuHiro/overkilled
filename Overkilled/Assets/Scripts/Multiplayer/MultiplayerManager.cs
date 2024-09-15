@@ -142,7 +142,7 @@ public class MultiplayerManager : NetworkBehaviour
 
     void Client_OnConnectEvent(NetworkManager manager, ConnectionEventData data)
     {
-        if (data.EventType == ConnectionEvent.ClientConnected)
+        if (data.EventType == ConnectionEvent.ClientConnected && data.ClientId == NetworkManager.Singleton.LocalClientId)
         {
             SetPlayerIdServerRpc(AuthenticationService.Instance.PlayerId);
             SetPlayerNameServerRpc(GetPlayerName());
@@ -330,4 +330,6 @@ public class MultiplayerManager : NetworkBehaviour
     }
 
     #endregion
+
+    
 }

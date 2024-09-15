@@ -333,4 +333,9 @@ public class GameLobby : MonoBehaviour
             Debug.LogException(e);
         }
     }
+
+    void OnApplicationQuit()
+    {
+        LeaveLobby();    
+    }
 }
