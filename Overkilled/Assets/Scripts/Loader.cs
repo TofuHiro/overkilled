@@ -15,7 +15,7 @@ public static class Loader
         CharacterSelectScene,
     }
 
-    public static void LeadScene(Scene targetScene)
+    public static void LoadScene(Scene targetScene)
     {
         SceneManager.LoadScene(targetScene.ToString());
     }

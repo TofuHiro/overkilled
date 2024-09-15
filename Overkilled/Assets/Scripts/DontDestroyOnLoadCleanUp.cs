@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-public class MainMenuCleanup : MonoBehaviour
+public class DontDestroyOnLoadCleanUp : MonoBehaviour
 {
     void Awake()
     {
@@ -12,5 +12,8 @@ public class MainMenuCleanup : MonoBehaviour
 
         if (MultiplayerManager.Instance != null)
             Destroy(MultiplayerManager.Instance.gameObject);
+
+        if (GameLobby.Instance != null)
+            Destroy(GameLobby.Instance.gameObject);
     }
 }

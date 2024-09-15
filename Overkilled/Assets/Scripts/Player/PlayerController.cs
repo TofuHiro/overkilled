@@ -19,7 +19,7 @@ public class PlayerController : NetworkBehaviour
     PlayerRotation _rotation;
     PlayerStamina _stamina;
     PlayerInteraction _interaction;
-    PlayerHealth _health;
+    PlayerVisuals _visuals;
 
     PlayerInput _input;
 
@@ -78,7 +78,10 @@ public class PlayerController : NetworkBehaviour
         _rotation = GetComponent<PlayerRotation>();
         _stamina = GetComponent<PlayerStamina>();
         _interaction = GetComponent<PlayerInteraction>();
-        _health = GetComponent<PlayerHealth>();
+        _visuals = GetComponentInChildren<PlayerVisuals>();
+
+        PlayerData playerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
+        _visuals.SetPlayerModel(playerData.PlayerModelId);
     }
 
     void FreezePlayer()

@@ -1,22 +1,27 @@
 using SurvivalGame;
 using System;
 using Unity.Netcode;
+using Unity.Services.Authentication;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class MultiplayerManager : NetworkBehaviour
 {
-    const int MAX_PLAYER_COUNT = 4;
+    public const int MAX_PLAYER_COUNT = 4;
+    const string PLAYER_PREFS_PLAYER_NAME_MULTIPLAYER = "PlayerNameMultiplayer";
 
     [SerializeField] NetworkPrefabsList _networkPrefabsList;
 
     public static MultiplayerManager Instance { get; private set; }
 
-    public static event Action OnDisconnect;
+    public static event Action OnLocalDisconnect;
     public static event Action OnTryingToJoinGame;
     public static event Action OnFailedToJoinGame;
+    public static event Action OnPlayerDataNetworkListChange;
 
+    NetworkList<PlayerData> _playerDataNetworkList;
     NetworkObject _previousSpawnedObject;
+    string _playerName;
 
     void Awake()
     {
@@ -28,21 +33,33 @@ public class MultiplayerManager : NetworkBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        _playerName = PlayerPrefs.GetString(PLAYER_PREFS_PLAYER_NAME_MULTIPLAYER, "PlayerName" + UnityEngine.Random.Range(0, 1000).ToString());
+        _playerDataNetworkList = new NetworkList<PlayerData>();
+        _playerDataNetworkList.OnListChanged += PlayerDataNetworkList_OnListChanged;
     }
 
-    public override void OnNetworkSpawn()
+    public string GetPlayerName()
     {
-        NetworkManager.Singleton.OnConnectionEvent += OnDisconnectEvent;
+        return _playerName;
     }
 
-    public override void OnNetworkDespawn()
+    public void SetPlayerName(string newName)
     {
-        NetworkManager.Singleton.OnConnectionEvent -= OnDisconnectEvent;
+        _playerName = newName;
+        PlayerPrefs.SetString(PLAYER_PREFS_PLAYER_NAME_MULTIPLAYER, _playerName);////
+    }
+
+    void PlayerDataNetworkList_OnListChanged(NetworkListEvent<PlayerData> changeEvent)
+    {
+        OnPlayerDataNetworkListChange?.Invoke();
     }
 
     public void StartHost()
     {
         NetworkManager.Singleton.ConnectionApprovalCallback += SetConnectionApproval;
+        NetworkManager.Singleton.OnConnectionEvent += AddPlayerToNetworkList;
+        NetworkManager.Singleton.OnConnectionEvent += Server_OnClientDisconnect;
         NetworkManager.Singleton.StartHost();
     }
 
@@ -65,25 +82,158 @@ public class MultiplayerManager : NetworkBehaviour
         response.Approved = true;
     }
 
+    void AddPlayerToNetworkList(NetworkManager manager, ConnectionEventData data)
+    {
+        if (data.EventType == ConnectionEvent.ClientConnected)
+        {
+            _playerDataNetworkList.Add(new PlayerData
+            {
+                clientId = data.ClientId
+            });
+
+            SetPlayerIdServerRpc(AuthenticationService.Instance.PlayerId);
+            SetPlayerNameServerRpc(GetPlayerName());
+        }
+    }
+
+    void Server_OnClientDisconnect(NetworkManager manager, ConnectionEventData data)
+    {
+        if (data.EventType == ConnectionEvent.ClientDisconnected)
+            RemovePlayerData(data.ClientId);
+    }
+
+    void RemovePlayerData(ulong clientId)
+    {
+        for (int i = 0; i < _playerDataNetworkList.Count; i++)
+        {
+            PlayerData playerData = _playerDataNetworkList[i];
+            if (playerData.clientId == clientId)
+            {
+                _playerDataNetworkList.RemoveAt(i);
+            }
+        }
+    }
+
     public void StartClient()
     {
         OnTryingToJoinGame?.Invoke();
 
-        NetworkManager.Singleton.OnConnectionEvent += FailToJoin;
+        NetworkManager.Singleton.OnConnectionEvent += Client_FailToJoin;
+        NetworkManager.Singleton.OnConnectionEvent += Client_OnLocalDisconnectEvent;
+        NetworkManager.Singleton.OnConnectionEvent += Client_OnConnectEvent;
         NetworkManager.Singleton.StartClient();
     }
 
-    void FailToJoin(NetworkManager manager, ConnectionEventData data)
+    void Client_FailToJoin(NetworkManager manager, ConnectionEventData data)
     {
         if (data.EventType == ConnectionEvent.ClientDisconnected && data.ClientId == NetworkManager.Singleton.LocalClientId)
+        {
             OnFailedToJoinGame?.Invoke();
+        }
     }
 
-    void OnDisconnectEvent(NetworkManager manager, ConnectionEventData data)
+    void Client_OnLocalDisconnectEvent(NetworkManager manager, ConnectionEventData data)
     {
         if (data.EventType == ConnectionEvent.ClientDisconnected && data.ClientId == NetworkManager.Singleton.LocalClientId)
-            OnDisconnect?.Invoke();
+        {
+            OnLocalDisconnect?.Invoke();
+        }
     }
+
+    void Client_OnConnectEvent(NetworkManager manager, ConnectionEventData data)
+    {
+        if (data.EventType == ConnectionEvent.ClientConnected)
+        {
+            SetPlayerIdServerRpc(AuthenticationService.Instance.PlayerId);
+            SetPlayerNameServerRpc(GetPlayerName());
+        }
+    }
+
+    public void KickPlayer(ulong clientId)
+    {
+        NetworkManager.Singleton.DisconnectClient(clientId);
+        RemovePlayerData(clientId);
+    }
+
+    public bool IsPlayerIndexConnected(int index)
+    {
+        return index < _playerDataNetworkList.Count;
+    }
+
+    #region Player Data
+
+    public int GetPlayerDataIndexFromClientId(ulong clientId)
+    {
+        for (int i = 0; i < _playerDataNetworkList.Count; i++)
+            if (_playerDataNetworkList[i].clientId == clientId)
+                return i;
+
+        return -1;
+    }
+
+    public PlayerData GetPlayerDataFromClientId(ulong clientId)
+    {
+        foreach (PlayerData playerData in _playerDataNetworkList)
+            if (playerData.clientId == clientId)
+                return playerData;
+
+        return default;
+    }
+
+    public PlayerData GetPlayerData()
+    {
+        return GetPlayerDataFromClientId(NetworkManager.Singleton.LocalClientId);
+    }
+
+    public PlayerData GetPlayerDataFromPlayerIndex(int index)
+    {
+        return _playerDataNetworkList[index];
+    }
+
+    public void CyclePlayerModel(bool forward)
+    {
+        CyclePlayerModelServerRpc(forward);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void CyclePlayerModelServerRpc(bool forward, ServerRpcParams serverRpcParams = default)
+    {
+        int playerDataIndex = GetPlayerDataIndexFromClientId(serverRpcParams.Receive.SenderClientId);
+        PlayerData playerData = _playerDataNetworkList[playerDataIndex];
+
+        if (forward)
+            playerData.PlayerModelId++;
+        else
+            playerData.PlayerModelId--;
+
+        _playerDataNetworkList[playerDataIndex] = playerData;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void SetPlayerIdServerRpc(string playerId, ServerRpcParams serverRpcParams = default)
+    {
+        int playerDataIndex = GetPlayerDataIndexFromClientId(serverRpcParams.Receive.SenderClientId);
+        PlayerData playerData = _playerDataNetworkList[playerDataIndex];
+
+        playerData.playerId = playerId;
+
+       _playerDataNetworkList[playerDataIndex] = playerData;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void SetPlayerNameServerRpc(string playerName, ServerRpcParams serverRpcParams = default)
+    {
+        int playerDataIndex = GetPlayerDataIndexFromClientId(serverRpcParams.Receive.SenderClientId);
+        PlayerData playerData = _playerDataNetworkList[playerDataIndex];
+
+        playerData.playerName = playerName;
+
+        _playerDataNetworkList[playerDataIndex] = playerData;
+    }
+
+    #endregion
+
+    #region Item Spawning
 
     int GetIndexFromObject(GameObject obj)
     {
@@ -178,4 +328,6 @@ public class MultiplayerManager : NetworkBehaviour
         itemNetworkObjectReference.TryGet(out NetworkObject itemNetworkObject);
         Destroy(itemNetworkObject.gameObject, delay);
     }
+
+    #endregion
 }
