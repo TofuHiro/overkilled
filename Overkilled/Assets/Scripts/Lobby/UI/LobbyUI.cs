@@ -13,7 +13,7 @@ public class LobbyUI : MonoBehaviour
     [Tooltip("Lobby Create UI instance to show when selecting create game")]
     [SerializeField] LobbyCreateUI _createGameUI;
     [Header("Join Game")]
-    [SerializeField] Button _quickJoinButton;
+    //[SerializeField] Button _quickJoinButton;
     [SerializeField] Button _joinCodeButton;
     [Tooltip("The input field to enter a lobby code to join")]
     [SerializeField] TMP_InputField _joinCodeInputField;
@@ -40,10 +40,10 @@ public class LobbyUI : MonoBehaviour
             _createGameUI.Show();
         });
 
-        _quickJoinButton.onClick.AddListener(() => 
+        /*_quickJoinButton.onClick.AddListener(() => 
         {
             GameLobby.Instance.QuickJoin();
-        });
+        });*/
 
         _joinCodeButton.onClick.AddListener(() =>
         {

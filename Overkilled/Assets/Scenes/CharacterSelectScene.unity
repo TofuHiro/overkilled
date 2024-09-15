@@ -400,8 +400,8 @@ Camera:
   m_GameObject: {fileID: 272258711}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 1}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0.042452812, g: 0.85492706, b: 1, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -1674,6 +1674,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 0}
+    - targetCorrespondingSourceObject: {fileID: 8187084723268388635, guid: c6b8d2fa48df21543a388d695969505f,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: c6b8d2fa48df21543a388d695969505f, type: 3}
 --- !u!1 &996306431
 GameObject:
@@ -2546,6 +2550,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 0}
+    - targetCorrespondingSourceObject: {fileID: 8187084723268388635, guid: c6b8d2fa48df21543a388d695969505f,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: c6b8d2fa48df21543a388d695969505f, type: 3}
 --- !u!1 &1983610624
 GameObject:
@@ -2895,6 +2903,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 0}
+    - targetCorrespondingSourceObject: {fileID: 8187084723268388635, guid: c6b8d2fa48df21543a388d695969505f,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: c6b8d2fa48df21543a388d695969505f, type: 3}
 --- !u!1001 &332951078630545535
 PrefabInstance:
@@ -2989,6 +3001,10 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 7740443519074446952, guid: c6b8d2fa48df21543a388d695969505f,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
+    - targetCorrespondingSourceObject: {fileID: 8187084723268388635, guid: c6b8d2fa48df21543a388d695969505f,
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 0}
