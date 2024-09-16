@@ -11,7 +11,7 @@ public class CombatManager : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            Debug.LogWarning("Warning. Multiple instances of Order System found. Destroying " + name);
+            Debug.LogWarning("Warning. Multiple instances of CombatManager found. Destroying " + name);
             Destroy(Instance);
         }
 
@@ -53,7 +53,10 @@ public class CombatManager : MonoBehaviour
     public void AddExplosiveForce(Rigidbody rigidbody, float explosiveForce, Vector3 explosionPosition, float explosionRadius)
     {
         NetworkObject networkObject = rigidbody.GetComponent<NetworkObject>();
-        AddExplosiveForceServerRpc(networkObject, explosiveForce, explosionPosition, explosionRadius);
+        if (networkObject != null)
+            AddExplosiveForceServerRpc(networkObject, explosiveForce, explosionPosition, explosionRadius);
+        else
+            Debug.LogError("Network Object could not be found for object " + name);
     }
 
     [ServerRpc(RequireOwnership = false)]

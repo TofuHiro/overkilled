@@ -5,6 +5,9 @@ using UnityEngine.UI;
 
 public class OrderCardUI : MonoBehaviour
 {
+    const float ORDER_CARD_UI_WIDTH = 35;
+    const float ORDER_CARD_UI_HEIGHT = 100;
+
     [Tooltip("The main body transform of the card to enable/disable")]
     [SerializeField] RectTransform _card;
     [Tooltip("The image holding the product sprite")]
@@ -15,7 +18,6 @@ public class OrderCardUI : MonoBehaviour
     [SerializeField] Slider _timeSlider;
 
     public bool Active { get; private set; }
-
 
     void Start()
     {
@@ -49,7 +51,7 @@ public class OrderCardUI : MonoBehaviour
 
         int ingredientNum = order.requestedItemRecipe.ingredients.Length;
 
-        _card.sizeDelta = new Vector2(35 * ingredientNum, 100);
+        _card.sizeDelta = new Vector2(ORDER_CARD_UI_WIDTH * ingredientNum, ORDER_CARD_UI_HEIGHT);
         
         _timeSlider.maxValue = order.timeLimit;
         _timeSlider.value = _timeSlider.maxValue;

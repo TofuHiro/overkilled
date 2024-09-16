@@ -1,10 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Netcode;
 using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
+    [Tooltip("The enemy to spawn")]
     [SerializeField] GameObject _enemyPrefab;
 
     MultiplayerManager _multiplayerManager;
@@ -16,7 +14,7 @@ public class EnemySpawner : MonoBehaviour
 
     public void Spawn()
     {
-        _multiplayerManager.SpawnItem(_enemyPrefab, transform.position, transform.rotation);
+        _multiplayerManager.SpawnObject(_enemyPrefab, transform.position, transform.rotation);
     }
 
     void OnDrawGizmos()

@@ -51,6 +51,9 @@ public class EnemyMovement : MonoBehaviour
         _timer = 0f;
     }
 
+    /// <summary>
+    /// Stop the navmesh from navigating
+    /// </summary>
     public void Stop()
     {
         _navAgent.isStopped = true;

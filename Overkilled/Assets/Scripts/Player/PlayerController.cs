@@ -11,9 +11,11 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerHealth))]
 public class PlayerController : NetworkBehaviour
 {
+    public static PlayerController LocalInstance { get; private set; }
+
     public delegate void PlayerInputAction();
-    public static event PlayerInputAction OnPlayerInteractInput;
-    public static event PlayerInputAction OnPlayerPauseInput;
+    public event PlayerInputAction OnPlayerInteractInput;
+    public event PlayerInputAction OnPlayerPauseInput;
 
     PlayerMotor _motor;
     PlayerRotation _rotation;
@@ -29,7 +31,7 @@ public class PlayerController : NetworkBehaviour
     {
         PlayerList.AddPlayer(gameObject);
 
-        FreezePlayer();
+        _canMove = false;
 
         _input.Player.Enable();
         _input.Player.Sprint.started += ToggleSprint;
@@ -41,10 +43,12 @@ public class PlayerController : NetworkBehaviour
         _input.Player.AltFire.canceled += SecondaryAttack;
         _input.Player.Pause.performed += Pause;
 
-        GameManager.OnGameStateChange += FreezePlayer;
-        GameManager.OnGameStateChange += UnfreezePlayer;
-        GameManager.OnLocalGamePause += FreezePlayer;
-        GameManager.OnLocalGameUnpause += UnfreezePlayer;
+        GameManager.Instance.OnGameStateChange += GameManager_OnGameStateChange;
+        GameManager.Instance.OnLocalGamePause += GameManager_OnLocalGamePause;
+        GameManager.Instance.OnLocalGameUnpause += GameManager_OnLocalGameUnpause;
+
+        PlayerData playerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
+        _visuals.SetPlayerModel(playerData.PlayerModelId);
     }
 
     public override void OnNetworkDespawn()
@@ -61,40 +65,53 @@ public class PlayerController : NetworkBehaviour
         _input.Player.AltFire.canceled -= SecondaryAttack;
         _input.Player.Pause.performed -= Pause;
 
-        GameManager.OnGameStateChange -= FreezePlayer;
-        GameManager.OnGameStateChange -= UnfreezePlayer;
-        GameManager.OnLocalGamePause -= FreezePlayer;
-        GameManager.OnLocalGameUnpause -= UnfreezePlayer;
+        GameManager.Instance.OnGameStateChange -= GameManager_OnGameStateChange;
+        GameManager.Instance.OnLocalGamePause -= GameManager_OnLocalGamePause;
+        GameManager.Instance.OnLocalGameUnpause -= GameManager_OnLocalGameUnpause;
     }
 
     void Awake()
     {
         _input = new PlayerInput();
-    }
 
-    void Start()
-    {
+        if (LocalInstance != null && LocalInstance != this)
+        {
+            Debug.LogWarning("Warning. Multiple instances of Player Controller found. Destroying " + name);
+            Destroy(LocalInstance);
+        }
+
+        LocalInstance = this;
+
         _motor = GetComponent<PlayerMotor>();
         _rotation = GetComponent<PlayerRotation>();
         _stamina = GetComponent<PlayerStamina>();
         _interaction = GetComponent<PlayerInteraction>();
         _visuals = GetComponentInChildren<PlayerVisuals>();
-
-        PlayerData playerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
-        _visuals.SetPlayerModel(playerData.PlayerModelId);
     }
 
-    void FreezePlayer()
+    void GameManager_OnGameStateChange()
     {
         if (GameManager.Instance.GameEnded)
         {
             _canMove = false;
         }
+        else if (GameManager.Instance.GameStarted)
+        {
+            _canMove = true;
+        }
     }
     
-    void UnfreezePlayer()
+    void GameManager_OnLocalGamePause()
     {
-        if (GameManager.Instance.GameStarted)
+        if (GameManager.Instance.IsPaused)
+        {
+            _canMove = false;
+        }
+    }
+
+    void GameManager_OnLocalGameUnpause()
+    {
+        if (!GameManager.Instance.IsPaused)
         {
             _canMove = true;
         }

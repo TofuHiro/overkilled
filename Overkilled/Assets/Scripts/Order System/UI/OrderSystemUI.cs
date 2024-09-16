@@ -6,8 +6,7 @@ public class OrderSystemUI : MonoBehaviour
     [SerializeField] RectTransform _orderCardsHolder;
 
     OrderCardUI[] _cards;
-    OrderSystem _orderSystem;
-
+    
     void Awake()
     {
         _cards = _orderCardsHolder.GetComponentsInChildren<OrderCardUI>();
@@ -15,11 +14,9 @@ public class OrderSystemUI : MonoBehaviour
 
     void Start()
     {
-        _orderSystem = OrderSystem.Instance;
-        
-        _orderSystem.OnOrderCreate += UpdateUI;
-        _orderSystem.OnOrderComplete += UpdateUI;
-        _orderSystem.OnOrderFail += UpdateUI;
+        OrderSystem.Instance.OnOrderCreate += UpdateUI;
+        OrderSystem.Instance.OnOrderComplete += UpdateUI;
+        OrderSystem.Instance.OnOrderFail += UpdateUI;
     }
 
     void Update()
@@ -27,23 +24,16 @@ public class OrderSystemUI : MonoBehaviour
         SetTimers();        
     }
 
-    void OnDestroy()
-    {
-        _orderSystem.OnOrderCreate -= UpdateUI;
-        _orderSystem.OnOrderComplete -= UpdateUI;
-        _orderSystem.OnOrderFail -= UpdateUI;
-    }
-
     void UpdateUI()
     {
-        ActiveOrder[] orders = _orderSystem.GetActiveOrders();
+        OrderSystem.ActiveOrder[] orders = OrderSystem.Instance.GetActiveOrders();
         for (int i = 0; i < orders.Length; i++)
             _cards[i].SetOrder(orders[i].Order);
     }
 
     void SetTimers()
     {
-        ActiveOrder[] orders = _orderSystem.GetActiveOrders();
+        OrderSystem.ActiveOrder[] orders = OrderSystem.Instance.GetActiveOrders();
         for (int i = 0; i < orders.Length; i++)
         {
             if (!orders[i].Active)

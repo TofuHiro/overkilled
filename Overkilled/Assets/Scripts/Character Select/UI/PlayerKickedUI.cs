@@ -21,14 +21,14 @@ public class PlayerKickedUI : MonoBehaviour
 
     void Start()
     {
-        MultiplayerManager.OnLocalDisconnect += Show;
+        MultiplayerManager.Instance.OnLocalDisconnect += Show;
 
         Hide();
     }
 
     void OnDestroy()
     {
-        MultiplayerManager.OnLocalDisconnect -= Show;
+        MultiplayerManager.Instance.OnLocalDisconnect -= Show;
     }
 
     void Show()

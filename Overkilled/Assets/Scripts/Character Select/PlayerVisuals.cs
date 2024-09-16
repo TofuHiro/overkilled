@@ -8,6 +8,10 @@ public class PlayerVisuals : MonoBehaviour
 
     int _currentIndex;
 
+    /// <summary>
+    /// Set the player model to another
+    /// </summary>
+    /// <param name="modelIndex">The index of the model to display</param>
     public void SetPlayerModel(int modelIndex)
     {
         _playerModels[_currentIndex].Hide(); ;

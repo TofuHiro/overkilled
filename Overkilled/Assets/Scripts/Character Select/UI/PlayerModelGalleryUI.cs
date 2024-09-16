@@ -5,7 +5,9 @@ using UnityEngine.UI;
 
 public class PlayerModelGalleryUI : MonoBehaviour
 {
+    [Tooltip("Button to cycle model back/left")]
     [SerializeField] Button _leftButton;
+    [Tooltip("Button to cycle model forward/right")]
     [SerializeField] Button _rightButton;
 
     void Awake()

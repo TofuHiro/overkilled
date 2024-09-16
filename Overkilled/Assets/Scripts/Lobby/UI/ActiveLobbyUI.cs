@@ -5,9 +5,12 @@ using Unity.Services.Lobbies.Models;
 using UnityEngine;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(Button))]
 public class ActiveLobbyUI : MonoBehaviour
 {
+    [Tooltip("Text to display the name of the lobby")]
     [SerializeField] TMP_Text _lobbyNameText;
+    [Tooltip("Text to display the number of players in the lobby")]
     [SerializeField] TMP_Text _lobbyPlayerCountText;
 
     Lobby _lobby;
@@ -25,6 +28,10 @@ public class ActiveLobbyUI : MonoBehaviour
         Hide();
     }
 
+    /// <summary>
+    /// Assign a lobby to display its details
+    /// </summary>
+    /// <param name="lobby"></param>
     public void SetLobby(Lobby lobby)
     {
         _lobby = lobby;

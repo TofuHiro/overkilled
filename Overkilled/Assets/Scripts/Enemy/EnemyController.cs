@@ -26,26 +26,22 @@ public class EnemyController : NetworkBehaviour
     /// <summary>
     /// Whether if this enemy currently has a target or not
     /// </summary>
-    public bool HasTarget { get { return _targetFinder.ClosestPlayer != null; } }
+    public bool HasTarget { get { return _targetFinder.GetClosestPlayer() != null; } }
 
     public EnemyStateMachine StateMachine { get; private set; }
     public EnemyIdleState IdleState { get; private set; }
     public EnemyChaseState ChaseState { get; private set; }
     public EnemyAttackState AttackState { get; private set; }
 
-    EnemyHealth _health;
     PlayerRotation _rotation;
     EnemyTargetFinder _targetFinder;
     EnemyMovement _movement;
-    NetworkObject _networkObject;
 
     void Awake()
     {
-        _health = GetComponent<EnemyHealth>();
         _rotation = GetComponent<PlayerRotation>();
         _targetFinder = GetComponent<EnemyTargetFinder>();
         _movement = GetComponent<EnemyMovement>();
-        _networkObject = GetComponent<NetworkObject>();
 
         StateMachine = new EnemyStateMachine();
         IdleState = new EnemyIdleState(this, StateMachine);
@@ -76,7 +72,7 @@ public class EnemyController : NetworkBehaviour
     /// <returns>Returns true if this enemy is within range to perform an attack</returns>
     public bool CheckCanAttack()
     {
-        float dist = Vector3.Distance(_targetFinder.ClosestPlayer.transform.position, transform.position);
+        float dist = Vector3.Distance(_targetFinder.GetClosestPlayer().transform.position, transform.position);
         if (dist <= _attackDistance)
             return true;
         else
@@ -88,7 +84,7 @@ public class EnemyController : NetworkBehaviour
     /// </summary>
     public void TargetPlayer()
     {
-        _movement.SetTarget(_targetFinder.ClosestPlayer.transform);
+        _movement.SetTarget(_targetFinder.GetClosestPlayer().transform);
         _rotation.SetLookDirection(_movement.GetDirection());
     }
 

@@ -11,8 +11,12 @@ public class PlayerInteraction : MonoBehaviour
     [Tooltip("Layer mask of counters")]
     [SerializeField] LayerMask _counterMask;
 
+    public bool IsHoldingItem { get { return _hand.IsHoldingItem; } }
+
     IInteractable _hoveredInteract;
     PlayerHand _hand;
+
+    public PlayerHand GetHand() { return _hand; }
 
     void Start()
     {

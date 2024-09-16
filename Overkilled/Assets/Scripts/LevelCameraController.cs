@@ -29,9 +29,23 @@ public class LevelCameraController : MonoBehaviour
     Vector3 _velocity = Vector3.zero;
     float _furthestPlayerDist = 0f;
 
-    void Awake()
+    void Start()
     {
-        GameManager.OnGameInitialize += Initialize;
+        GameManager.Instance.OnGameInitialize += Initialize;
+        PlayerList.OnPlayerListUpdate += SetPlayers;
+
+        _startOffset = transform.position;
+        SetPlayers();
+    }
+
+    void OnDestroy()
+    {
+        PlayerList.OnPlayerListUpdate -= SetPlayers;
+    }
+
+    void SetPlayers()
+    {
+        _players = PlayerList.GetPlayers();
     }
 
     void Initialize(LevelPreset preset)
@@ -48,19 +62,6 @@ public class LevelCameraController : MonoBehaviour
     void SetFocusModeClientRpc(bool state)
     {
         _useFocusMode = state;
-    }
-
-    void Start()
-    {
-        _startOffset = transform.position;
-
-        PlayerList.OnPlayerListUpdate += SetPlayers;
-        SetPlayers();
-    }
-
-    void SetPlayers()
-    {
-        _players = PlayerList.GetPlayers();
     }
 
     void Update()

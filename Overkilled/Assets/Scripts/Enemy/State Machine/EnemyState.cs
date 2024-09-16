@@ -1,8 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class EnemyState 
+public abstract class EnemyState 
 {
     protected EnemyController _enemy;
     protected EnemyStateMachine _stateMachine;

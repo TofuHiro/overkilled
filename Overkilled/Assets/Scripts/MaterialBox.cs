@@ -17,6 +17,6 @@ public class MaterialBox : CounterTop
 
     protected override void TakeFromEmptyCounter(PlayerHand hand)
     {
-        _multiplayerManager.SpawnItem(_materialPrefab, hand);
+        _multiplayerManager.SpawnObject(_materialPrefab, hand);
     }
 }

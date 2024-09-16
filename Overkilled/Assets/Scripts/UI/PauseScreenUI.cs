@@ -34,16 +34,10 @@ public class PauseScreenUI : MonoBehaviour
 
     void Start()
     {
-        GameManager.OnLocalGamePause += Show;
-        GameManager.OnLocalGameUnpause += Hide;
+        GameManager.Instance.OnLocalGamePause += Show;
+        GameManager.Instance.OnLocalGameUnpause += Hide;
 
         Hide();    
-    }
-
-    void OnDestroy()
-    {
-        GameManager.OnLocalGamePause -= Show;
-        GameManager.OnLocalGameUnpause -= Hide;
     }
 
     void Show()

@@ -17,6 +17,10 @@ public abstract class Weapon : NetworkBehaviour
     /// </summary>
     public int Durability { get; private set; }
 
+    /// <summary>
+    /// Get the weapon scriptable object for this weapon
+    /// </summary>
+    /// <returns></returns>
     public WeaponSO GetWeaponInfo() { return _weaponSO; }
 
     protected void DecreaseDurablity(int amount)
@@ -50,11 +54,18 @@ public abstract class Weapon : NetworkBehaviour
             Attack();
     }
 
+    /// <summary>
+    /// Set the weapon's attacking state
+    /// </summary>
+    /// <param name="state"></param>
     public void SetAttackState(bool state)
     {
         _isAttacking = state;
     }
 
+    /// <summary>
+    /// Perform an attack
+    /// </summary>
     public virtual void Attack()
     {
         if (_timer < _nextTimeToAttack)
@@ -74,11 +85,18 @@ public abstract class Weapon : NetworkBehaviour
         }
     }
 
+    /// <summary>
+    /// Set the weapon's secondary attack state
+    /// </summary>
+    /// <param name="state"></param>
     public virtual void SetSecondaryAttackState(bool state)
     {
         _isSecondaryAttacking = state;
     }
 
+    /// <summary>
+    /// Action performed on this weapon's pickup
+    /// </summary>
     public void OnPickup()
     {
         SetAttackState(false);
@@ -87,6 +105,9 @@ public abstract class Weapon : NetworkBehaviour
         _nextTimeToAttack = _timer + _weaponSO.attackFrequency;
     }
 
+    /// <summary>
+    /// Action performed on this weapon's drop
+    /// </summary>
     public void OnDrop()
     {
         SetAttackState(false);

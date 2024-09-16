@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 public class EnemyIdleState : EnemyState
 {
     public EnemyIdleState(EnemyController controller, EnemyStateMachine stateMachine) : base(controller, stateMachine)

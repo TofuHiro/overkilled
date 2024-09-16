@@ -1,4 +1,3 @@
-using System;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -7,6 +6,7 @@ public class PlayerHand : NetworkBehaviour
 {
     [Tooltip("Force applied to objects when dropping them")]
     [SerializeField] float _dropThrowForce = 5f;
+
     public bool IsHoldingItem { get { return _holder.IsOccupied; } }
 
     ItemHolder _holder;

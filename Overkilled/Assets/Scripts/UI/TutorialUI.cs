@@ -7,14 +7,9 @@ public class TutorialUI : MonoBehaviour
 {
     void Start()
     {
-        GameManager.OnLocalPlayerReady += Hide;
+        GameManager.Instance.OnLocalPlayerReady += Hide;
 
         Show();
-    }
-
-    void OnDestroy()
-    {
-        GameManager.OnLocalPlayerReady -= Hide;
     }
 
     void Show()
