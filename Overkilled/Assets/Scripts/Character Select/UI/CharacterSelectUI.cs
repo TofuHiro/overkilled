@@ -8,9 +8,13 @@ using UnityEngine.UI;
 
 public class CharacterSelectUI : MonoBehaviour
 {
+    [Tooltip("Button to toggle player ready state")]
     [SerializeField] Button _readyButton;
+    [Tooltip("Button to try to start the game")]
     [SerializeField] Button _startButton;
+    [Tooltip("Button to return to the main menu")]
     [SerializeField] Button _mainMenuButton;
+    [Tooltip("Text to display the lobby code")]
     [SerializeField] TMP_Text _lobbyCodeText;
 
     void Awake()
@@ -35,6 +39,7 @@ public class CharacterSelectUI : MonoBehaviour
 
     void Start()
     {
+        //Server/host only
         _startButton.gameObject.SetActive(NetworkManager.Singleton.IsServer);
 
         Lobby lobby = GameLobby.Instance.GetLobby();

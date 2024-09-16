@@ -10,16 +10,16 @@ public class MultiplayerManager : NetworkBehaviour
     public const int MAX_PLAYER_COUNT = 4;
     const string PLAYER_PREFS_PLAYER_NAME_MULTIPLAYER = "PlayerNameMultiplayer";
 
+    [Tooltip("Network prefab list used for spawning objects. It is used to find the index of an item by reference and spawned from this list")]
     [SerializeField] NetworkPrefabsList _networkPrefabsList;
 
     public static MultiplayerManager Instance { get; private set; }
 
-    public static event Action OnLocalDisconnect;
-    public static event Action OnTryingToJoinGame;
-    public static event Action OnFailedToJoinGame;
-    public static event Action OnPlayerDataNetworkListChange;
+    public event Action OnLocalDisconnect;
+    public event Action OnPlayerDataNetworkListChange;
 
     NetworkList<PlayerData> _playerDataNetworkList;
+    //Used to return spawned multiplayer objects as unable to do so within ServerRpcs
     NetworkObject _previousSpawnedObject;
     string _playerName;
 
@@ -27,7 +27,7 @@ public class MultiplayerManager : NetworkBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            Debug.LogWarning("Warning. Multiple instances of Order System found. Destroying " + name);
+            Debug.LogWarning("Warning. Multiple instances of MultiplayerManager found. Destroying " + name);
             Destroy(Instance);
         }
 
@@ -39,15 +39,23 @@ public class MultiplayerManager : NetworkBehaviour
         _playerDataNetworkList.OnListChanged += PlayerDataNetworkList_OnListChanged;
     }
 
+    /// <summary>
+    /// Get the local player's name
+    /// </summary>
+    /// <returns></returns>
     public string GetPlayerName()
     {
         return _playerName;
     }
 
+    /// <summary>
+    /// Set the local player's name
+    /// </summary>
+    /// <param name="newName"></param>
     public void SetPlayerName(string newName)
     {
         _playerName = newName;
-        PlayerPrefs.SetString(PLAYER_PREFS_PLAYER_NAME_MULTIPLAYER, _playerName);////
+        PlayerPrefs.SetString(PLAYER_PREFS_PLAYER_NAME_MULTIPLAYER, _playerName);////Temp for possible steam implementation
     }
 
     void PlayerDataNetworkList_OnListChanged(NetworkListEvent<PlayerData> changeEvent)
@@ -58,7 +66,7 @@ public class MultiplayerManager : NetworkBehaviour
     public void StartHost()
     {
         NetworkManager.Singleton.ConnectionApprovalCallback += SetConnectionApproval;
-        NetworkManager.Singleton.OnConnectionEvent += AddPlayerToNetworkList;
+        NetworkManager.Singleton.OnConnectionEvent += Server_OnClientConnect;
         NetworkManager.Singleton.OnConnectionEvent += Server_OnClientDisconnect;
         NetworkManager.Singleton.StartHost();
     }
@@ -82,18 +90,26 @@ public class MultiplayerManager : NetworkBehaviour
         response.Approved = true;
     }
 
-    void AddPlayerToNetworkList(NetworkManager manager, ConnectionEventData data)
+    void Server_OnClientConnect(NetworkManager manager, ConnectionEventData data)
     {
         if (data.EventType == ConnectionEvent.ClientConnected)
         {
-            _playerDataNetworkList.Add(new PlayerData
-            {
-                clientId = data.ClientId
-            });
+            AddPlayerToNetworkList(data.ClientId);
 
-            SetPlayerIdServerRpc(AuthenticationService.Instance.PlayerId);
-            SetPlayerNameServerRpc(GetPlayerName());
+            if (data.ClientId == NetworkManager.ServerClientId)
+            {
+                SetPlayerIdServerRpc(AuthenticationService.Instance.PlayerId);
+                SetPlayerNameServerRpc(GetPlayerName());
+            }
         }
+    }
+
+    void AddPlayerToNetworkList(ulong clientId)
+    {
+        _playerDataNetworkList.Add(new PlayerData
+        {
+            clientId = clientId
+        });
     }
 
     void Server_OnClientDisconnect(NetworkManager manager, ConnectionEventData data)
@@ -116,23 +132,12 @@ public class MultiplayerManager : NetworkBehaviour
 
     public void StartClient()
     {
-        OnTryingToJoinGame?.Invoke();
-
-        NetworkManager.Singleton.OnConnectionEvent += Client_FailToJoin;
-        NetworkManager.Singleton.OnConnectionEvent += Client_OnLocalDisconnectEvent;
-        NetworkManager.Singleton.OnConnectionEvent += Client_OnConnectEvent;
+        NetworkManager.Singleton.OnConnectionEvent += Client_OnLocalDisconnect;
+        NetworkManager.Singleton.OnConnectionEvent += Client_OnLocalConnect;
         NetworkManager.Singleton.StartClient();
     }
 
-    void Client_FailToJoin(NetworkManager manager, ConnectionEventData data)
-    {
-        if (data.EventType == ConnectionEvent.ClientDisconnected && data.ClientId == NetworkManager.Singleton.LocalClientId)
-        {
-            OnFailedToJoinGame?.Invoke();
-        }
-    }
-
-    void Client_OnLocalDisconnectEvent(NetworkManager manager, ConnectionEventData data)
+    void Client_OnLocalDisconnect(NetworkManager manager, ConnectionEventData data)
     {
         if (data.EventType == ConnectionEvent.ClientDisconnected && data.ClientId == NetworkManager.Singleton.LocalClientId)
         {
@@ -140,7 +145,7 @@ public class MultiplayerManager : NetworkBehaviour
         }
     }
 
-    void Client_OnConnectEvent(NetworkManager manager, ConnectionEventData data)
+    void Client_OnLocalConnect(NetworkManager manager, ConnectionEventData data)
     {
         if (data.EventType == ConnectionEvent.ClientConnected && data.ClientId == NetworkManager.Singleton.LocalClientId)
         {
@@ -162,7 +167,7 @@ public class MultiplayerManager : NetworkBehaviour
 
     #region Player Data
 
-    public int GetPlayerDataIndexFromClientId(ulong clientId)
+    int GetPlayerDataIndexFromClientId(ulong clientId)
     {
         for (int i = 0; i < _playerDataNetworkList.Count; i++)
             if (_playerDataNetworkList[i].clientId == clientId)
@@ -250,45 +255,45 @@ public class MultiplayerManager : NetworkBehaviour
     }
 
     /// <summary>
-    /// Instantiates a given item in multiplayer
+    /// Instantiates a given object in multiplayer
     /// </summary>
-    /// <param name="item"></param>
-    /// <returns>The network object of the spawned item</returns>
-    public NetworkObject SpawnItem(GameObject item)
+    /// <param name="obj"></param>
+    /// <returns>The network object of the spawned object</returns>
+    public NetworkObject SpawnObject(GameObject obj)
     {
-        SpawnItemServerRpc(GetIndexFromObject(item));
+        SpawnObjectServerRpc(GetIndexFromObject(obj));
         return _previousSpawnedObject;
     }
 
     /// <summary>
-    /// Instantiates a given item in multiplayer
+    /// Instantiates a given object in multiplayer
     /// </summary>
-    /// <param name="item"></param>
+    /// <param name="obj"></param>
     /// <param name="position">The position to spawn at</param>
     /// <param name="rotation">The rotation to spawn with</param>
     /// <returns></returns>
-    public NetworkObject SpawnItem(GameObject item, Vector3 position, Quaternion rotation)
+    public NetworkObject SpawnObject(GameObject obj, Vector3 position, Quaternion rotation)
     {
-        SpawnItem(item);
+        SpawnObject(obj);
         _previousSpawnedObject.transform.position = position;
         _previousSpawnedObject.transform.rotation = rotation;
         return _previousSpawnedObject;
     }
 
     /// <summary>
-    /// Instantiates a given item in multiplayer
+    /// Instantiates a given object in multiplayer
     /// </summary>
-    /// <param name="item"></param>
+    /// <param name="obj"></param>
     /// <param name="hand">The hand to set the items parents to</param>
     /// <returns></returns>
-    public NetworkObject SpawnItem(GameObject item, PlayerHand hand)
+    public NetworkObject SpawnObject(GameObject obj, PlayerHand hand)
     {
-        SpawnItemWithParentServerRpc(GetIndexFromObject(item), hand.GetNetworkObject());
+        SpawnObjectWithParentServerRpc(GetIndexFromObject(obj), hand.GetNetworkObject());
         return _previousSpawnedObject;
     }
 
     [ServerRpc(RequireOwnership = false)]
-    void SpawnItemServerRpc(int objectIndex)
+    void SpawnObjectServerRpc(int objectIndex)
     {
         GameObject material = Instantiate(GetObjectFromIndex(objectIndex));
         NetworkObject networkObject = material.GetComponent<NetworkObject>();
@@ -298,7 +303,7 @@ public class MultiplayerManager : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    void SpawnItemWithParentServerRpc(int objectIndex, NetworkObjectReference handNetworkObjectReference)
+    void SpawnObjectWithParentServerRpc(int objectIndex, NetworkObjectReference handNetworkObjectReference)
     {
         handNetworkObjectReference.TryGet(out NetworkObject handNetworkObject);
 
@@ -312,21 +317,30 @@ public class MultiplayerManager : NetworkBehaviour
         _previousSpawnedObject = networkObject;
     }
 
-    public void DestroyItem(GameObject item)
+    /// <summary>
+    /// Destroy a given object in multiplayer
+    /// </summary>
+    /// <param name="obj"></param>
+    public void DestroyObject(GameObject obj)
     {
-        DestroyItemServerRpc(item.GetComponent<NetworkObject>(), 0);
+        DestroyObjectServerRpc(obj.GetComponent<NetworkObject>(), 0);
     }
 
-    public void DestroyItem(GameObject item, float delay)
+    /// <summary>
+    /// Destroy a given object in multiplayer
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <param name="delay">The time delay to destroy this object</param>
+    public void DestroyObject(GameObject obj, float delay)
     {
-        DestroyItemServerRpc(item.GetComponent<NetworkObject>(), delay);
+        DestroyObjectServerRpc(obj.GetComponent<NetworkObject>(), delay);
     }
 
     [ServerRpc(RequireOwnership = false)]
-    void DestroyItemServerRpc(NetworkObjectReference itemNetworkObjectReference, float delay)
+    void DestroyObjectServerRpc(NetworkObjectReference networkObjectReference, float delay)
     {
-        itemNetworkObjectReference.TryGet(out NetworkObject itemNetworkObject);
-        Destroy(itemNetworkObject.gameObject, delay);
+        networkObjectReference.TryGet(out NetworkObject networkObject);
+        Destroy(networkObject.gameObject, delay);
     }
 
     #endregion

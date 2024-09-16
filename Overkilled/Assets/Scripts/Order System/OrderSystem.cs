@@ -7,12 +7,34 @@ using SurvivalGame;
 
 public class OrderSystem : NetworkBehaviour
 {
+    public class ActiveOrder
+    {
+        public OrderSO Order;
+        public float Timer;
+        public bool Active;
+
+        public ActiveOrder()
+        {
+            Order = null;
+            Timer = 0f;
+            Active = false;
+        }
+        public ActiveOrder(OrderSO order, float timer)
+        {
+            Order = order;
+            Timer = timer;
+            Active = false;
+        }
+    }
+
     [Tooltip("Orders to create from")]
     [SerializeField] OrderSO[] _ordersCatalog;
     [Tooltip("The maximum number of active orders allowed at once")]
     [SerializeField] int _maxActiveOrders = 5;
 
-    public static OrderSystem Instance;
+    public static OrderSystem Instance { get; private set; }
+
+    public bool OrderSlotsFull { get { return GetNextFreeOrderSlot() == -1; } }
 
     public delegate void OrderSystemAction();
     public event OrderSystemAction OnOrderCreate;
@@ -36,16 +58,9 @@ public class OrderSystem : NetworkBehaviour
 
         Instance = this;
 
-        GameManager.OnGameInitialize += Initialize;
-        GameManager.OnGameStateChange += StartCreatingOrders;
-        GameManager.OnGameStateChange += StopCreatingOrders;
-    }
-
-    public override void OnDestroy()
-    {
-        GameManager.OnGameInitialize -= Initialize;
-        GameManager.OnGameStateChange -= StartCreatingOrders;
-        GameManager.OnGameStateChange -= StopCreatingOrders;
+        GameManager.Instance.OnGameInitialize += Initialize;
+        GameManager.Instance.OnGameStateChange += StartCreatingOrders;
+        GameManager.Instance.OnGameStateChange += StopCreatingOrders;
     }
 
     void Update()
@@ -61,11 +76,9 @@ public class OrderSystem : NetworkBehaviour
 
     void Initialize(LevelPreset preset)
     {
-        SetOrderCatalog(preset.orders);
+        _ordersCatalog = preset.orders;
         _createRate = preset.orderCreationRate;
     }
-
-    void SetOrderCatalog(OrderSO[] orders) => _ordersCatalog = orders;
 
     /// <summary>
     /// Returns an array storing the active orders
@@ -118,10 +131,7 @@ public class OrderSystem : NetworkBehaviour
     /// <returns>Returns true if the item matches an active order</returns>
     public bool CheckActiveOrder(ItemSO item)
     {
-        if (GetActiveOrderIndex(item) == -1) 
-            return false;
-
-        return true;
+        return GetActiveOrderIndex(item) != -1;
     }
 
     void StartCreatingOrders()
@@ -150,7 +160,7 @@ public class OrderSystem : NetworkBehaviour
 
     void CreateRandomOrder()
     {
-        if (GetNextFreeOrderSlot() == -1)
+        if (OrderSlotsFull)
             return;
         
         OrderSO order = GetRandomOrder();
@@ -214,10 +224,6 @@ public class OrderSystem : NetworkBehaviour
     }
 
     [ClientRpc]
-    /// <summary>
-    /// Fails an incomplete order and removes it from active orders
-    /// </summary>
-    /// <param name="index"></param>
     void FailOrderClientRpc(int index)
     {
         Debug.Log("Order failed for " + _activeOrders[index].Order.requestedItemRecipe.product.name);

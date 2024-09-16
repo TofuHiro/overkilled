@@ -6,21 +6,28 @@ using UnityEngine.UI;
 
 public class LobbyUI : MonoBehaviour
 {
+    [Tooltip("Button to return to the main menu")]
     [SerializeField] Button _mainMenuButton;
+    [Tooltip("Input field to enter player name")]
     [SerializeField] TMP_InputField _playerNameInputField; 
     [Header("Create Game")]
+    [Tooltip("Button to create a new game lobby")]
     [SerializeField] Button _createGameButton;
-    [Tooltip("Lobby Create UI instance to show when selecting create game")]
+    [Tooltip("Lobby Create UI to show when selecting create game")]
     [SerializeField] LobbyCreateUI _createGameUI;
     [Header("Join Game")]
     //[SerializeField] Button _quickJoinButton;
+    [Tooltip("Button to join with an entered code")]
     [SerializeField] Button _joinCodeButton;
     [Tooltip("The input field to enter a lobby code to join")]
     [SerializeField] TMP_InputField _joinCodeInputField;
     [Header("Lobby")]
+    [Tooltip("The container holding all the lobby templates/active lobbies")]
     [SerializeField] Transform _lobbyContainer;
+    [Tooltip("The template to use for displaying active lobbies")]
     [SerializeField] Transform _lobbyTemplate;
 
+    //Used to track and reuse templates
     List<ActiveLobbyUI> _instantiatedLobbyTemplates;
 
     void Awake()
@@ -58,6 +65,7 @@ public class LobbyUI : MonoBehaviour
         GameLobby.Instance.OnLobbyListChanged += GameLobby_OnLobbyListChanged;
 
         _playerNameInputField.text = MultiplayerManager.Instance.GetPlayerName();
+
         UpdateLobbyList(new List<Lobby>());
     }
 

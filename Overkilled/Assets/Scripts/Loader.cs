@@ -15,6 +15,10 @@ public static class Loader
         CharacterSelectScene,
     }
 
+    /// <summary>
+    /// Load a scene locally
+    /// </summary>
+    /// <param name="targetScene"></param>
     public static void LoadScene(Scene targetScene)
     {
         SceneManager.LoadScene(targetScene.ToString());

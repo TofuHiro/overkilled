@@ -28,8 +28,8 @@ public class GameLobby : MonoBehaviour
     public event Action<List<Lobby>> OnLobbyListChanged;
 
     Lobby _joinedLobby;
-    float _heartBeatTimer, _maxHeartBeatTime = 20f;
-    float _listLobbiesTimer, _maxListLobbiesTimer = 3f;
+    float _heartBeatTimer, _maxHeartBeatTime = 15f;
+    float _listLobbiesTimer, _maxListLobbiesTimer = 1.5f;
 
     void Awake()
     {
@@ -50,7 +50,7 @@ public class GameLobby : MonoBehaviour
         if (UnityServices.State != ServicesInitializationState.Initialized)
         {
             InitializationOptions options = new InitializationOptions();
-            options.SetProfile(UnityEngine.Random.Range(0, 10000).ToString());////
+            options.SetProfile(UnityEngine.Random.Range(0, 10000).ToString());////Temp for testing
 
             await UnityServices.InitializeAsync(options);
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
@@ -156,6 +156,7 @@ public class GameLobby : MonoBehaviour
 
             Allocation allocation = await AllocateRelay();
             string relayJoinCode = await GetRelayJoinCode(allocation);
+
             await LobbyService.Instance.UpdateLobbyAsync(_joinedLobby.Id, new UpdateLobbyOptions
             {
                 Data = new Dictionary<string, DataObject>
@@ -163,6 +164,7 @@ public class GameLobby : MonoBehaviour
                     { KEY_RELAY_JOIN_CODE, new DataObject(DataObject.VisibilityOptions.Member, relayJoinCode) }
                 },
             });
+
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(allocation, "dtls"));
 
             MultiplayerManager.Instance.StartHost();
@@ -316,13 +318,13 @@ public class GameLobby : MonoBehaviour
             {
                 Count = 20,
                 Filters = new List<QueryFilter>
-            {
-                new QueryFilter(QueryFilter.FieldOptions.AvailableSlots, "0", QueryFilter.OpOptions.GT),
-            },
+                {
+                    new QueryFilter(QueryFilter.FieldOptions.AvailableSlots, "0", QueryFilter.OpOptions.GT),
+                },
                 Order = new List<QueryOrder>
-            {
-                new QueryOrder(false, QueryOrder.FieldOptions.AvailableSlots),
-            }
+                {
+                    new QueryOrder(false, QueryOrder.FieldOptions.AvailableSlots),
+                }
             };
 
             QueryResponse queryResponse = await LobbyService.Instance.QueryLobbiesAsync(options);

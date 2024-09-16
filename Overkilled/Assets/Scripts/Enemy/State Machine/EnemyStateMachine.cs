@@ -1,10 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 public class EnemyStateMachine 
 {
-    public EnemyState CurrentEnemyState {  get; private set; }
+    /// <summary>
+    /// The current state the enemy is in
+    /// </summary>
+    public EnemyState CurrentEnemyState { get; private set; }
 
     /// <summary>
     /// Initialize this state machine to an initial state

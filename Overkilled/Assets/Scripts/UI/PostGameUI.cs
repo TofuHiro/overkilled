@@ -11,16 +11,10 @@ public class PostGameUI : MonoBehaviour
 
     void Start()
     {
-        GameManager.OnGameStateChange += UpdateUI;
-        GameManager.OnGameStateChange += ShowOnGameEnd;
+        GameManager.Instance.OnGameStateChange += UpdateUI;
+        GameManager.Instance.OnGameStateChange += ShowOnGameEnd;
 
         Hide();
-    }
-
-    void OnDestroy()
-    {
-        GameManager.OnGameStateChange -= UpdateUI;
-        GameManager.OnGameStateChange -= ShowOnGameEnd;
     }
 
     void UpdateUI()

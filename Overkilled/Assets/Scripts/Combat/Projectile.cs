@@ -4,12 +4,12 @@ using Unity.Netcode;
 [RequireComponent(typeof(Rigidbody))]
 public class Projectile : NetworkBehaviour
 {
+    [Tooltip("Projectile Scriptable Object for this projectile")]
     [SerializeField] protected ProjectileSO _projectileSO;
 
     Rigidbody _rb;
     float _damage;
     float _knockbackForce;
-    bool _pointCollision;
 
     protected bool _isFired = false;
     Vector3 _prevPosition, _directionOfTravel;
@@ -32,7 +32,6 @@ public class Projectile : NetworkBehaviour
         _knockbackForce = knockbackForce;
         _rb = GetComponent<Rigidbody>();
         _rb.useGravity = _projectileSO.projectileGravity;
-        _pointCollision = _projectileSO.pointCollision;
 
         _isFired = true;
         _prevPosition = transform.position;
@@ -42,7 +41,7 @@ public class Projectile : NetworkBehaviour
 
     protected virtual void FixedUpdate()
     {
-        if (!_pointCollision)
+        if (!_projectileSO.pointCollision)
             return;
 
         if (_isFired)
@@ -59,7 +58,7 @@ public class Projectile : NetworkBehaviour
 
     protected virtual void OnCollisionEnter(Collision collision)
     {
-        if (_pointCollision)
+        if (_projectileSO.pointCollision)
             return;
 
         HitTarget(collision.transform, transform.position);
@@ -67,14 +66,16 @@ public class Projectile : NetworkBehaviour
 
     protected virtual void HitTarget(Transform target, Vector3 hitPoint)
     {
+        //Damage
         IDamagable damagable = target.GetComponent<IDamagable>();
         if (damagable != null)
             CombatManager.Instance.DamageTarget(damagable, _damage);
 
+        //Apply Force
         Rigidbody rb = target.GetComponent<Rigidbody>();
         if (rb != null)
             CombatManager.Instance.AddHitForce(rb, _directionOfTravel * _knockbackForce, hitPoint);
 
-        MultiplayerManager.Instance.DestroyItem(gameObject);
+        MultiplayerManager.Instance.DestroyObject(gameObject);
     }
 }

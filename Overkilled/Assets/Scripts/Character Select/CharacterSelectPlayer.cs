@@ -30,9 +30,10 @@ public class CharacterSelectPlayer : MonoBehaviour
 
     void Start()
     {
-        MultiplayerManager.OnPlayerDataNetworkListChange += UpdatePlayer;
+        MultiplayerManager.Instance.OnPlayerDataNetworkListChange += UpdatePlayer;
         CharacterSelectReady.Instance.OnPlayerReadyChange += UpdatePlayer;
 
+        //Server only + non host
         _kickButton.gameObject.SetActive(NetworkManager.Singleton.IsServer && _playerIndex > 0);
 
         UpdatePlayer();
@@ -40,7 +41,7 @@ public class CharacterSelectPlayer : MonoBehaviour
 
     void OnDestroy()
     {
-        MultiplayerManager.OnPlayerDataNetworkListChange -= UpdatePlayer;
+        MultiplayerManager.Instance.OnPlayerDataNetworkListChange -= UpdatePlayer;
         CharacterSelectReady.Instance.OnPlayerReadyChange -= UpdatePlayer;
     }
 

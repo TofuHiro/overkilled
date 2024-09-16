@@ -6,7 +6,9 @@ using UnityEngine.UI;
 
 public class LobbyCreateUI : MonoBehaviour
 {
+    [Tooltip("Button to exit the create lobby UI")]
     [SerializeField] Button _exitButton;
+    [Tooltip("Button to confirm creation of a lobby")]
     [SerializeField] Button _createLobbyButton;
     [Header("Creation Settings")]
     [Tooltip("Input field to enter a name for the lobby")]
@@ -20,9 +22,10 @@ public class LobbyCreateUI : MonoBehaviour
         {
             string lobbyName = _lobbyNameInputField.text;
             if (string.IsNullOrWhiteSpace(lobbyName))
-                lobbyName = "Lobby Name";
+                lobbyName = "Lobby Name " + Random.Range(0, 1000);
             GameLobby.Instance.CreateLobby(lobbyName, _privateLobbyToggle.isOn);
         });
+
         _exitButton.onClick.AddListener(() =>
         {
             ResetCreation();

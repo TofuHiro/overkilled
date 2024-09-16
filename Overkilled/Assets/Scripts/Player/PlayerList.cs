@@ -28,6 +28,7 @@ public static class PlayerList
 
     public static void ResetStaticData() 
     { 
-        s_playerList.Clear(); 
+        s_playerList.Clear();
+        OnPlayerListUpdate = null;
     }
 }

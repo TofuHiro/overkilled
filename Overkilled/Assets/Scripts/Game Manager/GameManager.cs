@@ -8,13 +8,25 @@ namespace SurvivalGame
 {
     public class GameManager : NetworkBehaviour
     {
-        [SerializeField] GameObject _playerPrefab;
+        public enum GameState
+        {
+            WaitingForPlayers,
+            StartingGame,
+            GameStarted,
+            GameEnded,
+        }
+
         [SerializeField] LevelPreset _levelPreset;
+        [Tooltip("The player prefab to spawn as a player")]
+        [SerializeField] GameObject _playerPrefab;
         [Tooltip("The count down timer when the game is starting")]
         [SerializeField] float _gameStartCountdownTime = 3f;
 
         public static GameManager Instance { get; private set; }
 
+        /// <summary>
+        /// Returns true if the game is waiting for players to ready
+        /// </summary>
         public bool IsWaiting { get { return _currentGameState.Value == GameState.WaitingForPlayers; } }
 
         /// <summary>
@@ -43,13 +55,13 @@ namespace SurvivalGame
         public Grade LevelGrade { get; private set; }
 
         public delegate void GameInitialize(LevelPreset preset);
-        public static event GameInitialize OnGameInitialize;
-        public static event Action OnGameStateChange;
-        public static event Action OnLocalPlayerReady;
-        public static event Action OnLocalGamePause;
-        public static event Action OnLocalGameUnpause;
-        public static event Action OnMultiplayerGamePause;
-        public static event Action OnMultiplayerGameUnpause;
+        public event GameInitialize OnGameInitialize;
+        public event Action OnGameStateChange;
+        public event Action OnLocalPlayerReady;
+        public event Action OnLocalGamePause;
+        public event Action OnLocalGameUnpause;
+        public event Action OnMultiplayerGamePause;
+        public event Action OnMultiplayerGameUnpause;
 
         Dictionary<ulong, bool> _playerReadyDictionary;
         Dictionary<ulong, bool> _playerPausedDictionary;
@@ -66,7 +78,7 @@ namespace SurvivalGame
         {
             if (Instance != null && Instance != this)
             {
-                Debug.LogWarning("Warning. Multiple instances of Order System found. Destroying " + name);
+                Debug.LogWarning("Warning. Multiple instances of GameManager found. Destroying " + name);
                 Destroy(Instance);
             }
 
@@ -76,6 +88,12 @@ namespace SurvivalGame
             _playerPausedDictionary = new Dictionary<ulong, bool>();
 
             OnGameStateChange += CalculateGrade;
+        }
+
+        void Start()
+        {
+            PlayerController.LocalInstance.OnPlayerInteractInput += SetLocalPlayerReady;
+            PlayerController.LocalInstance.OnPlayerPauseInput += TogglePauseGame;
         }
 
         public override void OnNetworkSpawn()
@@ -92,15 +110,6 @@ namespace SurvivalGame
             }
         }
 
-        void SpawnPlayers(string sceneName, UnityEngine.SceneManagement.LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
-        {
-            foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
-            {
-                GameObject playerObject = Instantiate(_playerPrefab);
-                playerObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
-            }
-        }
-
         public override void OnNetworkDespawn()
         {
             _currentGameState.OnValueChanged -= OnStateChange;
@@ -114,18 +123,15 @@ namespace SurvivalGame
             }
         }
 
-        void Start()
+        void InitializeLevel()
         {
-            PlayerController.OnPlayerInteractInput += SetLocalPlayerReady;
-            PlayerController.OnPlayerPauseInput += TogglePauseGame;
+            Bank.ResetBalance();
+            _currentGameState.Value = GameState.WaitingForPlayers;
+            _countdownTimer.Value = _gameStartCountdownTime;
+            _gameTimer.Value = _levelPreset.timeLimit;
+            OnGameInitialize?.Invoke(_levelPreset);
         }
 
-        void OnDisable()
-        {
-            PlayerController.OnPlayerInteractInput -= SetLocalPlayerReady;
-            PlayerController.OnPlayerPauseInput -= TogglePauseGame;
-        }
-    
         void TestPauseOnPlayerDisconnect(NetworkManager manager, ConnectionEventData data)
         {
             if (data.EventType == ConnectionEvent.ClientDisconnected)
@@ -141,23 +147,18 @@ namespace SurvivalGame
                 _autoTestGameReadyStart = true;
         }
 
+        void SpawnPlayers(string sceneName, UnityEngine.SceneManagement.LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
+        {
+            foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
+            {
+                GameObject playerObject = Instantiate(_playerPrefab);
+                playerObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
+            }
+        }
+
         void OnStateChange(GameState previousValue, GameState newValue)
         {
             OnGameStateChange?.Invoke();
-        }
-
-        void OnGamePausedChange(bool previousValue, bool newValue)
-        {
-            if (_isGamePaused.Value)
-            {
-                OnMultiplayerGamePause?.Invoke();
-                Time.timeScale = 0f;
-            }
-            else
-            {
-                OnMultiplayerGameUnpause?.Invoke();
-                Time.timeScale = 1f;
-            }
         }
 
         void Update()
@@ -169,17 +170,22 @@ namespace SurvivalGame
             {
                 case GameState.WaitingForPlayers:
                     break;
+
                 case GameState.StartingGame:
                     _countdownTimer.Value -= Time.deltaTime;
                     Debug.Log(_countdownTimer.Value);
+
                     if (_countdownTimer.Value <= 0)
                         _currentGameState.Value = GameState.GameStarted;
                     break;
+
                 case GameState.GameStarted:
                     _gameTimer.Value -= Time.deltaTime;
+
                     if (_gameTimer.Value <= 0f)
                         _currentGameState.Value = GameState.GameEnded;
                     break;
+
                 case GameState.GameEnded:
                     break;
             }
@@ -199,18 +205,11 @@ namespace SurvivalGame
             }
         }
 
-        void InitializeLevel()
-        {
-            Bank.ResetBalance();
-            _currentGameState.Value = GameState.WaitingForPlayers;
-            _countdownTimer.Value = _gameStartCountdownTime;
-            _gameTimer.Value = _levelPreset.timeLimit;
-            OnGameInitialize?.Invoke(_levelPreset);
-        }
-
         void SetLocalPlayerReady()
         {
-            if (_currentGameState.Value != GameState.WaitingForPlayers && _isLocalPlayerReady)
+            if (_currentGameState.Value != GameState.WaitingForPlayers)
+                return;
+            if (_isLocalPlayerReady)
                 return;
 
             _isLocalPlayerReady = true;
@@ -245,22 +244,18 @@ namespace SurvivalGame
             }
         }
 
-        void CalculateGrade()
+        void OnGamePausedChange(bool previousValue, bool newValue)
         {
-            if (!GameEnded) return;
-
-            if (Bank.Balance >= _levelPreset.fiveStarsMinimum)
-                LevelGrade = Grade.FiveStars;
-            else if (Bank.Balance >= _levelPreset.fourStarsMinimum)
-                LevelGrade = Grade.FourStars;
-            else if (Bank.Balance >= _levelPreset.threeStarsMinimum)
-                LevelGrade = Grade.ThreeStars;
-            else if (Bank.Balance >= _levelPreset.twoStarsMinimum)
-                LevelGrade = Grade.TwoStars;
-            else if (Bank.Balance >= _levelPreset.oneStarMinimum)
-                LevelGrade = Grade.OneStar;
+            if (_isGamePaused.Value)
+            {
+                OnMultiplayerGamePause?.Invoke();
+                Time.timeScale = 0f;
+            }
             else
-                LevelGrade = Grade.NoStars;
+            {
+                OnMultiplayerGameUnpause?.Invoke();
+                Time.timeScale = 1f;
+            }
         }
 
         public void TogglePauseGame()
@@ -309,6 +304,24 @@ namespace SurvivalGame
             }
 
             _isGamePaused.Value = false;
+        }
+
+        void CalculateGrade()
+        {
+            if (!GameEnded) return;
+
+            if (Bank.Balance >= _levelPreset.fiveStarsMinimum)
+                LevelGrade = Grade.FiveStars;
+            else if (Bank.Balance >= _levelPreset.fourStarsMinimum)
+                LevelGrade = Grade.FourStars;
+            else if (Bank.Balance >= _levelPreset.threeStarsMinimum)
+                LevelGrade = Grade.ThreeStars;
+            else if (Bank.Balance >= _levelPreset.twoStarsMinimum)
+                LevelGrade = Grade.TwoStars;
+            else if (Bank.Balance >= _levelPreset.oneStarMinimum)
+                LevelGrade = Grade.OneStar;
+            else
+                LevelGrade = Grade.NoStars;
         }
     }
 }

@@ -8,7 +8,7 @@ public class CharacterSelectReady : NetworkBehaviour
 {
     const float READY_TOGGLE_COOLDOWN = 1f;
 
-    public static CharacterSelectReady Instance;
+    public static CharacterSelectReady Instance { get; private set; }
 
     public event Action OnPlayerReadyChange;
 
@@ -22,7 +22,7 @@ public class CharacterSelectReady : NetworkBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            Debug.LogWarning("Warning. Multiple instances of Order System found. Destroying " + name);
+            Debug.LogWarning("Warning. Multiple instances of CharacterSelectReady found. Destroying " + name);
             Destroy(Instance);
         }
 
@@ -36,6 +36,7 @@ public class CharacterSelectReady : NetworkBehaviour
         if (IsServer)
         {
             NetworkManager.Singleton.OnConnectionEvent += Network_OnConnectionEvent;
+            //Add self/host to dictionary as OnConnectionEvent wont count for host
             _playerReadyDictionary.Add(NetworkManager.ServerClientId, false);
         }
     }
@@ -49,9 +50,7 @@ public class CharacterSelectReady : NetworkBehaviour
     void Update()
     {
         if (_readyToggleCooldownTimer < READY_TOGGLE_COOLDOWN)
-        {
             _readyToggleCooldownTimer += Time.deltaTime;
-        }
     }
 
     void Network_OnConnectionEvent(NetworkManager manager, ConnectionEventData data)
@@ -64,6 +63,7 @@ public class CharacterSelectReady : NetworkBehaviour
         else if (data.EventType == ConnectionEvent.ClientDisconnected)
         {
             _playerReadyDictionary.Remove(data.ClientId);
+            //Delayed CheckPlayerReady call to wait for dictionary to update
             _checkPlayerReadySwitch = true;
         }
     }
@@ -77,6 +77,9 @@ public class CharacterSelectReady : NetworkBehaviour
         }
     }
 
+    /// <summary>
+    /// Toggles the player's ready state
+    /// </summary>
     public void TogglePlayerReady()
     {
         if (_readyToggleCooldownTimer < READY_TOGGLE_COOLDOWN)
@@ -86,10 +89,6 @@ public class CharacterSelectReady : NetworkBehaviour
         _readyToggleCooldownTimer = 0f;
     }
 
-    /// <summary>
-    /// Checks if all players in a server are ready and loads the game scene
-    /// </summary>
-    /// <param name="serverRpcParams"></param>
     [ServerRpc(RequireOwnership = false)]
     void TogglePlayerReadyServerRpc(ServerRpcParams serverRpcParams = default)
     {
@@ -101,6 +100,9 @@ public class CharacterSelectReady : NetworkBehaviour
         CheckPlayerReady();
     }
 
+    /// <summary>
+    /// Checks and sets the AllPlayersReady bool
+    /// </summary>
     void CheckPlayerReady()
     {
         foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
@@ -115,6 +117,9 @@ public class CharacterSelectReady : NetworkBehaviour
         _allPlayersReady = true;
     }
 
+    /// <summary>
+    /// Starts the game and loads the game scene
+    /// </summary>
     public void StartGame()
     {
         if (!_allPlayersReady)
@@ -132,6 +137,11 @@ public class CharacterSelectReady : NetworkBehaviour
         OnPlayerReadyChange?.Invoke();
     }
 
+    /// <summary>
+    /// Check if a player is ready or not
+    /// </summary>
+    /// <param name="clientId">The client id of the player</param>
+    /// <returns></returns>
     public bool IsPlayerReady(ulong clientId)
     {
         return _playerReadyDictionary.ContainsKey(clientId) && _playerReadyDictionary[clientId];

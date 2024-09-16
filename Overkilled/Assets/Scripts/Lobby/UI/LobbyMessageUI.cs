@@ -7,7 +7,9 @@ using UnityEngine.UI;
 
 public class LobbyMessageUI : MonoBehaviour
 {
+    [Tooltip("Text to display lobby messages")]
     [SerializeField] TMP_Text _messageText;
+    [Tooltip("Button to close message")]
     [SerializeField] Button _closeButton;
 
     void Awake()
@@ -17,7 +19,7 @@ public class LobbyMessageUI : MonoBehaviour
 
     void Start()
     {
-        MultiplayerManager.OnFailedToJoinGame += MultiplayerManager_OnFailedToJoinGame;
+        MultiplayerManager.Instance.OnLocalDisconnect += MultiplayerManager_OnFailedToJoinGame;
         GameLobby.Instance.OnCreateLobbyStarted += GameLobby_OnCreateLobbyStarted;
         GameLobby.Instance.OnCreateLobbyFailed += GameLobby_OnCreateLobbyFailed;
         GameLobby.Instance.OnJoinStarted += GameLobby_OnJoinStarted;
@@ -29,7 +31,7 @@ public class LobbyMessageUI : MonoBehaviour
 
     void OnDestroy()
     {
-        MultiplayerManager.OnFailedToJoinGame -= MultiplayerManager_OnFailedToJoinGame;
+        MultiplayerManager.Instance.OnLocalDisconnect -= MultiplayerManager_OnFailedToJoinGame;
         GameLobby.Instance.OnCreateLobbyStarted -= GameLobby_OnCreateLobbyStarted;
         GameLobby.Instance.OnCreateLobbyFailed -= GameLobby_OnCreateLobbyFailed;
         GameLobby.Instance.OnJoinStarted -= GameLobby_OnJoinStarted;

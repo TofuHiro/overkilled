@@ -7,16 +7,10 @@ public class MultiplayerPauseScreenUI : MonoBehaviour
 {
     void Start()
     {
-        GameManager.OnMultiplayerGamePause += Show;
-        GameManager.OnMultiplayerGameUnpause += Hide;
+        GameManager.Instance.OnMultiplayerGamePause += Show;
+        GameManager.Instance.OnMultiplayerGameUnpause += Hide;
 
         Hide();
-    }
-
-    void OnDestroy()
-    {
-        GameManager.OnMultiplayerGamePause -= Show;
-        GameManager.OnMultiplayerGameUnpause -= Hide;
     }
 
     void Show()
