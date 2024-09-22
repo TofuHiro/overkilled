@@ -8,14 +8,17 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerStamina))]
 [RequireComponent(typeof(PlayerInteraction))]
 [RequireComponent(typeof(PlayerHand))]
-[RequireComponent(typeof(PlayerHealth))]
-public class PlayerController : NetworkBehaviour
+public class PlayerController : MonoBehaviour
 {
     public static PlayerController LocalInstance { get; private set; }
+
+    public delegate void PlayerReferenceSwitch(PlayerController prevRef, PlayerController newRef);
+    public static event PlayerReferenceSwitch OnSingletonSwitch;
 
     public delegate void PlayerInputAction();
     public event PlayerInputAction OnPlayerInteractInput;
     public event PlayerInputAction OnPlayerPauseInput;
+    public event PlayerInputAction OnUICancelInput;
 
     PlayerMotor _motor;
     PlayerRotation _rotation;
@@ -25,14 +28,47 @@ public class PlayerController : NetworkBehaviour
 
     PlayerInput _input;
 
-    bool _canMove;
+    bool _canMove, _canControl;
 
-    public override void OnNetworkSpawn()
+    void Awake()
     {
-        PlayerList.AddPlayer(gameObject);
+        _input = new PlayerInput();
 
-        _canMove = false;
+        _motor = GetComponent<PlayerMotor>();
+        _rotation = GetComponent<PlayerRotation>();
+        _stamina = GetComponent<PlayerStamina>();
+        _interaction = GetComponent<PlayerInteraction>();
+        _visuals = GetComponentInChildren<PlayerVisuals>();
 
+        if (GetIsOffline())
+        {
+            if (LocalInstance != null && LocalInstance != this)
+            {
+                Debug.LogWarning("Warning. Multiple instances of Player Controller found");
+            }
+
+            LocalInstance = this;
+        }
+    }
+
+    void Start()
+    {
+        _canMove = true;
+        _canControl = true;
+
+        /*PlayerData playerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
+        _visuals.SetPlayerModel(playerData.PlayerModelId);*/
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnGameStateChange += GameManager_OnGameStateChange;
+            GameManager.Instance.OnLocalGamePause += GameManager_OnLocalGamePause;
+            GameManager.Instance.OnLocalGameUnpause += GameManager_OnLocalGameUnpause;
+        }
+    }
+
+    void OnEnable()
+    {
         _input.Player.Enable();
         _input.Player.Sprint.started += ToggleSprint;
         _input.Player.Sprint.canceled += ToggleSprint;
@@ -43,18 +79,11 @@ public class PlayerController : NetworkBehaviour
         _input.Player.AltFire.canceled += SecondaryAttack;
         _input.Player.Pause.performed += Pause;
 
-        GameManager.Instance.OnGameStateChange += GameManager_OnGameStateChange;
-        GameManager.Instance.OnLocalGamePause += GameManager_OnLocalGamePause;
-        GameManager.Instance.OnLocalGameUnpause += GameManager_OnLocalGameUnpause;
-
-        PlayerData playerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
-        _visuals.SetPlayerModel(playerData.PlayerModelId);
+        _input.UI.Cancel.performed += Cancel;
     }
 
-    public override void OnNetworkDespawn()
+    void OnDisable()
     {
-        PlayerList.RemovePlayer(gameObject);
-
         _input.Player.Disable();
         _input.Player.Sprint.started -= ToggleSprint;
         _input.Player.Sprint.canceled -= ToggleSprint;
@@ -65,66 +94,98 @@ public class PlayerController : NetworkBehaviour
         _input.Player.AltFire.canceled -= SecondaryAttack;
         _input.Player.Pause.performed -= Pause;
 
-        GameManager.Instance.OnGameStateChange -= GameManager_OnGameStateChange;
-        GameManager.Instance.OnLocalGamePause -= GameManager_OnLocalGamePause;
-        GameManager.Instance.OnLocalGameUnpause -= GameManager_OnLocalGameUnpause;
+        _input.UI.Disable();
+        _input.UI.Cancel.performed -= Cancel;
     }
 
-    void Awake()
+    void OnDestroy()
     {
-        _input = new PlayerInput();
+        _input.Player.Disable();
+        _input.Player.Sprint.started -= ToggleSprint;
+        _input.Player.Sprint.canceled -= ToggleSprint;
+        _input.Player.Use.performed -= Interact;
+        _input.Player.Fire.started -= Attack;
+        _input.Player.Fire.canceled -= Attack;
+        _input.Player.AltFire.started -= SecondaryAttack;
+        _input.Player.AltFire.canceled -= SecondaryAttack;
+        _input.Player.Pause.performed -= Pause;
 
-        if (LocalInstance != null && LocalInstance != this)
-        {
-            Debug.LogWarning("Warning. Multiple instances of Player Controller found. Destroying " + name);
-            Destroy(LocalInstance);
-        }
+        _input.UI.Disable();
+        _input.UI.Cancel.performed -= Cancel;
+    }
 
-        LocalInstance = this;
+    public void InitSingleton(PlayerController instance)
+    {
+        OnSingletonSwitch?.Invoke(LocalInstance, instance);
 
-        _motor = GetComponent<PlayerMotor>();
-        _rotation = GetComponent<PlayerRotation>();
-        _stamina = GetComponent<PlayerStamina>();
-        _interaction = GetComponent<PlayerInteraction>();
-        _visuals = GetComponentInChildren<PlayerVisuals>();
+        LocalInstance = instance;
+    }
+
+    bool GetIsOffline()
+    {
+        return (NetworkManager.Singleton != null && !NetworkManager.Singleton.IsClient) || NetworkManager.Singleton == null;
     }
 
     void GameManager_OnGameStateChange()
     {
-        if (GameManager.Instance.GameEnded)
-        {
+        if (GameManager.Instance.IsWaiting)
             _canMove = false;
-        }
         else if (GameManager.Instance.GameStarted)
-        {
             _canMove = true;
-        }
+        else if (GameManager.Instance.GameEnded)
+            _canMove = false;
     }
-    
+
     void GameManager_OnLocalGamePause()
     {
         if (GameManager.Instance.IsPaused)
-        {
             _canMove = false;
-        }
     }
 
     void GameManager_OnLocalGameUnpause()
     {
         if (!GameManager.Instance.IsPaused)
-        {
             _canMove = true;
+    }
+
+    public void SetUIControls(bool state)
+    {
+        if (state)
+        {
+            _input.Player.Disable();
+            _input.UI.Enable();
+
+            _stamina.SetSprint(false);
+            _interaction.SetAttackState(false);
+            _interaction.SetSecondaryAttackState(false);
         }
+        else
+        {
+            _input.Player.Enable();
+            _input.UI.Disable();
+        }
+    }
+
+    public void SetCanMove(bool state)
+    {
+        _canMove = state;
+    }
+
+    public void SetCanControl(bool state)
+    {
+        _canControl = state;
     }
 
     void Update()
     {
-        if (!IsOwner) 
+        if (!_canControl)
             return;
 
         Movement();
         Rotation();
     }
+
+    #region Player Controls
 
     void Movement()
     {
@@ -137,7 +198,7 @@ public class PlayerController : NetworkBehaviour
         {
             _motor.SetDirection(Vector2.zero);
         }
-    } 
+    }
 
     void Rotation()
     {
@@ -154,7 +215,7 @@ public class PlayerController : NetworkBehaviour
 
     void ToggleSprint(InputAction.CallbackContext context)
     {
-        if (!IsOwner || !_canMove)
+        if (!_canControl || !_canMove)
             return;
 
         if (context.started)
@@ -165,7 +226,7 @@ public class PlayerController : NetworkBehaviour
 
     void Interact(InputAction.CallbackContext context)
     {
-        if (!IsOwner)
+        if (!_canControl)
             return;
 
         if (context.performed)
@@ -179,45 +240,51 @@ public class PlayerController : NetworkBehaviour
 
     void Attack(InputAction.CallbackContext context)
     {
-        if (!IsOwner)
+        if (!_canControl || !_canMove)
             return;
 
-        if (_canMove)
-        {
-            if (context.started)
-                _interaction.SetAttackState(true);
-            else if (context.canceled)
-                _interaction.SetAttackState(false);
-        }
-        else
-        {
+        if (context.started)
+            _interaction.SetAttackState(true);
+        else if (context.canceled)
             _interaction.SetAttackState(false);
-        }
     }
 
     void SecondaryAttack(InputAction.CallbackContext context)
     {
-        if (!IsOwner)
+        if (!_canControl || !_canMove)
             return;
 
-        if (_canMove)
-        {
-            if (context.started)
-                _interaction.SetSecondaryAttackState(true);
-            else if (context.canceled)
-                _interaction.SetSecondaryAttackState(false);
-        }
-        else
-        {
+        if (context.started)
+            _interaction.SetSecondaryAttackState(true);
+        else if (context.canceled)
             _interaction.SetSecondaryAttackState(false);
-        }
     }
 
     void Pause(InputAction.CallbackContext context)
     {
-        if (!IsOwner)
+        if (!_canControl)
             return;
 
-        OnPlayerPauseInput?.Invoke();
+        if (context.performed)
+        {
+            OnPlayerPauseInput?.Invoke();
+        }
     }
+
+    #endregion
+
+    #region UI Controls
+
+    void Cancel(InputAction.CallbackContext context)
+    {
+        if (!_canControl)
+            return;
+
+        if (context.performed)
+        {
+            OnUICancelInput?.Invoke();
+        }
+    }
+
+    #endregion
 }

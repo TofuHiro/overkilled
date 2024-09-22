@@ -1592,7 +1592,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0.42261827, y: 0, z: 0, w: 0.9063079}
-  m_LocalPosition: {x: 0, y: 11.6, z: -8.39}
+  m_LocalPosition: {x: 0, y: 11, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4226,6 +4226,50 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 731941026}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &740855160
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 740855162}
+  - component: {fileID: 740855161}
+  m_Layer: 0
+  m_Name: Reset Static Data
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &740855161
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740855160}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73b86e3202a355441aa9657aae47a067, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &740855162
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740855160}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &756526691
 GameObject:
   m_ObjectHideFlags: 0
@@ -6111,9 +6155,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 382c076e774b3c54f821538e97c27ede, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _levelPreset: {fileID: 11400000, guid: 2b2a98dc17e3332458a5a1b53c0f99e2, type: 2}
   _playerPrefab: {fileID: 8211705792208053782, guid: d58cc1a45cdd1584b9bff21b5f942812,
     type: 3}
-  _levelPreset: {fileID: 11400000, guid: 2b2a98dc17e3332458a5a1b53c0f99e2, type: 2}
   _gameStartCountdownTime: 3
 --- !u!1 &1375737368
 GameObject:
@@ -9910,6 +9954,7 @@ SceneRoots:
   - {fileID: 1708489726}
   - {fileID: 1693108047}
   - {fileID: 1264486033}
+  - {fileID: 740855162}
   - {fileID: 1811379089}
   - {fileID: 2144829608}
   - {fileID: 1818196465}

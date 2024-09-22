@@ -1,7 +1,6 @@
-using Unity.Netcode;
 using UnityEngine;
 
-public class ItemHolder : NetworkBehaviour
+public class ItemHolder : MonoBehaviour
 {
     [Tooltip("The position to hold items at")]
     [SerializeField] Transform _holdPosition;
@@ -18,6 +17,9 @@ public class ItemHolder : NetworkBehaviour
     /// Whether this holder is currently holding an object
     /// </summary>
     public bool IsOccupied { get; private set; } = false;
+
+    public delegate void ItemHolderAction(Item item);
+    public event ItemHolderAction OnItemChange;
 
     Item _currentItem;
     Rigidbody _currentRigidbody;
@@ -53,23 +55,8 @@ public class ItemHolder : NetworkBehaviour
     /// <param name="item"></param>
     public void SetItem(Item item)
     {
-        SetItemServerRpc(item ? item.GetNetworkObject() : null);
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    void SetItemServerRpc(NetworkObjectReference itemNetworkObjectReference)
-    {
-        SetItemClientRpc(itemNetworkObjectReference);
-    }
-
-    [ClientRpc]
-    void SetItemClientRpc(NetworkObjectReference itemNetworkObjectReference)
-    {
-        itemNetworkObjectReference.TryGet(out NetworkObject itemNetworkObject);
-        
-        if (itemNetworkObject != null)
+        if (item != null)
         {
-            Item item = itemNetworkObject.GetComponent<Item>();
             _currentItem = item;
             _currentRigidbody = item.GetComponent<Rigidbody>();
             _currentColliders = item.GetComponents<Collider>();
@@ -86,9 +73,11 @@ public class ItemHolder : NetworkBehaviour
             _itemTransform = null;
             IsOccupied = false;
         }
+
+        OnItemChange?.Invoke(item);
     }
 
-    void SetLockItem(bool state)
+    public void SetLockItem(bool state)
     {
         _currentRigidbody.isKinematic = state;
 

@@ -26,7 +26,7 @@ public class PlayerStamina : MonoBehaviour
     bool _isRegeningStamina, _isSprinting;
     Coroutine _staminaRegenRoutine;
 
-    void Start()
+    void Awake()
     {
         _motor = GetComponent<PlayerMotor>();
 

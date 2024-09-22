@@ -106,7 +106,6 @@ namespace SurvivalGame
             {
                 NetworkManager.Singleton.OnConnectionEvent += TestPauseOnPlayerDisconnect;
                 NetworkManager.Singleton.OnConnectionEvent += TestPlayersReadyOnPlayerDisconnect;
-                NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += SpawnPlayers;
             }
         }
 
@@ -119,7 +118,6 @@ namespace SurvivalGame
             {
                 NetworkManager.Singleton.OnConnectionEvent -= TestPauseOnPlayerDisconnect;
                 NetworkManager.Singleton.OnConnectionEvent -= TestPlayersReadyOnPlayerDisconnect;
-                NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= SpawnPlayers;
             }
         }
 
@@ -147,14 +145,17 @@ namespace SurvivalGame
                 _autoTestGameReadyStart = true;
         }
 
-        void SpawnPlayers(string sceneName, UnityEngine.SceneManagement.LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
+        /*void SpawnPlayers(string sceneName, UnityEngine.SceneManagement.LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
         {
+            if (sceneName != Loader.Scene.GameScene.ToString())
+                return;
+
             foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
             {
                 GameObject playerObject = Instantiate(_playerPrefab);
                 playerObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
             }
-        }
+        }*/
 
         void OnStateChange(GameState previousValue, GameState newValue)
         {
