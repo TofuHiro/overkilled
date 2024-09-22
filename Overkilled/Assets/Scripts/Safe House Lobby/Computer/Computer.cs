@@ -6,12 +6,13 @@ public class Computer : MonoBehaviour, IInteractable
 {
     public static Computer Instance { get; private set; }
 
-    public bool HasWindowOpen { get { return _openedWindows.Count > 0; } }
-
     [Tooltip("The computer UI to display")]
     [SerializeField] ComputerUI _computerUI;
     [Tooltip("Cover to prevent player from opening windows")]
     [SerializeField] GameObject _coverObject;
+
+    public bool HasWindowOpen { get { return _openedWindows.Count > 0; } }
+    public bool IsComputerOpen { get { return _computerUI.isActiveAndEnabled; } }
 
     List<ComputerWindowUI> _openedWindows;
 
@@ -47,6 +48,9 @@ public class Computer : MonoBehaviour, IInteractable
 
     void Close()
     {
+        if (!IsComputerOpen)
+            return;
+
         if (HasWindowOpen)
         {
             CloseTopWindow();
