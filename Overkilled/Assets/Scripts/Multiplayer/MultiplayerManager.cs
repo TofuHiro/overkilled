@@ -166,7 +166,9 @@ public class MultiplayerManager : NetworkBehaviour
         return index < _playerDataNetworkList.Count;
     }
 
+
     #region Player Data
+
 
     int GetPlayerDataIndexFromClientId(ulong clientId)
     {
@@ -237,9 +239,12 @@ public class MultiplayerManager : NetworkBehaviour
         _playerDataNetworkList[playerDataIndex] = playerData;
     }
 
+
     #endregion
 
+
     #region Item Spawning
+
 
     int GetIndexFromObject(GameObject obj)
     {
@@ -343,6 +348,7 @@ public class MultiplayerManager : NetworkBehaviour
         networkObjectReference.TryGet(out NetworkObject networkObject);
         Destroy(networkObject.gameObject, delay);
     }
+
 
     #endregion
 
