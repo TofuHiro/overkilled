@@ -17,13 +17,20 @@ public class ItemHolderMultiplayer : NetworkBehaviour
 
     void ItemHolder_OnItemChange(Item item)
     {
+        //Event resub to avoid infinite loop
+        _itemHolder.OnItemChange -= ItemHolder_OnItemChange;
         SetItemServerRpc(item ? item.GetNetworkObject() : null);
+        _itemHolder.OnItemChange += ItemHolder_OnItemChange;
     }
 
     [ServerRpc(RequireOwnership = false)]
-    void SetItemServerRpc(NetworkObjectReference itemNetworkObjectReference)
+    void SetItemServerRpc(NetworkObjectReference itemNetworkObjectReference, ServerRpcParams serverRpcParams = default)
     {
-        SetItemClientRpc(itemNetworkObjectReference);
+        //As local client already set from ItemHolder
+        if (serverRpcParams.Receive.SenderClientId != NetworkManager.LocalClientId)
+        {
+            SetItemClientRpc(itemNetworkObjectReference);
+        }
     }
 
     [ClientRpc]

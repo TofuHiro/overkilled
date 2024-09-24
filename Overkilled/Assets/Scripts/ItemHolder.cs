@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public class ItemHolder : MonoBehaviour
@@ -11,8 +12,6 @@ public class ItemHolder : MonoBehaviour
     [Tooltip("If is static, when parenting, object will just be placed at hold position once, while if not static, the object will constantly be set to the position")]
     [SerializeField] bool _isStatic = true;
 
-    Transform _itemTransform = null;
-
     /// <summary>
     /// Whether this holder is currently holding an object
     /// </summary>
@@ -22,8 +21,6 @@ public class ItemHolder : MonoBehaviour
     public event ItemHolderAction OnItemChange;
 
     Item _currentItem;
-    Rigidbody _currentRigidbody;
-    Collider[] _currentColliders;
 
     /// <summary>
     /// Get the current item thats being held
@@ -44,8 +41,8 @@ public class ItemHolder : MonoBehaviour
 
         if (IsOccupied)
         {
-            _itemTransform.position = _holdPosition.position;
-            _itemTransform.rotation = _holdPosition.rotation;
+            _currentItem.transform.position = _holdPosition.position;
+            _currentItem.transform.rotation = _holdPosition.rotation;
         }
     }
 
@@ -58,9 +55,6 @@ public class ItemHolder : MonoBehaviour
         if (item != null)
         {
             _currentItem = item;
-            _currentRigidbody = item.GetComponent<Rigidbody>();
-            _currentColliders = item.GetComponents<Collider>();
-            _itemTransform = item.transform;
             IsOccupied = true;
             SetLockItem(true);
         }
@@ -68,9 +62,6 @@ public class ItemHolder : MonoBehaviour
         {
             SetLockItem(false);
             _currentItem = null;
-            _currentRigidbody = null;
-            _currentColliders = null;
-            _itemTransform = null;
             IsOccupied = false;
         }
 
@@ -79,10 +70,8 @@ public class ItemHolder : MonoBehaviour
 
     public void SetLockItem(bool state)
     {
-        _currentRigidbody.isKinematic = state;
+        _currentItem.ToggleItemLock(state);
 
-        foreach (Collider collider in _currentColliders)
-            collider.enabled = !state;
         if (state == true)
         {
             _currentItem.transform.position = _holdPosition.transform.position;
