@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f5da4b4ea739382418bf69ae07bc64ce, type: 3}
-  m_Name: Test Level
+  m_Name: Test Level 2
   m_EditorClassIdentifier: 
-  name: Test Level
-  useCameraFocusMode: 1
-  timeLimit: 30
+  name: Test Level 2
+  useCameraFocusMode: 0
+  timeLimit: 50
   orders:
   - {fileID: 11400000, guid: f72bed3916a7b0840a75dcbf92736568, type: 2}
   - {fileID: 11400000, guid: fdf04c9ec9572874a8405051d2ed674f, type: 2}
   - {fileID: 11400000, guid: a0d4307cd9c0b6a4b97c1b528b2c9d14, type: 2}
-  orderCreationRate: 4
-  fiveStarsMinimum: 100
-  fourStarsMinimum: 70
-  threeStarsMinimum: 50
-  twoStarsMinimum: 30
-  oneStarMinimum: 20
+  orderCreationRate: 6
+  fiveStarsMinimum: 150
+  fourStarsMinimum: 120
+  threeStarsMinimum: 90
+  twoStarsMinimum: 60
+  oneStarMinimum: 40

@@ -16,7 +16,6 @@ namespace SurvivalGame
             GameEnded,
         }
 
-        [SerializeField] LevelPreset _levelPreset;
         [Tooltip("The player prefab to spawn as a player")]
         [SerializeField] GameObject _playerPrefab;
         [Tooltip("The count down timer when the game is starting")]
@@ -74,6 +73,8 @@ namespace SurvivalGame
         bool _isLocalPlayerReady = false, _isLocalPlayerPaused = false;
         bool _autoTestGamePausedState, _autoTestGameReadyStart;
 
+        LevelPreset _currentLevelPreset;
+
         void Awake()
         {
             if (Instance != null && Instance != this)
@@ -98,7 +99,6 @@ namespace SurvivalGame
 
         public override void OnNetworkSpawn()
         {
-            InitializeLevel();
             _currentGameState.OnValueChanged += OnStateChange;
             _isGamePaused.OnValueChanged += OnGamePausedChange;
 
@@ -106,6 +106,7 @@ namespace SurvivalGame
             {
                 NetworkManager.Singleton.OnConnectionEvent += TestPauseOnPlayerDisconnect;
                 NetworkManager.Singleton.OnConnectionEvent += TestPlayersReadyOnPlayerDisconnect;
+                NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += SpawnPlayers;
             }
         }
 
@@ -118,16 +119,19 @@ namespace SurvivalGame
             {
                 NetworkManager.Singleton.OnConnectionEvent -= TestPauseOnPlayerDisconnect;
                 NetworkManager.Singleton.OnConnectionEvent -= TestPlayersReadyOnPlayerDisconnect;
+                NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= SpawnPlayers;
             }
         }
 
-        void InitializeLevel()
+        public void InitializeLevel(LevelPreset preset)
         {
+            _currentLevelPreset = preset;
+
             Bank.ResetBalance();
             _currentGameState.Value = GameState.WaitingForPlayers;
             _countdownTimer.Value = _gameStartCountdownTime;
-            _gameTimer.Value = _levelPreset.timeLimit;
-            OnGameInitialize?.Invoke(_levelPreset);
+            _gameTimer.Value = preset.timeLimit;
+            OnGameInitialize?.Invoke(preset);
         }
 
         void TestPauseOnPlayerDisconnect(NetworkManager manager, ConnectionEventData data)
@@ -145,17 +149,14 @@ namespace SurvivalGame
                 _autoTestGameReadyStart = true;
         }
 
-        /*void SpawnPlayers(string sceneName, UnityEngine.SceneManagement.LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
+        void SpawnPlayers(string sceneName, UnityEngine.SceneManagement.LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
         {
-            if (sceneName != Loader.Scene.GameScene.ToString())
-                return;
-
             foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
             {
                 GameObject playerObject = Instantiate(_playerPrefab);
                 playerObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
             }
-        }*/
+        }
 
         void OnStateChange(GameState previousValue, GameState newValue)
         {
@@ -311,15 +312,15 @@ namespace SurvivalGame
         {
             if (!GameEnded) return;
 
-            if (Bank.Balance >= _levelPreset.fiveStarsMinimum)
+            if (Bank.Balance >= _currentLevelPreset.fiveStarsMinimum)
                 LevelGrade = Grade.FiveStars;
-            else if (Bank.Balance >= _levelPreset.fourStarsMinimum)
+            else if (Bank.Balance >= _currentLevelPreset.fourStarsMinimum)
                 LevelGrade = Grade.FourStars;
-            else if (Bank.Balance >= _levelPreset.threeStarsMinimum)
+            else if (Bank.Balance >= _currentLevelPreset.threeStarsMinimum)
                 LevelGrade = Grade.ThreeStars;
-            else if (Bank.Balance >= _levelPreset.twoStarsMinimum)
+            else if (Bank.Balance >= _currentLevelPreset.twoStarsMinimum)
                 LevelGrade = Grade.TwoStars;
-            else if (Bank.Balance >= _levelPreset.oneStarMinimum)
+            else if (Bank.Balance >= _currentLevelPreset.oneStarMinimum)
                 LevelGrade = Grade.OneStar;
             else
                 LevelGrade = Grade.NoStars;

@@ -37,9 +37,9 @@ public class PlayerReadyManager : NetworkBehaviour
         LobbyManager.Instance.OnSwitchToMultiplayer += LobbyManager_OnSwitchToMultiplayer;
     }
 
-    void LobbyManager_OnSwitchToMultiplayer()
+    void LobbyManager_OnSwitchToMultiplayer(bool isHost)
     {
-        if (IsServer)
+        if (isHost)
         {
             NetworkManager.Singleton.OnConnectionEvent += NetworkManager_Server_OnConnectionEvent;
             _playerReadyDictionary.Add(NetworkManager.ServerClientId, false);

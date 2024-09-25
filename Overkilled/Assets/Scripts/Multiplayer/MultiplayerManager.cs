@@ -86,7 +86,6 @@ public class MultiplayerManager : NetworkBehaviour
             return;
         }
 
-        response.CreatePlayerObject = true;
         response.Approved = true;
     }
 

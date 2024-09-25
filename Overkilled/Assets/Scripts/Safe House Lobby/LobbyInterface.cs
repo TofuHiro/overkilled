@@ -34,6 +34,7 @@ public class LobbyInterface : MonoBehaviour
     void OnDestroy()
     {
         PlayerController.OnSingletonSwitch -= PlayerController_OnSingletonSwitch;
+        _currentPlayerInstance.OnUICancelInput -= Close;
     }
 
     void PlayerController_OnSingletonSwitch(PlayerController prevRef, PlayerController newRef)
