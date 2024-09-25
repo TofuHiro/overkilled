@@ -2,7 +2,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 [RequireComponent(typeof(ItemHolder))]
-public class PlayerHand : MonoBehaviour
+public class PlayerHand : NetworkBehaviour
 {
     [Tooltip("Force applied to objects when dropping them")]
     [SerializeField] float _dropThrowForce = 5f;
@@ -15,7 +15,26 @@ public class PlayerHand : MonoBehaviour
     void Awake()
     {
         _holder = GetComponent<ItemHolder>();
-    }    
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        NetworkManager.Singleton.OnConnectionEvent += DropItemOnDisconnect;
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        NetworkManager.Singleton.OnConnectionEvent -= DropItemOnDisconnect;
+    }
+
+    void DropItemOnDisconnect(NetworkManager manager, ConnectionEventData data)
+    {
+        if (!IsHoldingItem)
+            return;
+
+        if (data.EventType == ConnectionEvent.ClientDisconnected && data.ClientId == OwnerClientId)
+            DropItem();
+    }
 
     public void SetAttackState(bool state)
     {

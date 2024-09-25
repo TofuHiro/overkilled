@@ -1,7 +1,8 @@
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 
-public class ItemHolder : MonoBehaviour
+public class ItemHolder : NetworkBehaviour
 {
     [Tooltip("The position to hold items at")]
     [SerializeField] Transform _holdPosition;
@@ -16,9 +17,6 @@ public class ItemHolder : MonoBehaviour
     /// Whether this holder is currently holding an object
     /// </summary>
     public bool IsOccupied { get; private set; } = false;
-
-    public delegate void ItemHolderAction(Item item);
-    public event ItemHolderAction OnItemChange;
 
     Item _currentItem;
 
@@ -46,14 +44,30 @@ public class ItemHolder : MonoBehaviour
         }
     }
 
+
     /// <summary>
     /// Assigns a new item to this holder, locking it into place
     /// </summary>
     /// <param name="item"></param>
     public void SetItem(Item item)
     {
-        if (item != null)
+        SetItemServerRpc(item ? item.GetNetworkObject() : null);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void SetItemServerRpc(NetworkObjectReference itemNetworkObjectReference)
+    {
+        SetItemClientRpc(itemNetworkObjectReference);
+    }
+
+    [ClientRpc]
+    void SetItemClientRpc(NetworkObjectReference itemNetworkObjectReference)
+    {
+        itemNetworkObjectReference.TryGet(out NetworkObject itemNetworkObject);
+
+        if (itemNetworkObject != null)
         {
+            Item item = itemNetworkObject.GetComponent<Item>();
             _currentItem = item;
             IsOccupied = true;
             SetLockItem(true);
@@ -64,8 +78,6 @@ public class ItemHolder : MonoBehaviour
             _currentItem = null;
             IsOccupied = false;
         }
-
-        OnItemChange?.Invoke(item);
     }
 
     public void SetLockItem(bool state)

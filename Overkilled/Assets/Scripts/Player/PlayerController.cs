@@ -1,19 +1,20 @@
 using SurvivalGame;
+using System;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 
 [RequireComponent(typeof(PlayerMotor))]
 [RequireComponent(typeof(PlayerRotation))]
 [RequireComponent(typeof(PlayerStamina))]
 [RequireComponent(typeof(PlayerInteraction))]
 [RequireComponent(typeof(PlayerHand))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     public static PlayerController LocalInstance { get; private set; }
 
-    public delegate void PlayerReferenceSwitch(PlayerController prevRef, PlayerController newRef);
-    public static event PlayerReferenceSwitch OnSingletonSwitch;
+    public static event Action<PlayerController> OnPlayerSpawn;
 
     public delegate void PlayerInputAction();
     public event PlayerInputAction OnPlayerInteractInput;
@@ -28,9 +29,9 @@ public class PlayerController : MonoBehaviour
 
     PlayerInput _input;
 
-    bool _canMove, _canControl;
+    bool _canMove;
 
-    void Awake()
+    public override void OnNetworkSpawn()
     {
         _input = new PlayerInput();
 
@@ -40,35 +41,6 @@ public class PlayerController : MonoBehaviour
         _interaction = GetComponent<PlayerInteraction>();
         _visuals = GetComponentInChildren<PlayerVisuals>();
 
-        if (GetIsOffline())
-        {
-            if (LocalInstance != null && LocalInstance != this)
-            {
-                Debug.LogWarning("Warning. Multiple instances of Player Controller found");
-            }
-
-            LocalInstance = this;
-        }
-    }
-
-    void Start()
-    {
-        _canMove = true;
-        _canControl = true;
-
-        /*PlayerData playerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
-        _visuals.SetPlayerModel(playerData.PlayerModelId);*/
-
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.OnGameStateChange += GameManager_OnGameStateChange;
-            GameManager.Instance.OnLocalGamePause += GameManager_OnLocalGamePause;
-            GameManager.Instance.OnLocalGameUnpause += GameManager_OnLocalGameUnpause;
-        }
-    }
-
-    void OnEnable()
-    {
         _input.Player.Enable();
         _input.Player.Sprint.started += ToggleSprint;
         _input.Player.Sprint.canceled += ToggleSprint;
@@ -80,10 +52,20 @@ public class PlayerController : MonoBehaviour
         _input.Player.Pause.performed += Pause;
 
         _input.UI.Cancel.performed += Cancel;
+
+        if (IsOwner)
+        {
+            LocalInstance = this;
+            OnPlayerSpawn?.Invoke(this);
+        }
+
+        PlayerList.AddPlayer(gameObject);
     }
 
-    void OnDisable()
+    public override void OnNetworkDespawn()
     {
+        PlayerList.RemovePlayer(gameObject);
+
         _input.Player.Disable();
         _input.Player.Sprint.started -= ToggleSprint;
         _input.Player.Sprint.canceled -= ToggleSprint;
@@ -98,32 +80,19 @@ public class PlayerController : MonoBehaviour
         _input.UI.Cancel.performed -= Cancel;
     }
 
-    void OnDestroy()
+    void Start()
     {
-        _input.Player.Disable();
-        _input.Player.Sprint.started -= ToggleSprint;
-        _input.Player.Sprint.canceled -= ToggleSprint;
-        _input.Player.Use.performed -= Interact;
-        _input.Player.Fire.started -= Attack;
-        _input.Player.Fire.canceled -= Attack;
-        _input.Player.AltFire.started -= SecondaryAttack;
-        _input.Player.AltFire.canceled -= SecondaryAttack;
-        _input.Player.Pause.performed -= Pause;
+        _canMove = true;
 
-        _input.UI.Disable();
-        _input.UI.Cancel.performed -= Cancel;
-    }
+        /*PlayerData playerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
+        _visuals.SetPlayerModel(playerData.PlayerModelId);*/
 
-    public void InitSingleton(PlayerController instance)
-    {
-        OnSingletonSwitch?.Invoke(LocalInstance, instance);
-
-        LocalInstance = instance;
-    }
-
-    bool GetIsOffline()
-    {
-        return (NetworkManager.Singleton != null && !NetworkManager.Singleton.IsClient) || NetworkManager.Singleton == null;
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnGameStateChange += GameManager_OnGameStateChange;
+            GameManager.Instance.OnLocalGamePause += GameManager_OnLocalGamePause;
+            GameManager.Instance.OnLocalGameUnpause += GameManager_OnLocalGameUnpause;
+        }
     }
 
     void GameManager_OnGameStateChange()
@@ -171,14 +140,9 @@ public class PlayerController : MonoBehaviour
         _canMove = state;
     }
 
-    public void SetCanControl(bool state)
-    {
-        _canControl = state;
-    }
-
     void Update()
     {
-        if (!_canControl)
+        if (!IsOwner)
             return;
 
         Movement();
@@ -202,20 +166,16 @@ public class PlayerController : MonoBehaviour
 
     void Rotation()
     {
-        if (_canMove)
-        {
-            Vector2 input = _input.Player.Move.ReadValue<Vector2>();
-            _rotation.SetLookDirection(input);
-        }
-        else
-        {
-            _rotation.SetLookDirection(Vector2.zero);
-        }
+        if (!IsOwner)
+            return;
+
+        Vector2 input = _input.Player.Move.ReadValue<Vector2>();
+        _rotation.SetLookDirection(input);
     }
 
     void ToggleSprint(InputAction.CallbackContext context)
     {
-        if (!_canControl || !_canMove)
+        if (!IsOwner || !_canMove)
             return;
 
         if (context.started)
@@ -226,13 +186,13 @@ public class PlayerController : MonoBehaviour
 
     void Interact(InputAction.CallbackContext context)
     {
-        if (!_canControl)
+        if (!IsOwner)
             return;
 
         if (context.performed)
         {
             OnPlayerInteractInput?.Invoke();
-
+            
             if (_canMove)
                 _interaction.Interact();
         }
@@ -240,7 +200,7 @@ public class PlayerController : MonoBehaviour
 
     void Attack(InputAction.CallbackContext context)
     {
-        if (!_canControl || !_canMove)
+        if (!IsOwner || !_canMove)
             return;
 
         if (context.started)
@@ -251,7 +211,7 @@ public class PlayerController : MonoBehaviour
 
     void SecondaryAttack(InputAction.CallbackContext context)
     {
-        if (!_canControl || !_canMove)
+        if (!IsOwner || !_canMove)
             return;
 
         if (context.started)
@@ -262,7 +222,7 @@ public class PlayerController : MonoBehaviour
 
     void Pause(InputAction.CallbackContext context)
     {
-        if (!_canControl)
+        if (!IsOwner)
             return;
 
         if (context.performed)
@@ -277,7 +237,7 @@ public class PlayerController : MonoBehaviour
 
     void Cancel(InputAction.CallbackContext context)
     {
-        if (!_canControl)
+        if (!IsOwner)
             return;
 
         if (context.performed)

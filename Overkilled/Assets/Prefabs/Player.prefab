@@ -50,11 +50,8 @@ GameObject:
   - component: {fileID: 6712905131585986637}
   - component: {fileID: 4998910605803664010}
   - component: {fileID: 6210217734690124960}
-  - component: {fileID: 95583692868592989}
   - component: {fileID: 6457565049515844094}
-  - component: {fileID: 2673300216118709336}
   - component: {fileID: 7816694388690394052}
-  - component: {fileID: -520855282805472853}
   m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
@@ -141,7 +138,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3220570652
+  GlobalObjectIdHash: 3987055694
   InScenePlacedSourceGlobalObjectIdHash: 2852306063
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -269,18 +266,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54a35a6788038604a827f6bdf4026114, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &95583692868592989
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8211705792208053782}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 17e70f36bd57a2d48b1f6dc0e84ba097, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &6457565049515844094
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -294,18 +279,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dropThrowForce: 5
---- !u!114 &2673300216118709336
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8211705792208053782}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e5843fc8d371f0947a0be3ce5f2a3fdc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &7816694388690394052
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -322,18 +295,6 @@ MonoBehaviour:
   _itemShrinkfactor: 1
   _lockRotation: {x: 0, y: 0, z: 0}
   _isStatic: 0
---- !u!114 &-520855282805472853
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8211705792208053782}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eec360993cb01124f9366697a536f953, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &5747527485087314361
 PrefabInstance:
   m_ObjectHideFlags: 0

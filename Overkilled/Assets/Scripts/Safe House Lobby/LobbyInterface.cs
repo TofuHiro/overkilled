@@ -26,29 +26,21 @@ public class LobbyInterface : MonoBehaviour
 
     void Start()
     {
-        PlayerController.OnSingletonSwitch += PlayerController_OnSingletonSwitch;
+        PlayerController.OnPlayerSpawn += Player_OnPlayerSpawn;
 
         _currentPlayerInstance = PlayerController.LocalInstance;
     }
 
-    void OnDestroy()
+    void Player_OnPlayerSpawn(PlayerController player)
     {
-        PlayerController.OnSingletonSwitch -= PlayerController_OnSingletonSwitch;
-        _currentPlayerInstance.OnUICancelInput -= Close;
+        _currentPlayerInstance = player;
+        ToggleInterface(IsInterfaceOpen);
     }
 
-    void PlayerController_OnSingletonSwitch(PlayerController prevRef, PlayerController newRef)
+    void OnDestroy()
     {
-        prevRef.SetUIControls(false);
-        prevRef.OnUICancelInput -= Close;
-
-        _currentPlayerInstance = newRef;
-
-        if (IsInterfaceOpen)
-        {
-            newRef.SetUIControls(true);
-            newRef.OnUICancelInput += Close;
-        }
+        PlayerController.OnPlayerSpawn -= Player_OnPlayerSpawn;
+        _currentPlayerInstance.OnUICancelInput -= Close;
     }
 
     public void ToggleInterface(bool state)

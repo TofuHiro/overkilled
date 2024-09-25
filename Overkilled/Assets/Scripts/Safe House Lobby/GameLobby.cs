@@ -147,6 +147,8 @@ public class GameLobby : MonoBehaviour
 
         try
         {
+            LobbyManager.Instance.EndLocalHost();
+
             CreateLobbyOptions options = new CreateLobbyOptions
             {
                 IsPrivate = isPrivate,
@@ -170,7 +172,6 @@ public class GameLobby : MonoBehaviour
 
             MultiplayerManager.Instance.StartHost();
             OnCreateLobbySuccess?.Invoke();
-            //Loader.LoadSceneNetwork(Loader.Scene.CharacterSelectScene);
         }
         catch (LobbyServiceException e)
         {
@@ -185,6 +186,8 @@ public class GameLobby : MonoBehaviour
 
         try
         {
+            LobbyManager.Instance.EndLocalHost();
+
             _joinedLobby = await LobbyService.Instance.QuickJoinLobbyAsync();
 
             string relayJoinCode = _joinedLobby.Data[KEY_RELAY_JOIN_CODE].Value;
@@ -210,6 +213,8 @@ public class GameLobby : MonoBehaviour
 
         try
         {
+            LobbyManager.Instance.EndLocalHost();
+
             _joinedLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode);
 
             string relayJoinCode = _joinedLobby.Data[KEY_RELAY_JOIN_CODE].Value;
@@ -235,6 +240,8 @@ public class GameLobby : MonoBehaviour
 
         try
         {
+            LobbyManager.Instance.EndLocalHost();
+
             _joinedLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyId);
 
             string relayJoinCode = _joinedLobby.Data[KEY_RELAY_JOIN_CODE].Value;

@@ -9,6 +9,7 @@ public class Item : NetworkBehaviour, IInteractable
 
     Rigidbody _rigidbody;
     Collider[] _colliders;
+    NetworkObject _networkObject;
 
     void Awake()
     {
@@ -17,6 +18,7 @@ public class Item : NetworkBehaviour, IInteractable
 
         _rigidbody = GetComponent<Rigidbody>();
         _colliders = GetComponents<Collider>();
+        _networkObject = GetComponent<NetworkObject>();
     }
 
     public ItemSO GetItemInfo() { return _itemSO; }
@@ -40,6 +42,6 @@ public class Item : NetworkBehaviour, IInteractable
 
     public NetworkObject GetNetworkObject()
     {
-        return GetComponent<NetworkObject>();
+        return _networkObject;
     }
 }

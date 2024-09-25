@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 
 public class LobbyCameraController : MonoBehaviour
@@ -16,15 +17,20 @@ public class LobbyCameraController : MonoBehaviour
 
     void Start()
     {
-        PlayerController.OnSingletonSwitch += PlayerController_OnSingletonSwitch;
-       
+        PlayerController.OnPlayerSpawn += Player_OnPlayerSpawn;
+
         _startOffset = transform.position;
         _player = PlayerController.LocalInstance.transform;
     }
 
-    void PlayerController_OnSingletonSwitch(PlayerController prevRef, PlayerController newRef)
+    void OnDestroy()
     {
-        _player = newRef.transform;
+        PlayerController.OnPlayerSpawn -= Player_OnPlayerSpawn;
+    }
+
+    void Player_OnPlayerSpawn(PlayerController player)
+    {
+        _player = player.transform;
     }
 
     void Update()

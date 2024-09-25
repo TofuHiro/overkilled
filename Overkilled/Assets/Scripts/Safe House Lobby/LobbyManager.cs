@@ -6,11 +6,8 @@ using UnityEngine.SceneManagement;
 
 public class LobbyManager : NetworkBehaviour
 {
+    [Tooltip("The player prefab to spawn as a player")]
     [SerializeField] GameObject _playerPrefab;
-    [Tooltip("The local player reference the local player starts with")]
-    [SerializeField] PlayerController _localPlayerInstance;
-    [Tooltip("The position to spawn the local player when the scene starts")]
-    [SerializeField] Vector3 _localPlayerSpawnPosition;
 
     public static LobbyManager Instance { get; private set; }
 
@@ -32,50 +29,48 @@ public class LobbyManager : NetworkBehaviour
         Instance = this;
     }
 
+    void Start()
+    {
+        GameLobby.Instance.OnCreateLobbySuccess += MultiplayerSwitch;
+        GameLobby.Instance.OnJoinSuccess += MultiplayerSwitch;
+
+        //Local network - Unity Transport
+        NetworkManager.Singleton.StartHost();
+    }
+
     public override void OnNetworkSpawn()
     {
-        NetworkManager.Singleton.OnConnectionEvent += NetworkManager_OnConnectionEvent;
-
         if (IsServer)
         {
-            NetworkManager.Singleton.OnConnectionEvent += NetworkManager_Server_OnConnectionEvent;
+            NetworkManager.Singleton.OnConnectionEvent += SpawnClient;
         }
     }
 
     public override void OnNetworkDespawn()
     {
-        NetworkManager.Singleton.OnConnectionEvent -= NetworkManager_OnConnectionEvent;
-
         if (IsServer)
         {
-            NetworkManager.Singleton.OnConnectionEvent -= NetworkManager_Server_OnConnectionEvent;
+            NetworkManager.Singleton.OnConnectionEvent -= SpawnClient;
         }
     }
 
-    void NetworkManager_OnConnectionEvent(NetworkManager manager, ConnectionEventData data)
+    void MultiplayerSwitch()
     {
-        if (data.ClientId == NetworkManager.LocalClientId)
-        {
-            if (data.EventType == ConnectionEvent.ClientConnected)
-            {
-                _localPlayerInstance.gameObject.SetActive(false);
-                OnSwitchToMultiplayer?.Invoke(NetworkManager.IsServer);
-            }
-        }
+        OnSwitchToMultiplayer?.Invoke(NetworkManager.IsServer);
     }
 
-    void NetworkManager_Server_OnConnectionEvent(NetworkManager manager, ConnectionEventData data)
+    void SpawnClient(NetworkManager manager, ConnectionEventData data)
     {
         if (data.EventType == ConnectionEvent.ClientConnected)
         {
-            SpawnPlayer(data.ClientId);
+            GameObject playerObject = Instantiate(_playerPrefab);
+            playerObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(data.ClientId, true);
         }
     }
 
-    void SpawnPlayer(ulong clientId)
+    public void EndLocalHost()
     {
-        GameObject playerObject = Instantiate(_playerPrefab);
-        playerObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
+        NetworkManager.Singleton.Shutdown();
     }
 
     public void StartGame()
@@ -92,6 +87,7 @@ public class LobbyManager : NetworkBehaviour
         }
 
         GameLobby.Instance.DeleteLobby();
+
         Loader.LoadLevel(_selectedLevel);
     }
 
@@ -99,6 +95,7 @@ public class LobbyManager : NetworkBehaviour
     {
         Destroy(NetworkManager.Singleton.gameObject);
         Destroy(MultiplayerManager.Instance.gameObject);
+
         SceneManager.LoadScene(Loader.Scene.SafeHouseScene.ToString());
     }
 

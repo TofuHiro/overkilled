@@ -91,14 +91,10 @@ namespace SurvivalGame
             OnGameStateChange += CalculateGrade;
         }
 
-        void Start()
-        {
-            PlayerController.LocalInstance.OnPlayerInteractInput += SetLocalPlayerReady;
-            PlayerController.LocalInstance.OnPlayerPauseInput += TogglePauseGame;
-        }
-
         public override void OnNetworkSpawn()
         {
+            PlayerController.OnPlayerSpawn += PlayerController_OnPlayerSpawn;
+
             _currentGameState.OnValueChanged += OnStateChange;
             _isGamePaused.OnValueChanged += OnGamePausedChange;
 
@@ -110,8 +106,15 @@ namespace SurvivalGame
             }
         }
 
+        void PlayerController_OnPlayerSpawn(PlayerController player)
+        {
+            player.OnPlayerInteractInput += SetLocalPlayerReady;
+            player.OnPlayerPauseInput += TogglePauseGame;
+        }
+
         public override void OnNetworkDespawn()
         {
+            Time.timeScale = 1f;
             _currentGameState.OnValueChanged -= OnStateChange;
             _isGamePaused.OnValueChanged -= OnGamePausedChange;
 

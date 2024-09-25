@@ -56,7 +56,9 @@ public class LevelButtonUI : MonoBehaviour
 
     void SetSelectedOverlay()
     {
-        s_currentSelectedOverlay?.SetActive(false);
+        if (s_currentSelectedOverlay != null)
+            s_currentSelectedOverlay.SetActive(false);
+
         s_currentSelectedOverlay = _selectedOverlay;
         s_currentSelectedOverlay.SetActive(true);
     }
