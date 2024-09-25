@@ -1,4 +1,3 @@
-using SurvivalGame;
 using System;
 using Unity.Netcode;
 using Unity.Services.Authentication;
@@ -34,9 +33,9 @@ public class MultiplayerManager : NetworkBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        _playerName = PlayerPrefs.GetString(PLAYER_PREFS_PLAYER_NAME_MULTIPLAYER, "PlayerName" + UnityEngine.Random.Range(0, 1000).ToString());
         _playerDataNetworkList = new NetworkList<PlayerData>();
         _playerDataNetworkList.OnListChanged += PlayerDataNetworkList_OnListChanged;
+        _playerName = PlayerPrefs.GetString(PLAYER_PREFS_PLAYER_NAME_MULTIPLAYER, "PlayerName" + UnityEngine.Random.Range(0, 1000).ToString());
     }
 
     /// <summary>
@@ -73,7 +72,7 @@ public class MultiplayerManager : NetworkBehaviour
 
     void SetConnectionApproval(NetworkManager.ConnectionApprovalRequest request, NetworkManager.ConnectionApprovalResponse response)
     {
-        if (SceneManager.GetActiveScene().name != Loader.Scene.CharacterSelectScene.ToString())
+        if (SceneManager.GetActiveScene().name != Loader.Scene.SafeHouseScene.ToString())
         {
             response.Approved = false;
             response.Reason = "Game has already started";
@@ -96,6 +95,7 @@ public class MultiplayerManager : NetworkBehaviour
         {
             AddPlayerToNetworkList(data.ClientId);
 
+            //Init host data
             if (data.ClientId == NetworkManager.ServerClientId)
             {
                 SetPlayerIdServerRpc(AuthenticationService.Instance.PlayerId);
@@ -165,7 +165,9 @@ public class MultiplayerManager : NetworkBehaviour
         return index < _playerDataNetworkList.Count;
     }
 
+
     #region Player Data
+
 
     int GetPlayerDataIndexFromClientId(ulong clientId)
     {
@@ -236,9 +238,12 @@ public class MultiplayerManager : NetworkBehaviour
         _playerDataNetworkList[playerDataIndex] = playerData;
     }
 
+
     #endregion
 
+
     #region Item Spawning
+
 
     int GetIndexFromObject(GameObject obj)
     {
@@ -343,7 +348,7 @@ public class MultiplayerManager : NetworkBehaviour
         Destroy(networkObject.gameObject, delay);
     }
 
+
     #endregion
 
-    
 }

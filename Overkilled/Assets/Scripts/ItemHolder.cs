@@ -1,3 +1,4 @@
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -12,16 +13,12 @@ public class ItemHolder : NetworkBehaviour
     [Tooltip("If is static, when parenting, object will just be placed at hold position once, while if not static, the object will constantly be set to the position")]
     [SerializeField] bool _isStatic = true;
 
-    Transform _itemTransform = null;
-
     /// <summary>
     /// Whether this holder is currently holding an object
     /// </summary>
     public bool IsOccupied { get; private set; } = false;
 
     Item _currentItem;
-    Rigidbody _currentRigidbody;
-    Collider[] _currentColliders;
 
     /// <summary>
     /// Get the current item thats being held
@@ -42,10 +39,11 @@ public class ItemHolder : NetworkBehaviour
 
         if (IsOccupied)
         {
-            _itemTransform.position = _holdPosition.position;
-            _itemTransform.rotation = _holdPosition.rotation;
+            _currentItem.transform.position = _holdPosition.position;
+            _currentItem.transform.rotation = _holdPosition.rotation;
         }
     }
+
 
     /// <summary>
     /// Assigns a new item to this holder, locking it into place
@@ -66,14 +64,11 @@ public class ItemHolder : NetworkBehaviour
     void SetItemClientRpc(NetworkObjectReference itemNetworkObjectReference)
     {
         itemNetworkObjectReference.TryGet(out NetworkObject itemNetworkObject);
-        
+
         if (itemNetworkObject != null)
         {
             Item item = itemNetworkObject.GetComponent<Item>();
             _currentItem = item;
-            _currentRigidbody = item.GetComponent<Rigidbody>();
-            _currentColliders = item.GetComponents<Collider>();
-            _itemTransform = item.transform;
             IsOccupied = true;
             SetLockItem(true);
         }
@@ -81,19 +76,14 @@ public class ItemHolder : NetworkBehaviour
         {
             SetLockItem(false);
             _currentItem = null;
-            _currentRigidbody = null;
-            _currentColliders = null;
-            _itemTransform = null;
             IsOccupied = false;
         }
     }
 
-    void SetLockItem(bool state)
+    public void SetLockItem(bool state)
     {
-        _currentRigidbody.isKinematic = state;
+        _currentItem.ToggleItemLock(state);
 
-        foreach (Collider collider in _currentColliders)
-            collider.enabled = !state;
         if (state == true)
         {
             _currentItem.transform.position = _holdPosition.transform.position;

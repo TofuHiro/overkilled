@@ -12,7 +12,7 @@ public class PlayerMotor : MonoBehaviour
     Vector2 _currentDir;
     bool _isSprinting;
 
-    void Start()
+    void Awake()
     {
         _rb = GetComponent<Rigidbody>();
     }

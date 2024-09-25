@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5da4b4ea739382418bf69ae07bc64ce, type: 3}
+  m_Name: Test Level 1
+  m_EditorClassIdentifier: 
+  name: Test Level 1
+  useCameraFocusMode: 1
+  timeLimit: 30
+  orders:
+  - {fileID: 11400000, guid: a0d4307cd9c0b6a4b97c1b528b2c9d14, type: 2}
+  orderCreationRate: 4
+  fiveStarsMinimum: 100
+  fourStarsMinimum: 80
+  threeStarsMinimum: 60
+  twoStarsMinimum: 40
+  oneStarMinimum: 20

@@ -16,7 +16,6 @@ namespace SurvivalGame
             GameEnded,
         }
 
-        [SerializeField] LevelPreset _levelPreset;
         [Tooltip("The player prefab to spawn as a player")]
         [SerializeField] GameObject _playerPrefab;
         [Tooltip("The count down timer when the game is starting")]
@@ -74,6 +73,8 @@ namespace SurvivalGame
         bool _isLocalPlayerReady = false, _isLocalPlayerPaused = false;
         bool _autoTestGamePausedState, _autoTestGameReadyStart;
 
+        LevelPreset _currentLevelPreset;
+
         void Awake()
         {
             if (Instance != null && Instance != this)
@@ -90,15 +91,10 @@ namespace SurvivalGame
             OnGameStateChange += CalculateGrade;
         }
 
-        void Start()
-        {
-            PlayerController.LocalInstance.OnPlayerInteractInput += SetLocalPlayerReady;
-            PlayerController.LocalInstance.OnPlayerPauseInput += TogglePauseGame;
-        }
-
         public override void OnNetworkSpawn()
         {
-            InitializeLevel();
+            PlayerController.OnPlayerSpawn += PlayerController_OnPlayerSpawn;
+
             _currentGameState.OnValueChanged += OnStateChange;
             _isGamePaused.OnValueChanged += OnGamePausedChange;
 
@@ -110,8 +106,15 @@ namespace SurvivalGame
             }
         }
 
+        void PlayerController_OnPlayerSpawn(PlayerController player)
+        {
+            player.OnPlayerInteractInput += SetLocalPlayerReady;
+            player.OnPlayerPauseInput += TogglePauseGame;
+        }
+
         public override void OnNetworkDespawn()
         {
+            Time.timeScale = 1f;
             _currentGameState.OnValueChanged -= OnStateChange;
             _isGamePaused.OnValueChanged -= OnGamePausedChange;
 
@@ -123,13 +126,15 @@ namespace SurvivalGame
             }
         }
 
-        void InitializeLevel()
+        public void InitializeLevel(LevelPreset preset)
         {
+            _currentLevelPreset = preset;
+
             Bank.ResetBalance();
             _currentGameState.Value = GameState.WaitingForPlayers;
             _countdownTimer.Value = _gameStartCountdownTime;
-            _gameTimer.Value = _levelPreset.timeLimit;
-            OnGameInitialize?.Invoke(_levelPreset);
+            _gameTimer.Value = preset.timeLimit;
+            OnGameInitialize?.Invoke(preset);
         }
 
         void TestPauseOnPlayerDisconnect(NetworkManager manager, ConnectionEventData data)
@@ -310,15 +315,15 @@ namespace SurvivalGame
         {
             if (!GameEnded) return;
 
-            if (Bank.Balance >= _levelPreset.fiveStarsMinimum)
+            if (Bank.Balance >= _currentLevelPreset.fiveStarsMinimum)
                 LevelGrade = Grade.FiveStars;
-            else if (Bank.Balance >= _levelPreset.fourStarsMinimum)
+            else if (Bank.Balance >= _currentLevelPreset.fourStarsMinimum)
                 LevelGrade = Grade.FourStars;
-            else if (Bank.Balance >= _levelPreset.threeStarsMinimum)
+            else if (Bank.Balance >= _currentLevelPreset.threeStarsMinimum)
                 LevelGrade = Grade.ThreeStars;
-            else if (Bank.Balance >= _levelPreset.twoStarsMinimum)
+            else if (Bank.Balance >= _currentLevelPreset.twoStarsMinimum)
                 LevelGrade = Grade.TwoStars;
-            else if (Bank.Balance >= _levelPreset.oneStarMinimum)
+            else if (Bank.Balance >= _currentLevelPreset.oneStarMinimum)
                 LevelGrade = Grade.OneStar;
             else
                 LevelGrade = Grade.NoStars;

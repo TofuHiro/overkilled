@@ -18,7 +18,7 @@ public class PlayerInteraction : MonoBehaviour
 
     public PlayerHand GetHand() { return _hand; }
 
-    void Start()
+    void Awake()
     {
         _hand = GetComponent<PlayerHand>();
     }
