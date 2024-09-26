@@ -6,18 +6,15 @@ public class BankUI : MonoBehaviour
     [Tooltip("TMP Text component displaying the balance")]
     [SerializeField] TMP_Text _balanceText;
 
-    void Awake()
+    void Start()
     {
-        Bank.OnBalanceChange += UpdateUI;
+        Bank.Instance.OnBalanceChange += UpdateUI;
+
+        _balanceText.text = "0";
     }
 
-    void OnDestroy()
+    void UpdateUI(int balance)
     {
-        Bank.OnBalanceChange -= UpdateUI;
-    }
-
-    void UpdateUI()
-    {
-        _balanceText.text = Bank.Balance.ToString();
+        _balanceText.text = balance.ToString();
     }
 }

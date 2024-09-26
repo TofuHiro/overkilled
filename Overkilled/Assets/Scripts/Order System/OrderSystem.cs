@@ -208,15 +208,17 @@ public class OrderSystem : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     void CompleteOrderServerRpc(int orderIndex, float durabilityFactor)
     {
-        CompleteOrderClientRpc(orderIndex, durabilityFactor);
+        OrderSO order = _activeOrders[orderIndex].Order;
+        Bank.Instance.AddMoney((int)Mathf.Max(order.minReward, order.reward * durabilityFactor));
+
+        CompleteOrderClientRpc(orderIndex);
     }
 
     [ClientRpc]
-    void CompleteOrderClientRpc(int orderIndex, float durabilityFactor)
+    void CompleteOrderClientRpc(int orderIndex)
     {
         OrderSO order = _activeOrders[orderIndex].Order;
 
-        Bank.AddMoney((int)Mathf.Max(order.minReward, order.reward * durabilityFactor));
         RemoveOrder(order);
         OnOrderComplete?.Invoke();
 

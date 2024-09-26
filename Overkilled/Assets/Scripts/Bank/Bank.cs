@@ -1,50 +1,91 @@
 using System;
+using Unity.Netcode;
+using UnityEngine;
 
-public static class Bank
+public class Bank : NetworkBehaviour
 {
-    public static event Action OnBalanceChange;
+    public static Bank Instance { get; private set; }
+    public int CurrentBalance { get; private set; }
     
-    public static int Balance { get; private set; }
+    public event Action<int> OnBalanceChange;
 
-    public static void ResetStaticData()
+    void Awake()
     {
-        OnBalanceChange = null;
-        ResetBalance();
-    }
+        if (Instance != null && Instance != this)
+        {
+            Debug.LogWarning("Warning. Multiple instances of Bank found. Destroying " + name);
+            Destroy(Instance);
+        }
 
-    public static void ResetBalance()
-    {
-        Balance = 0;
-        OnBalanceChange?.Invoke();
+        Instance = this;
     }
 
     /// <summary>
-    /// Set the shared balance to a number
+    /// Resets the current balance to 0
+    /// </summary>
+    public void ResetBalance()
+    {
+        ResetBalanceServerRpc();
+    }
+
+    [ServerRpc]
+    void ResetBalanceServerRpc()
+    {
+        CurrentBalance = 0;
+        OnBalanceChangeClientRpc(CurrentBalance);
+    }
+
+    /// <summary>
+    /// Set the current balance to a value
     /// </summary>
     /// <param name="number"></param>
-    public static void SetMoney(int number)
+    public void SetMoney(int number)
     {
-        Balance = number;
-        OnBalanceChange?.Invoke();
+        SetMoneyServerRpc(number);
+    }
+
+    [ServerRpc]
+    void SetMoneyServerRpc(int number)
+    {
+        CurrentBalance = number;
+        OnBalanceChangeClientRpc(CurrentBalance);
     }
 
     /// <summary>
     /// Add an amount to the current balance
     /// </summary>
     /// <param name="amount"></param>
-    public static void AddMoney(int amount) 
-    { 
-        Balance += amount;
-        OnBalanceChange?.Invoke();
+    public void AddMoney(int amount) 
+    {
+        AddMoneyServerRpc(amount);
+    }
+
+    [ServerRpc]
+    void AddMoneyServerRpc(int amount)
+    {
+        CurrentBalance += amount;
+        OnBalanceChangeClientRpc(CurrentBalance);
     }
 
     /// <summary>
     /// Remove an amount to the current balance
     /// </summary>
     /// <param name="amount"></param>
-    public static void RemoveMoney(int amount) 
-    { 
-        Balance -= amount;
-        OnBalanceChange?.Invoke();
+    public void RemoveMoney(int amount) 
+    {
+        RemoveMoneyServerRpc(amount);
+    }
+
+    [ServerRpc]
+    void RemoveMoneyServerRpc(int amount)
+    {
+        CurrentBalance += amount;
+        OnBalanceChangeClientRpc(CurrentBalance);
+    }
+
+    [ClientRpc]
+    void OnBalanceChangeClientRpc(int currentBalance)
+    {
+        OnBalanceChange?.Invoke(currentBalance);
     }
 }
