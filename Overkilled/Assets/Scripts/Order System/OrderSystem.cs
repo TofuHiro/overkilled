@@ -57,7 +57,10 @@ public class OrderSystem : NetworkBehaviour
         }
 
         Instance = this;
+    }
 
+    void Start()
+    {
         GameManager.Instance.OnGameInitialize += Initialize;
         GameManager.Instance.OnGameStateChange += StartCreatingOrders;
         GameManager.Instance.OnGameStateChange += StopCreatingOrders;

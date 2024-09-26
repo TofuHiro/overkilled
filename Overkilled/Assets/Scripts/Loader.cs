@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using static Loader;
 
 public static class Loader
 {
@@ -12,7 +11,7 @@ public static class Loader
         MainMenuScene,
         SafeHouseScene,
         LoadingScene,
-        GameScene,
+        BaseLevelScene,
     }
 
     public enum Level
@@ -40,6 +39,15 @@ public static class Loader
 
     public static void LoadLevel(Level level)
     {
+        NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += SceneManager_OnLoadEventCompleted;
+
         NetworkManager.Singleton.SceneManager.LoadScene(level.ToString(), LoadSceneMode.Single);
+    }
+
+    static void SceneManager_OnLoadEventCompleted(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
+    {
+        NetworkManager.Singleton.SceneManager.LoadScene(Scene.BaseLevelScene.ToString(), LoadSceneMode.Additive);
+
+        NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= SceneManager_OnLoadEventCompleted;
     }
 }

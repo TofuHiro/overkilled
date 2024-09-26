@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
+using UnityEditor.Presets;
 using UnityEngine;
 
 namespace SurvivalGame
@@ -72,7 +73,7 @@ namespace SurvivalGame
 
         bool _isLocalPlayerReady = false, _isLocalPlayerPaused = false;
         bool _autoTestGamePausedState, _autoTestGameReadyStart;
-
+        
         LevelPreset _currentLevelPreset;
 
         void Awake()
@@ -106,12 +107,6 @@ namespace SurvivalGame
             }
         }
 
-        void PlayerController_OnPlayerSpawn(PlayerController player)
-        {
-            player.OnPlayerInteractInput += SetLocalPlayerReady;
-            player.OnPlayerPauseInput += TogglePauseGame;
-        }
-
         public override void OnNetworkDespawn()
         {
             Time.timeScale = 1f;
@@ -126,15 +121,25 @@ namespace SurvivalGame
             }
         }
 
-        public void InitializeLevel(LevelPreset preset)
+        void Start()
         {
-            _currentLevelPreset = preset;
+            Init();    
+        }
 
-            Bank.Instance.ResetBalance();
+        void Init()
+        {
+            _currentLevelPreset = LevelSetter.Instance.GetPreset();
+
             _currentGameState.Value = GameState.WaitingForPlayers;
             _countdownTimer.Value = _gameStartCountdownTime;
-            _gameTimer.Value = preset.timeLimit;
-            OnGameInitialize?.Invoke(preset);
+            _gameTimer.Value = _currentLevelPreset.timeLimit;
+            OnGameInitialize?.Invoke(_currentLevelPreset);
+        }
+
+        void PlayerController_OnPlayerSpawn(PlayerController player)
+        {
+            player.OnPlayerInteractInput += SetLocalPlayerReady;
+            player.OnPlayerPauseInput += TogglePauseGame;
         }
 
         void TestPauseOnPlayerDisconnect(NetworkManager manager, ConnectionEventData data)
@@ -159,6 +164,8 @@ namespace SurvivalGame
                 GameObject playerObject = Instantiate(_playerPrefab);
                 playerObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
             }
+
+            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= SpawnPlayers;
         }
 
         void OnStateChange(GameState previousValue, GameState newValue)

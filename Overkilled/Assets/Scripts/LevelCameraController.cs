@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-public class LevelCameraController : MonoBehaviour
+public class LevelCameraController : NetworkBehaviour
 {
     [Tooltip("The camera to offset")]
     [SerializeField] Camera _camera;
@@ -29,7 +29,7 @@ public class LevelCameraController : MonoBehaviour
     Vector3 _velocity = Vector3.zero;
     float _furthestPlayerDist = 0f;
 
-    void Start()
+    public override void OnNetworkSpawn()
     {
         GameManager.Instance.OnGameInitialize += Initialize;
         PlayerList.OnPlayerListUpdate += SetPlayers;
@@ -38,7 +38,7 @@ public class LevelCameraController : MonoBehaviour
         SetPlayers();
     }
 
-    void OnDestroy()
+    public override void OnNetworkDespawn()
     {
         PlayerList.OnPlayerListUpdate -= SetPlayers;
     }
