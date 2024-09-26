@@ -13,19 +13,38 @@ public class ActiveLobbyUI : MonoBehaviour
     [Tooltip("Text to display the number of players in the lobby")]
     [SerializeField] TMP_Text _lobbyPlayerCountText;
 
+    Button _button;
     Lobby _lobby;
 
     void Awake()
     {
-        GetComponent<Button>().onClick.AddListener(() =>
+        _button = GetComponent<Button>();
+        
+        _button.onClick.AddListener(() =>
         {
+            _button.enabled = false;
+
             GameLobby.Instance.JoinLobbyWithId(_lobby.Id);
         }); 
     }
 
     void Start()
     {
+        GameLobby.Instance.OnCreateLobbySuccess += GameLobby_OnLobbySuccess;
+        GameLobby.Instance.OnJoinSuccess += GameLobby_OnLobbySuccess;
+
         Hide();
+    }
+
+    void OnDestroy()
+    {
+        GameLobby.Instance.OnCreateLobbySuccess -= GameLobby_OnLobbySuccess;
+        GameLobby.Instance.OnJoinSuccess -= GameLobby_OnLobbySuccess;
+    }
+
+    void GameLobby_OnLobbySuccess()
+    {
+        _button.enabled = true;
     }
 
     /// <summary>

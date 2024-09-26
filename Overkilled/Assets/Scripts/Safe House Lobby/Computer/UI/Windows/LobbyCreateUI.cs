@@ -20,26 +20,34 @@ public class LobbyCreateUI : ComputerWindowUI
 
         _createLobbyButton.onClick.AddListener(() =>
         {
+            _createLobbyButton.enabled = false;
+
             string lobbyName = _lobbyNameInputField.text;
             if (string.IsNullOrWhiteSpace(lobbyName))
                 lobbyName = "Lobby Name " + Random.Range(0, 1000);
-
             GameLobby.Instance.CreateLobby(lobbyName, _privateLobbyToggle.isOn);
         });
     }
 
     void Start()
     {
-        GameLobby.Instance.OnCreateLobbySuccess += Hide;
-        GameLobby.Instance.OnJoinSuccess += Hide;
+        GameLobby.Instance.OnCreateLobbySuccess += GameLobby_OnLobbySuccess; ;
+        GameLobby.Instance.OnJoinSuccess += GameLobby_OnLobbySuccess;
 
         Hide();
     }
 
+    void GameLobby_OnLobbySuccess()
+    {
+        Hide();
+
+        _createLobbyButton.enabled = true;
+    }
+
     void OnDestroy()
     {
-        GameLobby.Instance.OnCreateLobbySuccess -= Hide;
-        GameLobby.Instance.OnJoinSuccess -= Hide;
+        GameLobby.Instance.OnCreateLobbySuccess -= GameLobby_OnLobbySuccess;
+        GameLobby.Instance.OnJoinSuccess -= GameLobby_OnLobbySuccess;
     }
 
     public override void Hide()
