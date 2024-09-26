@@ -1,3 +1,4 @@
+using SurvivalGame;
 using System;
 using Unity.Netcode;
 using UnityEngine;
@@ -18,6 +19,16 @@ public class Bank : NetworkBehaviour
         }
 
         Instance = this;
+    }
+
+    void Start()
+    {
+        GameManager.Instance.OnGameInitialize += Instance_OnGameInitialize;    
+    }
+
+    void Instance_OnGameInitialize(LevelPreset preset)
+    {
+        ResetBalance();
     }
 
     /// <summary>
