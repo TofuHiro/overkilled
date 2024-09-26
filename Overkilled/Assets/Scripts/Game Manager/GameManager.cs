@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
-using UnityEditor.Presets;
 using UnityEngine;
 
 namespace SurvivalGame
@@ -130,6 +129,7 @@ namespace SurvivalGame
         {
             _currentLevelPreset = LevelSetter.Instance.GetPreset();
 
+            LevelCameraController.Instance.SetFocusMode(_currentLevelPreset.useCameraFocusMode);
             _currentGameState.Value = GameState.WaitingForPlayers;
             _countdownTimer.Value = _gameStartCountdownTime;
             _gameTimer.Value = _currentLevelPreset.timeLimit;

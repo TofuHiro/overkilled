@@ -2,10 +2,13 @@ using SurvivalGame;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
+using UnityEditor.Presets;
 using UnityEngine;
 
-public class LevelCameraController : NetworkBehaviour
+public class LevelCameraController : MonoBehaviour
 {
+    public static LevelCameraController Instance { get; private set; }
+
     [Tooltip("The camera to offset")]
     [SerializeField] Camera _camera;
     [Tooltip("The smooth time for camera movement")]
@@ -29,16 +32,26 @@ public class LevelCameraController : NetworkBehaviour
     Vector3 _velocity = Vector3.zero;
     float _furthestPlayerDist = 0f;
 
-    public override void OnNetworkSpawn()
+    void Awake()
     {
-        GameManager.Instance.OnGameInitialize += Initialize;
+        if (Instance != null && Instance != this)
+        {
+            Debug.LogWarning("Warning. Multiple instances of LevelCameraController found. Destroying " + name);
+            Destroy(Instance);
+        }
+
+        Instance = this;
+    }
+
+    void Start()
+    {
         PlayerList.OnPlayerListUpdate += SetPlayers;
 
         _startOffset = transform.position;
         SetPlayers();
     }
 
-    public override void OnNetworkDespawn()
+    void OnDestroy()
     {
         PlayerList.OnPlayerListUpdate -= SetPlayers;
     }
@@ -48,9 +61,9 @@ public class LevelCameraController : NetworkBehaviour
         _players = PlayerList.GetPlayers();
     }
 
-    void Initialize(LevelPreset preset)
+    public void SetFocusMode(bool state)
     {
-        SetFocusModeServerRpc(preset.useCameraFocusMode);
+        SetFocusModeServerRpc(state);
     }
 
     [ServerRpc(RequireOwnership = false)]
