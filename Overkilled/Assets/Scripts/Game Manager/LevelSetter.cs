@@ -1,14 +1,28 @@
 using SurvivalGame;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 public class LevelSetter : MonoBehaviour
 {
     [SerializeField] LevelPreset _preset;
 
-    void Start()
+    public static LevelSetter Instance { get; private set; }
+
+    void Awake()
     {
-        GameManager.Instance.InitializeLevel(_preset);
+        if (Instance != null && Instance != this)
+        {
+            Debug.LogWarning("Warning. Multiple instances of LevelPreset found. Destroying " + name);
+            Destroy(Instance);
+        }
+
+        Instance = this;
+    }
+
+    public LevelPreset GetPreset()
+    {
+        return _preset;
     }
 }
