@@ -32,6 +32,8 @@ public class LobbyJoinUI : ComputerWindowUI
 
         _joinCodeButton.onClick.AddListener(() =>
         {
+            _joinCodeButton.enabled = false;
+
             GameLobby.Instance.JoinLobbyWithCode(_joinCodeInputField.text);
         });
 
@@ -41,8 +43,8 @@ public class LobbyJoinUI : ComputerWindowUI
     void Start()
     {
         GameLobby.Instance.OnLobbyListChanged += UpdateLobbyList;
-        GameLobby.Instance.OnCreateLobbySuccess += Hide;
-        GameLobby.Instance.OnJoinSuccess += Hide;
+        GameLobby.Instance.OnCreateLobbySuccess += GameLobby_OnLobbySuccess;
+        GameLobby.Instance.OnJoinSuccess += GameLobby_OnLobbySuccess;
 
         UpdateLobbyList(new List<Lobby>());
         Hide();
@@ -51,8 +53,15 @@ public class LobbyJoinUI : ComputerWindowUI
     void OnDestroy()
     {
         GameLobby.Instance.OnLobbyListChanged -= UpdateLobbyList;
-        GameLobby.Instance.OnCreateLobbySuccess -= Hide;
-        GameLobby.Instance.OnJoinSuccess -= Hide;
+        GameLobby.Instance.OnCreateLobbySuccess -= GameLobby_OnLobbySuccess;
+        GameLobby.Instance.OnJoinSuccess -= GameLobby_OnLobbySuccess;
+    }
+
+    void GameLobby_OnLobbySuccess()
+    {
+        Hide();
+
+        _joinCodeButton.enabled = true;
     }
 
     void UpdateLobbyList(List<Lobby> lobbyList)
