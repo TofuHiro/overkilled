@@ -130,7 +130,7 @@ namespace SurvivalGame
         {
             _currentLevelPreset = preset;
 
-            Bank.ResetBalance();
+            Bank.Instance.ResetBalance();
             _currentGameState.Value = GameState.WaitingForPlayers;
             _countdownTimer.Value = _gameStartCountdownTime;
             _gameTimer.Value = preset.timeLimit;
@@ -315,15 +315,15 @@ namespace SurvivalGame
         {
             if (!GameEnded) return;
 
-            if (Bank.Balance >= _currentLevelPreset.fiveStarsMinimum)
+            if (Bank.Instance.CurrentBalance >= _currentLevelPreset.fiveStarsMinimum)
                 LevelGrade = Grade.FiveStars;
-            else if (Bank.Balance >= _currentLevelPreset.fourStarsMinimum)
+            else if (Bank.Instance.CurrentBalance >= _currentLevelPreset.fourStarsMinimum)
                 LevelGrade = Grade.FourStars;
-            else if (Bank.Balance >= _currentLevelPreset.threeStarsMinimum)
+            else if (Bank.Instance.CurrentBalance >= _currentLevelPreset.threeStarsMinimum)
                 LevelGrade = Grade.ThreeStars;
-            else if (Bank.Balance >= _currentLevelPreset.twoStarsMinimum)
+            else if (Bank.Instance.CurrentBalance >= _currentLevelPreset.twoStarsMinimum)
                 LevelGrade = Grade.TwoStars;
-            else if (Bank.Balance >= _currentLevelPreset.oneStarMinimum)
+            else if (Bank.Instance.CurrentBalance >= _currentLevelPreset.oneStarMinimum)
                 LevelGrade = Grade.OneStar;
             else
                 LevelGrade = Grade.NoStars;
