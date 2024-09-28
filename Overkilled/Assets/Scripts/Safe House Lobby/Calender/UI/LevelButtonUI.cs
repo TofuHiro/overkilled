@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LevelButtonUI : MonoBehaviour
+public class LevelButtonUI : MonoBehaviour, IStartInvoke
 {
     [SerializeField] Loader.Level _level;
     [SerializeField] GameObject _lockedOverlay;
@@ -31,6 +31,11 @@ public class LevelButtonUI : MonoBehaviour
 
     void Start()
     {
+        //InvokeStart
+    }
+
+    public void InvokeStart()
+    {
         LobbyManager.Instance.OnSwitchToMultiplayer += LobbyManager_OnSwitchToMultiplayer;
         LobbyManager.Instance.OnLevelChange += LobbyManager_Client_OnLevelChange;
 
@@ -48,7 +53,7 @@ public class LevelButtonUI : MonoBehaviour
     /// <param name="level"></param>
     void LobbyManager_Client_OnLevelChange(Loader.Level level)
     {
-        if (level.ToString() == _level.ToString())
+        if (level == _level)
         {
             SetSelectedOverlay();
         }
@@ -62,8 +67,6 @@ public class LevelButtonUI : MonoBehaviour
         s_currentSelectedOverlay = _selectedOverlay;
         s_currentSelectedOverlay.SetActive(true);
     }
-
-    public Loader.Level GetLevel() { return _level; }
 
     public void ToggleLock(bool state)
     {

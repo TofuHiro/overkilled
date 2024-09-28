@@ -99,11 +99,18 @@ public class LobbyManager : NetworkBehaviour
         SceneManager.LoadScene(Loader.Scene.SafeHouseScene.ToString());
     }
 
+    public Loader.Level GetSelectedLevel()
+    {
+        return _selectedLevel;
+    }
+
     public void SetLevel(Loader.Level level)
     {
         _selectedLevel = level;
         OnLevelChange?.Invoke(_selectedLevel);
-        SetLevelRpc(_selectedLevel);
+
+        if (IsServer)
+            SetLevelRpc(_selectedLevel);
     }
 
     [Rpc(SendTo.NotMe)]

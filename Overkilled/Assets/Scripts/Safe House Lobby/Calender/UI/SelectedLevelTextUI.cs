@@ -16,7 +16,7 @@ public class SelectedLevelTextUI : MonoBehaviour
     {
         LobbyManager.Instance.OnLevelChange += LobbyManager_OnLevelChange;
 
-        _text.text = "Next Shift: Not Selected";
+        SetLevelText("Not Selected");
     }
 
     void LobbyManager_OnLevelChange(Loader.Level level)
@@ -24,6 +24,11 @@ public class SelectedLevelTextUI : MonoBehaviour
         string levelText = level.ToString();
         levelText = levelText.Replace("_", " ");
 
-        _text.text = "Next Shift: " + levelText;
+        SetLevelText(levelText);
+    }
+
+    public void SetLevelText(string text)
+    {
+        _text.text = "Next Shift: " + text;
     }
 }
