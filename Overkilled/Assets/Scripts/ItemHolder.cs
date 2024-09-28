@@ -18,13 +18,21 @@ public class ItemHolder : NetworkBehaviour
     /// </summary>
     public bool IsOccupied { get; private set; } = false;
 
+    NetworkObject _networkObject;
     Item _currentItem;
+
+    void Awake()
+    {
+        _networkObject = GetComponent<NetworkObject>();
+    }
 
     /// <summary>
     /// Get the current item thats being held
     /// </summary>
     /// <returns></returns>
     public Item GetItem() { return _currentItem; }
+
+    public NetworkObject GetNetworkObject() { return _networkObject; } 
 
     /// <summary>
     /// The position of where the item is held at
@@ -51,17 +59,27 @@ public class ItemHolder : NetworkBehaviour
     /// <param name="item"></param>
     public void SetItem(Item item)
     {
-        SetItemServerRpc(item ? item.GetNetworkObject() : null);
+        SetItemServerRpc(item ? item.GetNetworkObject() : null, true);
+    }
+
+    /// <summary>
+    /// Specify whether to shrink the item using this item holders shrink scale settings or not
+    /// </summary>
+    /// <param name="item"></param>
+    /// <param name="useShrink"></param>
+    public void SetItem(Item item, bool useShrink)
+    {
+        SetItemServerRpc(item ? item.GetNetworkObject() : null, useShrink);
     }
 
     [ServerRpc(RequireOwnership = false)]
-    void SetItemServerRpc(NetworkObjectReference itemNetworkObjectReference)
+    void SetItemServerRpc(NetworkObjectReference itemNetworkObjectReference, bool useShrink)
     {
-        SetItemClientRpc(itemNetworkObjectReference);
+        SetItemClientRpc(itemNetworkObjectReference, useShrink);
     }
 
     [ClientRpc]
-    void SetItemClientRpc(NetworkObjectReference itemNetworkObjectReference)
+    void SetItemClientRpc(NetworkObjectReference itemNetworkObjectReference, bool useShrink)
     {
         itemNetworkObjectReference.TryGet(out NetworkObject itemNetworkObject);
 
@@ -70,29 +88,32 @@ public class ItemHolder : NetworkBehaviour
             Item item = itemNetworkObject.GetComponent<Item>();
             _currentItem = item;
             IsOccupied = true;
-            SetLockItem(true);
+            SetLockItem(true, useShrink);
         }
         else
         {
-            SetLockItem(false);
+            SetLockItem(false, useShrink);
             _currentItem = null;
             IsOccupied = false;
         }
     }
 
-    public void SetLockItem(bool state)
+    public void SetLockItem(bool lockState, bool useShrink)
     {
-        _currentItem.ToggleItemLock(state);
+        _currentItem.ToggleItemLock(lockState);
 
-        if (state == true)
+        if (lockState == true)
         {
             _currentItem.transform.position = _holdPosition.transform.position;
             _currentItem.transform.rotation = Quaternion.Euler(_lockRotation);
-            _currentItem.transform.localScale *= _itemShrinkfactor;
+            
+            if (useShrink)
+                _currentItem.transform.localScale *= _itemShrinkfactor;
         }
         else
         {
-            _currentItem.transform.localScale /= _itemShrinkfactor;
+            if (useShrink)
+                _currentItem.transform.localScale /= _itemShrinkfactor;
         }
     }
 
