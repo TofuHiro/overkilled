@@ -11,11 +11,18 @@ public class PlayerInteraction : MonoBehaviour
     [Tooltip("Layer mask of counters")]
     [SerializeField] LayerMask _counterMask;
 
+    /// <summary>
+    /// Whether this player is holding an item
+    /// </summary>
     public bool IsHoldingItem { get { return _hand.IsHoldingItem; } }
 
     IInteractable _hoveredInteract;
     PlayerHand _hand;
 
+    /// <summary>
+    /// Get the hand reference for this player
+    /// </summary>
+    /// <returns></returns>
     public PlayerHand GetHand() { return _hand; }
 
     void Awake()
@@ -47,6 +54,9 @@ public class PlayerInteraction : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Perform interaction action
+    /// </summary>
     public void Interact()
     {
         if (_hoveredInteract != null && _hand.IsHoldingItem)

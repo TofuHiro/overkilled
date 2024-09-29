@@ -18,6 +18,11 @@ public class CombatManager : MonoBehaviour
         Instance = this;
     }
 
+    /// <summary>
+    /// Apply a damage value to a given target
+    /// </summary>
+    /// <param name="damagable">The damagable target</param>
+    /// <param name="damage">The damage value</param>
     public void DamageTarget(IDamagable damagable, float damage)
     {
         DamageTargetServerRpc(damagable.GetNetworkObject(), damage);
@@ -32,6 +37,12 @@ public class CombatManager : MonoBehaviour
         damagable.TakeDamage(damage);
     }
 
+    /// <summary>
+    /// Add a force to an object with a rigidbody
+    /// </summary>
+    /// <param name="rigidbody">The rigidbody of the object</param>
+    /// <param name="force">The force to apply</param>
+    /// <param name="hitPoint">The hit position to apply the force at</param>
     public void AddHitForce(Rigidbody rigidbody, Vector3 force, Vector3 hitPoint)
     {
         NetworkObject networkObject = rigidbody.GetComponent<NetworkObject>();
@@ -50,6 +61,13 @@ public class CombatManager : MonoBehaviour
         rigidbody.AddForceAtPosition(force, hitPoint, ForceMode.Impulse);
     }
 
+    /// <summary>
+    /// Add an explosive force to an object with a rigidbody
+    /// </summary>
+    /// <param name="rigidbody">The rigidbody of the object</param>
+    /// <param name="explosiveForce">The explosive force to apply</param>
+    /// <param name="explosionPosition">The position of the explosion</param>
+    /// <param name="explosionRadius">The radius of the explosion</param>
     public void AddExplosiveForce(Rigidbody rigidbody, float explosiveForce, Vector3 explosionPosition, float explosionRadius)
     {
         NetworkObject networkObject = rigidbody.GetComponent<NetworkObject>();

@@ -7,6 +7,9 @@ public class PlayerHand : NetworkBehaviour
     [Tooltip("Force applied to objects when dropping them")]
     [SerializeField] float _dropThrowForce = 5f;
 
+    /// <summary>
+    /// Whether this hand is holding an item
+    /// </summary>
     public bool IsHoldingItem { get { return _holder.IsOccupied; } }
 
     ItemHolder _holder;
@@ -52,6 +55,10 @@ public class PlayerHand : NetworkBehaviour
         _currentWeapon.SetSecondaryAttackState(state);
     }
 
+    /// <summary>
+    /// Get the item this holder is currently assigned
+    /// </summary>
+    /// <returns></returns>
     public Item GetItem()
     {
         return _holder.GetItem();

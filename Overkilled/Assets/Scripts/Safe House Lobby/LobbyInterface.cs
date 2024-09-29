@@ -7,8 +7,14 @@ public class LobbyInterface : MonoBehaviour
 {
     public static LobbyInterface Instance { get; private set; }
 
+    /// <summary>
+    /// Whether a UI is open or not
+    /// </summary>
     public bool IsInterfaceOpen { get; private set; }
 
+    /// <summary>
+    /// Invoked when local player cancel action is invoked
+    /// </summary>
     public event Action OnUICancel;
 
     PlayerController _currentPlayerInstance;
@@ -43,6 +49,10 @@ public class LobbyInterface : MonoBehaviour
         _currentPlayerInstance.OnUICancelInput -= Close;
     }
 
+    /// <summary>
+    /// Toggle interface settings. If true, player UI controls are activated.
+    /// </summary>
+    /// <param name="state"></param>
     public void ToggleInterface(bool state)
     {
         IsInterfaceOpen = state;

@@ -12,8 +12,15 @@ public class LobbyManager : NetworkBehaviour
     public static LobbyManager Instance { get; private set; }
 
     public delegate void LevelSelectAction(Loader.Level level);
+    /// <summary>
+    /// Invoked when the selected level is changed
+    /// </summary>
     public event LevelSelectAction OnLevelChange;
+
     public delegate void LobbyAction(bool isHost);
+    /// <summary>
+    /// Invoked when the lobby switches from local host to multiplayer. This can be when the player creates a new lobby or join a lobby
+    /// </summary>
     public event LobbyAction OnSwitchToMultiplayer;
 
     Loader.Level _selectedLevel;
@@ -91,6 +98,9 @@ public class LobbyManager : NetworkBehaviour
         Loader.LoadLevel(_selectedLevel);
     }
 
+    /// <summary>
+    /// Reloads the lobby scene, reverting everything to its defaults and local host
+    /// </summary>
     public void ReloadLobby()
     {
         Destroy(NetworkManager.Singleton.gameObject);
@@ -99,11 +109,19 @@ public class LobbyManager : NetworkBehaviour
         SceneManager.LoadScene(Loader.Scene.SafeHouseScene.ToString());
     }
 
+    /// <summary>
+    /// Get the selected level
+    /// </summary>
+    /// <returns></returns>
     public Loader.Level GetSelectedLevel()
     {
         return _selectedLevel;
     }
 
+    /// <summary>
+    /// Set the selected level to a given level
+    /// </summary>
+    /// <param name="level"></param>
     public void SetLevel(Loader.Level level)
     {
         _selectedLevel = level;

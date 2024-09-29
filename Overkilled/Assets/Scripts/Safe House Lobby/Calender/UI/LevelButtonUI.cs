@@ -5,8 +5,11 @@ using UnityEngine.UI;
 
 public class LevelButtonUI : MonoBehaviour, IStartInvoke
 {
+    [Tooltip("The level this button will set the selected level to")]
     [SerializeField] Loader.Level _level;
+    [Tooltip("The locked interface to display when this level is locked")]
     [SerializeField] GameObject _lockedOverlay;
+    [Tooltip("The UI element to display that this level is currently selected")]
     [SerializeField] GameObject _selectedOverlay;
 
     static GameObject s_currentSelectedOverlay;

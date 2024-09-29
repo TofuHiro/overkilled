@@ -5,9 +5,14 @@ using UnityEngine;
 
 public class Calender : MonoBehaviour, IInteractable
 {
+    [Tooltip("The UI to toggle the display for")]
     [SerializeField] LevelSelectUI _levelSelectUI;
+    [Tooltip("The world space text to display the currently selected level")]
     [SerializeField] TMP_Text _calenderText;
 
+    /// <summary>
+    /// If the calender interface is currently open
+    /// </summary>
     public bool IsCalenderOpen { get { return _levelSelectUI.isActiveAndEnabled; } }
 
     void Start()

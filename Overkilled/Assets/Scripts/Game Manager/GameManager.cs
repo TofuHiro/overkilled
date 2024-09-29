@@ -54,12 +54,33 @@ namespace SurvivalGame
         public Grade LevelGrade { get; private set; }
 
         public delegate void GameInitialize(LevelPreset preset);
+        /// <summary>
+        /// Invoked when the game settings are initialized
+        /// </summary>
         public event GameInitialize OnGameInitialize;
+        /// <summary>
+        /// Invoked when the game's state is changed
+        /// </summary>
         public event Action OnGameStateChange;
+        /// <summary>
+        /// Invoked when the local player is ready
+        /// </summary>
         public event Action OnLocalPlayerReady;
+        /// <summary>
+        /// Invoked when the local player attempts to pause
+        /// </summary>
         public event Action OnLocalGamePause;
+        /// <summary>
+        /// Invoked when the local player attempts to unpause
+        /// </summary>
         public event Action OnLocalGameUnpause;
+        /// <summary>
+        /// Invoked when the game is set to pause
+        /// </summary>
         public event Action OnMultiplayerGamePause;
+        /// <summary>
+        /// Invoked when the game is set to unpause
+        /// </summary>
         public event Action OnMultiplayerGameUnpause;
 
         Dictionary<ulong, bool> _playerReadyDictionary;

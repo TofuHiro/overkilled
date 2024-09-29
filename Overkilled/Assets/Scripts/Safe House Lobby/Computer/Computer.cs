@@ -11,7 +11,14 @@ public class Computer : MonoBehaviour, IInteractable
     [Tooltip("Cover to prevent player from opening windows")]
     [SerializeField] GameObject _coverObject;
 
+    /// <summary>
+    /// If the computer currently has any windows open
+    /// </summary>
     public bool HasWindowOpen { get { return _openedWindows.Count > 0; } }
+
+    /// <summary>
+    /// If the computer interface is open
+    /// </summary>
     public bool IsComputerOpen { get { return _computerUI.isActiveAndEnabled; } }
 
     List<ComputerWindowUI> _openedWindows;
@@ -70,6 +77,10 @@ public class Computer : MonoBehaviour, IInteractable
         CloseWindow(window);
     }
 
+    /// <summary>
+    /// Close a given computer window
+    /// </summary>
+    /// <param name="window"></param>
     public void CloseWindow(ComputerWindowUI window)
     {
         _openedWindows.Remove(window);
@@ -77,6 +88,10 @@ public class Computer : MonoBehaviour, IInteractable
         _coverObject.SetActive(_openedWindows.Count > 0);
     }
 
+    /// <summary>
+    /// Add a given window to a list
+    /// </summary>
+    /// <param name="window"></param>
     public void AddWindow(ComputerWindowUI window)
     {
         if (!_openedWindows.Contains(window))

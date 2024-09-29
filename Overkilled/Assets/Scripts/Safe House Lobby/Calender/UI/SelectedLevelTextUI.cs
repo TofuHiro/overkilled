@@ -27,6 +27,10 @@ public class SelectedLevelTextUI : MonoBehaviour
         SetLevelText(levelText);
     }
 
+    /// <summary>
+    /// Set the current level display
+    /// </summary>
+    /// <param name="text"></param>
     public void SetLevelText(string text)
     {
         _text.text = "Next Shift: " + text;
