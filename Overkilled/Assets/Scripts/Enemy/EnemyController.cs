@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
+using SurvivalGame;
 
 [RequireComponent(typeof(EnemyHealth))]
 [RequireComponent(typeof(PlayerRotation))]
@@ -51,13 +52,29 @@ public class EnemyController : NetworkBehaviour
         StateMachine.Initialize(IdleState);
     }
 
+    public override void OnNetworkSpawn()
+    {
+        GameManager.Instance.OnGameStateChange += Stop;    
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        GameManager.Instance.OnGameStateChange -= Stop;
+    }
+
     void Update()
     {
+        if (GameManager.Instance.GameEnded)
+            return;
+
         StateMachine.CurrentEnemyState.FrameUpdate();
     }
 
     void FixedUpdate()
     {
+        if (GameManager.Instance.GameEnded)
+            return;
+
         StateMachine.CurrentEnemyState.PhysicsUpdate();    
     }
 
@@ -95,5 +112,14 @@ public class EnemyController : NetworkBehaviour
     {
         _movement.Stop();
         _weapon.Attack();
+    }
+
+    void Stop()
+    {
+        if (GameManager.Instance.GameEnded)
+        {
+            _movement.Stop();
+            StateMachine.ChangeState(IdleState);
+        }
     }
 }
