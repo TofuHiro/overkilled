@@ -1,0 +1,103 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Computer : MonoBehaviour, IInteractable
+{
+    public static Computer Instance { get; private set; }
+
+    [Tooltip("The computer UI to display")]
+    [SerializeField] ComputerUI _computerUI;
+    [Tooltip("Cover to prevent player from opening windows")]
+    [SerializeField] GameObject _coverObject;
+
+    /// <summary>
+    /// If the computer currently has any windows open
+    /// </summary>
+    public bool HasWindowOpen { get { return _openedWindows.Count > 0; } }
+
+    /// <summary>
+    /// If the computer interface is open
+    /// </summary>
+    public bool IsComputerOpen { get { return _computerUI.isActiveAndEnabled; } }
+
+    List<ComputerWindowUI> _openedWindows;
+
+    void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Debug.LogWarning("Warning. Multiple instances of Computer found. Destroying " + name);
+            Destroy(Instance);
+        }
+
+        Instance = this;
+
+        _openedWindows = new List<ComputerWindowUI>();
+    }
+
+    void Start()
+    {
+        LobbyInterface.Instance.OnUICancel += Close;
+    }
+
+    void OnDestroy()
+    {
+        LobbyInterface.Instance.OnUICancel -= Close;
+    }
+
+    public void Interact(PlayerInteraction player)
+    {
+        _computerUI.Show();
+
+        LobbyInterface.Instance.ToggleInterface(true);
+    }
+
+    void Close()
+    {
+        if (!IsComputerOpen)
+            return;
+
+        if (HasWindowOpen)
+        {
+            CloseTopWindow();
+        }
+        else
+        {
+            _computerUI.Hide();
+
+            LobbyInterface.Instance.ToggleInterface(false);
+        }
+    }
+
+    void CloseTopWindow()
+    {
+        ComputerWindowUI window = _openedWindows[_openedWindows.Count - 1];
+        window.Hide();
+        CloseWindow(window);
+    }
+
+    /// <summary>
+    /// Close a given computer window
+    /// </summary>
+    /// <param name="window"></param>
+    public void CloseWindow(ComputerWindowUI window)
+    {
+        _openedWindows.Remove(window);
+
+        _coverObject.SetActive(_openedWindows.Count > 0);
+    }
+
+    /// <summary>
+    /// Add a given window to a list
+    /// </summary>
+    /// <param name="window"></param>
+    public void AddWindow(ComputerWindowUI window)
+    {
+        if (!_openedWindows.Contains(window))
+        {
+            _openedWindows.Add(window);
+            _coverObject.SetActive(true);
+        }
+    }
+}

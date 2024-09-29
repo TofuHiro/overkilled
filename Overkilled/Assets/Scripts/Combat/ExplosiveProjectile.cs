@@ -41,6 +41,7 @@ public class ExplosiveProjectile : Projectile
 
         base.OnCollisionEnter(collision);
     }
+
     protected override void HitTarget(Transform target, Vector3 hitPoint)
     {
         Explode();
@@ -52,15 +53,17 @@ public class ExplosiveProjectile : Projectile
 
         foreach (Collider collider in colliders)
         {
+            //Damage
             IDamagable damagable = collider.GetComponent<IDamagable>();
             if (damagable != null)
                 CombatManager.Instance.DamageTarget(damagable, _explosiveProjectile.explosionDamage);
 
+            //Apply Force
             Rigidbody rb = collider.GetComponent<Rigidbody>();
             if (rb != null)
                 CombatManager.Instance.AddExplosiveForce(rb, _explosiveProjectile.explosionForce, transform.position, _explosiveProjectile.explosionRadius);
         }
 
-        DespawnProjectileServerRpc();
+        MultiplayerManager.Instance.DestroyObject(gameObject);
     }
 }

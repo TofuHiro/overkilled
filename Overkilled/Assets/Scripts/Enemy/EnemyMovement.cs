@@ -28,11 +28,19 @@ public class EnemyMovement : MonoBehaviour
         _timer += Time.deltaTime;
     }
 
+    /// <summary>
+    /// Get the current direction the navmesh is moving towards
+    /// </summary>
+    /// <returns></returns>
     public Vector2 GetDirection()
     {
         return new Vector2(_navAgent.velocity.x, _navAgent.velocity.z).normalized;
     }
 
+    /// <summary>
+    /// Set the navmesh destination to a target's position
+    /// </summary>
+    /// <param name="target"></param>
     public void SetTarget(Transform target)
     {
         if (_timer < _pathDrawRate)
@@ -43,6 +51,9 @@ public class EnemyMovement : MonoBehaviour
         _timer = 0f;
     }
 
+    /// <summary>
+    /// Stop the navmesh from navigating
+    /// </summary>
     public void Stop()
     {
         _navAgent.isStopped = true;

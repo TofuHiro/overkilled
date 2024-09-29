@@ -33,11 +33,6 @@ public class FirearmWeapon : Weapon
         DecreaseDurablity(1);
     }
 
-    void SetAccuracy(float angle)
-    {
-        _aimConeAngle = angle;
-    }
-
     void ShootProjectile()
     {
         ShootProjectileServerRpc();
@@ -49,9 +44,7 @@ public class FirearmWeapon : Weapon
         float spread = Random.Range(-_aimConeAngle / 2f, _aimConeAngle / 2f);
         Quaternion rotation = Quaternion.Euler(_projectileExit.rotation.eulerAngles + (Vector3.up * spread));
 
-        NetworkObject projectileNetworkObject = Instantiate(_firearmSO.projectile.prefab, _projectileExit.position, rotation).GetComponent<NetworkObject>();
-        projectileNetworkObject.Spawn(true);
-
+        NetworkObject projectileNetworkObject = MultiplayerManager.Instance.SpawnObject(_firearmSO.projectile.prefab, _projectileExit.position, rotation);
         Projectile projectile = projectileNetworkObject.GetComponent<Projectile>();
         projectile.InitProjectile(_firearmSO.damage, _firearmSO.knockbackForce, projectile.transform.forward);
     }
@@ -63,6 +56,11 @@ public class FirearmWeapon : Weapon
             SetAccuracy(_firearmSO.accurateAimConeAngle);
         else
             SetAccuracy(_firearmSO.normalAimConeAngle);
+    }
+
+    void SetAccuracy(float angle)
+    {
+        _aimConeAngle = angle;
     }
 
     void OnDrawGizmos()

@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class ObjectHealth : NetworkBehaviour, IDamagable
 {
+    [Tooltip("The maximum possible health for this object")]
     [SerializeField] float _maxHealth;
 
     float _currentHealth;

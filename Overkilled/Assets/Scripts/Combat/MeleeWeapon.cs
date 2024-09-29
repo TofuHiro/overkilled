@@ -23,67 +23,48 @@ public class MeleeWeapon : Weapon
 
         if (_isSecondaryAttacking)
         {
-            HeavySwing();
+            //Heavy Attack
+            Swing(_meleeSO.heavyAreaOfAttack, _meleeSO.heavyDamage, _meleeSO.heavyKnockbackForce, 2);
             SetNextTimeAttack(_meleeSO.heavyAttackFrequency);
         }
         else
         {
-            Swing();
+            //Normal Attack
+            Swing(_meleeSO.areaOfAttack, _meleeSO.damage, _meleeSO.knockbackForce, 1);
+            //Next time to attack is set in base class
         }
     }
 
-    void Swing()
+    void Swing(Vector3 areaOfAttack, float damage, float knockbackForce, int durabilityConsumption)
     {
-        Collider[] colliders = Physics.OverlapBox(_swingPoint.position, _meleeSO.areaOfAttack/2f);
+        Collider[] colliders = Physics.OverlapBox(_swingPoint.position, areaOfAttack / 2f);
 
         bool hit = false;
         foreach (Collider collider in colliders)
         {
+            //Damage
             IDamagable damagable = collider.GetComponent<IDamagable>();
             if (damagable != null)
             {
-                CombatManager.Instance.DamageTarget(damagable, _meleeSO.damage);
+                CombatManager.Instance.DamageTarget(damagable, damage);
                 hit = true;
             }
 
+            //Impact Force
             Rigidbody rb = collider.GetComponent<Rigidbody>();
             if (rb != null)
-                CombatManager.Instance.AddHitForce(rb, _swingPoint.forward * _meleeSO.knockbackForce, collider.ClosestPoint(transform.position));
+                CombatManager.Instance.AddHitForce(rb, _swingPoint.forward * knockbackForce, collider.ClosestPoint(transform.position));
         }
 
+        //Only reduce durability if damagable hit
         if (hit)
-            DecreaseDurablity(1);
-    }
-
-    void HeavySwing()
-    {
-        Collider[] colliders = Physics.OverlapBox(_swingPoint.position, _meleeSO.heavyAreaOfAttack / 2f);
-
-        bool hit = false;
-        foreach (Collider collider in colliders)
-        {
-            IDamagable damagable = collider.GetComponent<IDamagable>();
-            if (damagable != null)
-            {
-                CombatManager.Instance.DamageTarget(damagable, _meleeSO.heavyDamage);
-                hit = true;
-            }
-
-            Rigidbody rb = collider.GetComponent<Rigidbody>();
-            if (rb != null)
-                CombatManager.Instance.AddHitForce(rb, _swingPoint.forward * _meleeSO.heavyKnockbackForce, collider.ClosestPoint(transform.position));
-        }
-
-        if (hit)
-        {
-            DecreaseDurablity(2);
-        }
+            DecreaseDurablity(durabilityConsumption);
     }
 
     public override void SetSecondaryAttackState(bool state)
     {
         base.SetSecondaryAttackState(state);
-
+        //
     }
 
     void OnDrawGizmos()

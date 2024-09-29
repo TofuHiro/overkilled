@@ -9,6 +9,9 @@ public class CounterTop : NetworkBehaviour, IInteractable
     protected ItemHolder[] _holders;
     int _itemHolderCount;
 
+    /// <summary>
+    /// Whether this counter is currently full or not
+    /// </summary>
     public bool CounterIsFull
     {
         get
@@ -20,6 +23,9 @@ public class CounterTop : NetworkBehaviour, IInteractable
         }
     }
 
+    /// <summary>
+    /// Whether this counter is empty or not
+    /// </summary>
     public bool CounterIsEmpty
     {
         get
@@ -34,7 +40,7 @@ public class CounterTop : NetworkBehaviour, IInteractable
     /// <summary>
     /// Returns the number of items on this counter
     /// </summary>
-    public int ItemsOnCounter
+    public int NumberOfItemsOnCounter
     {
         get
         {
@@ -58,8 +64,9 @@ public class CounterTop : NetworkBehaviour, IInteractable
     
     public virtual void Interact(PlayerInteraction player)
     {
-        PlayerHand hand = player.GetComponent<PlayerHand>();
+        PlayerHand hand = player.GetHand();
 
+        //Place
         if (hand.IsHoldingItem)
         {
             if (CounterIsFull)
@@ -71,6 +78,7 @@ public class CounterTop : NetworkBehaviour, IInteractable
                 PlaceItemFromHand(hand);
             }
         }
+        //Take
         else 
         {
             if (CounterIsEmpty)
@@ -116,7 +124,7 @@ public class CounterTop : NetworkBehaviour, IInteractable
         return -1;
     }
 
-    protected void ReleaseAllItems()
+    void ReleaseAllItems()
     {
         for (int i = 0; i < _holders.Length; i++)
         {

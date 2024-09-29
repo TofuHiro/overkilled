@@ -1,24 +1,20 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Netcode;
 using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
+    [Tooltip("The enemy to spawn")]
     [SerializeField] GameObject _enemyPrefab;
+
+    MultiplayerManager _multiplayerManager;
+
+    void Start()
+    {
+        _multiplayerManager = MultiplayerManager.Instance;
+    }
 
     public void Spawn()
     {
-        SpawnServerRpc();
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    void SpawnServerRpc()
-    {
-        EnemyController enemy = Instantiate(_enemyPrefab, transform.position, transform.rotation).GetComponentInChildren<EnemyController>();
-        NetworkObject networkObject = enemy.GetNetworkObject();
-
-        networkObject.Spawn(true);
+        _multiplayerManager.SpawnObject(_enemyPrefab, transform.position, transform.rotation);
     }
 
     void OnDrawGizmos()

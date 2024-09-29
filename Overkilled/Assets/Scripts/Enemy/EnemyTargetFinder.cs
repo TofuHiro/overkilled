@@ -18,8 +18,7 @@ public class EnemyTargetFinder : MonoBehaviour
     [Tooltip("The rate to poll for player locations when far from one")]
     [SerializeField] float _farTargetPollRate = 3f;
 
-    public GameObject ClosestPlayer {  get; private set; }
-
+    GameObject _closestPlayer;
     GameObject[] _playerReferences;
     float _closestPlayerDistance;
     float _pollTimer = 0f, _nextTimeToPoll = 0f;
@@ -30,11 +29,29 @@ public class EnemyTargetFinder : MonoBehaviour
         SetPlayerReferences();
     }
 
+    void OnDestroy()
+    {
+        PlayerList.OnPlayerListUpdate -= SetPlayerReferences;
+    }
+
+    /// <summary>
+    /// Get the current closest player to this enemy
+    /// </summary>
+    /// <returns></returns>
+    public GameObject GetClosestPlayer()
+    {
+        return _closestPlayer;
+    }
+
     void Update()
     {
         _pollTimer += Time.deltaTime;
         if (_pollTimer >= _nextTimeToPoll)
+        {
             PollClosestPlayer();
+            _nextTimeToPoll = GetPollRate(_closestPlayerDistance);
+            _pollTimer = 0f;
+        }
     }
 
     void SetPlayerReferences()
@@ -46,11 +63,11 @@ public class EnemyTargetFinder : MonoBehaviour
     {
         if (_playerReferences.Length == 0)
         {
-            ClosestPlayer = null;
+            _closestPlayer = null;
             return;
         }
 
-        ClosestPlayer = _playerReferences[0];
+        _closestPlayer = _playerReferences[0];
         _closestPlayerDistance = Vector3.Distance(_playerReferences[0].transform.position, transform.position);
 
         for (int i = 1; i < _playerReferences.Length; i++)
@@ -58,15 +75,17 @@ public class EnemyTargetFinder : MonoBehaviour
             float distance = Vector3.Distance(_playerReferences[i].transform.position, transform.position);
             if (distance < _closestPlayerDistance)
             {
-                ClosestPlayer = _playerReferences[i];
+                _closestPlayer = _playerReferences[i];
                 _closestPlayerDistance = distance;
             }
         }
-
-        _nextTimeToPoll = GetPollRate(_closestPlayerDistance);
-        _pollTimer = 0f;
     }
 
+    /// <summary>
+    /// Get the variable poll rate based on the current closest player's distance.
+    /// </summary>
+    /// <param name="distance"></param>
+    /// <returns></returns>
     float GetPollRate(float distance)
     {
         if (distance > _partwayTargetDistanceThreshold)
