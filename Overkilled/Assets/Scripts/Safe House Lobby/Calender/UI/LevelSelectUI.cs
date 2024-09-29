@@ -5,8 +5,11 @@ using UnityEngine.UI;
 
 public class LevelSelectUI : MonoBehaviour
 {
+    [Tooltip("Navigation button to go to the previous page")]
     [SerializeField] Button _prevPageButton;
+    [Tooltip("Navigation button to go to the next page")]
     [SerializeField] Button _nextPageButton;
+    [Tooltip("The set of month objects to cycle through")]
     [SerializeField] GameObject[] _monthPages;
 
     int _pageIndex = 0;

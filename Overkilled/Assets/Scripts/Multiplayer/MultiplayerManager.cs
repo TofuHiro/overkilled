@@ -14,6 +14,9 @@ public class MultiplayerManager : NetworkBehaviour
 
     public static MultiplayerManager Instance { get; private set; }
 
+    /// <summary>
+    /// Invoked when the local player is disconnect
+    /// </summary>
     public event Action OnLocalDisconnect;
     public event Action OnPlayerDataNetworkListChange;
 

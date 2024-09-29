@@ -3,7 +3,6 @@ using System;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.LowLevel;
 
 [RequireComponent(typeof(PlayerMotor))]
 [RequireComponent(typeof(PlayerRotation))]
@@ -12,13 +11,28 @@ using UnityEngine.InputSystem.LowLevel;
 [RequireComponent(typeof(PlayerHand))]
 public class PlayerController : NetworkBehaviour
 {
+    /// <summary>
+    /// The player instance local to the current lobby/game
+    /// </summary>
     public static PlayerController LocalInstance { get; private set; }
 
+    /// <summary>
+    /// Invoked when a player is spawned into the game
+    /// </summary>
     public static event Action<PlayerController> OnPlayerSpawn;
 
     public delegate void PlayerInputAction();
+    /// <summary>
+    /// Invoked when the interact key is pressed by the player
+    /// </summary>
     public event PlayerInputAction OnPlayerInteractInput;
+    /// <summary>
+    /// Invoked when the pause key is pressed by the player
+    /// </summary>
     public event PlayerInputAction OnPlayerPauseInput;
+    /// <summary>
+    /// Invoked when the cancel key for UI elements is pressed by the player
+    /// </summary>
     public event PlayerInputAction OnUICancelInput;
 
     PlayerMotor _motor;
@@ -117,6 +131,10 @@ public class PlayerController : NetworkBehaviour
             _canMove = true;
     }
 
+    /// <summary>
+    /// Set the controls between UI and player controls
+    /// </summary>
+    /// <param name="state"></param>
     public void SetUIControls(bool state)
     {
         if (state)
@@ -166,7 +184,7 @@ public class PlayerController : NetworkBehaviour
 
     void Rotation()
     {
-        if (!IsOwner)
+        if (!IsOwner || !_canMove)
             return;
 
         Vector2 input = _input.Player.Move.ReadValue<Vector2>();

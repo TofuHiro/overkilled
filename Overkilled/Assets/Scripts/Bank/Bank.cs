@@ -6,8 +6,15 @@ using UnityEngine;
 public class Bank : NetworkBehaviour
 {
     public static Bank Instance { get; private set; }
+
+    /// <summary>
+    /// Get the current balance the players has accumalated for the round
+    /// </summary>
     public int CurrentBalance { get; private set; }
     
+    /// <summary>
+    /// Invoked when the current balance changes
+    /// </summary>
     public event Action<int> OnBalanceChange;
 
     void Awake()

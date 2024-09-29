@@ -10,8 +10,14 @@ public class PlayerReadyManager : NetworkBehaviour
 
     public static PlayerReadyManager Instance { get; private set; }
 
+    /// <summary>
+    /// Returns true if all players are ready
+    /// </summary>
     public bool AllPlayersReady {  get {  return _allPlayersReady; } }
 
+    /// <summary>
+    /// Invoked when any player's ready state is changed. This can be to ready or unready
+    /// </summary>
     public event Action OnPlayerReadyChange;
 
     Dictionary<ulong, bool> _playerReadyDictionary;

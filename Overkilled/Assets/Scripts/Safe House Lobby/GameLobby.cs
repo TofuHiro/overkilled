@@ -20,13 +20,37 @@ public class GameLobby : MonoBehaviour
 
     public static GameLobby Instance { get; private set; }
 
+    /// <summary>
+    /// Invoked when lobby creation has started
+    /// </summary>
     public event Action OnCreateLobbyStarted;
+    /// <summary>
+    /// Invoked when a lobby is successfully created
+    /// </summary>
     public event Action OnCreateLobbySuccess;
+    /// <summary>
+    /// Invoked when lobby creation has failed
+    /// </summary>
     public event Action OnCreateLobbyFailed;
+    /// <summary>
+    /// Invoked when an attempt to join a lobby has started
+    /// </summary>
     public event Action OnJoinStarted;
+    /// <summary>
+    /// Invoked when quick join lobby attempt has failed
+    /// </summary>
     public event Action OnQuickJoinFailed;
+    /// <summary>
+    /// Invoked when joining a lobby attempt by code/id has failed
+    /// </summary>
     public event Action OnJoinFailed;
+    /// <summary>
+    /// Invoked when a lobby was successfully joined
+    /// </summary>
     public event Action OnJoinSuccess;
+    /// <summary>
+    /// Invoked when a new list of lobbies was queried
+    /// </summary>
     public event Action<List<Lobby>> OnLobbyListChanged;
 
     Lobby _joinedLobby;
@@ -141,6 +165,11 @@ public class GameLobby : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Create a new lobby with a given name and privacy modifier
+    /// </summary>
+    /// <param name="lobbyName">The name of the lobby</param>
+    /// <param name="isPrivate">If the new lobby is private or public. Private lobbies require a code to join</param>
     public async void CreateLobby(string lobbyName, bool isPrivate)
     {
         OnCreateLobbyStarted?.Invoke();
@@ -180,6 +209,9 @@ public class GameLobby : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Quick join a random lobby
+    /// </summary>
     public async void QuickJoin()
     {
         OnJoinStarted?.Invoke();
@@ -207,6 +239,10 @@ public class GameLobby : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Attempt to join a lobby with a given code
+    /// </summary>
+    /// <param name="lobbyCode">The lobby code of the target lobby</param>
     public async void JoinLobbyWithCode(string lobbyCode)
     {
         OnJoinStarted?.Invoke();
@@ -234,6 +270,10 @@ public class GameLobby : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Attempt to join a lobby with a given ID
+    /// </summary>
+    /// <param name="lobbyCode">The lobby ID of the target lobby</param>
     public async void JoinLobbyWithId(string lobbyId)
     {
         OnJoinStarted?.Invoke();
@@ -261,11 +301,18 @@ public class GameLobby : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Get the current lobby this player is in
+    /// </summary>
+    /// <returns></returns>
     public Lobby GetLobby()
     {
         return _joinedLobby;
     }
 
+    /// <summary>
+    /// Delete the current lobby the player is hosting
+    /// </summary>
     public async void DeleteLobby()
     {
         if (_joinedLobby != null)
@@ -283,6 +330,9 @@ public class GameLobby : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Leave the current lobby this player is in
+    /// </summary>
     public async void LeaveLobby()
     {
         if (_joinedLobby != null)
@@ -307,6 +357,10 @@ public class GameLobby : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Kick a target player given a player ID
+    /// </summary>
+    /// <param name="playerId">The ID of the player to kick from the lobby</param>
     public async void KickPlayer(string playerId)
     {
         if (IsLobbyHost())
@@ -322,6 +376,9 @@ public class GameLobby : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Query a list of lobbies
+    /// </summary>
     public async void ListLobbies()
     {
         try
