@@ -44,8 +44,9 @@ public class FirearmWeapon : Weapon
         float spread = Random.Range(-_aimConeAngle / 2f, _aimConeAngle / 2f);
         Quaternion rotation = Quaternion.Euler(_projectileExit.rotation.eulerAngles + (Vector3.up * spread));
 
-        NetworkObject projectileNetworkObject = MultiplayerManager.Instance.SpawnObject(_firearmSO.projectile.prefab, _projectileExit.position, rotation);
-        Projectile projectile = projectileNetworkObject.GetComponent<Projectile>();
+        GameObject projectileObject = Instantiate(_firearmSO.projectile.prefab, _projectileExit.position, rotation);
+        MultiplayerManager.Instance.SpawnObject(projectileObject);
+        Projectile projectile = projectileObject.GetComponent<Projectile>();
         projectile.InitProjectile(_firearmSO.damage, _firearmSO.knockbackForce, projectile.transform.forward);
     }
 

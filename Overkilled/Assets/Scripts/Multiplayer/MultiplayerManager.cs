@@ -21,8 +21,6 @@ public class MultiplayerManager : NetworkBehaviour
     public event Action OnPlayerDataNetworkListChange;
 
     NetworkList<PlayerData> _playerDataNetworkList;
-    //Used to return spawned multiplayer objects as unable to do so within ServerRpcs
-    NetworkObject _previousSpawnedObject;
     string _playerName;
 
     void Awake()
@@ -263,66 +261,82 @@ public class MultiplayerManager : NetworkBehaviour
     }
 
     /// <summary>
-    /// Instantiates a given object in multiplayer
+    /// Instantiates a given object and spawns it in multiplayer
     /// </summary>
     /// <param name="obj"></param>
     /// <returns>The network object of the spawned object</returns>
-    public NetworkObject SpawnObject(GameObject obj)
+    public void CreateObject(GameObject obj)
     {
-        SpawnObjectServerRpc(GetIndexFromObject(obj));
-        return _previousSpawnedObject;
+        CreateObjectServerRpc(GetIndexFromObject(obj));
     }
 
     /// <summary>
-    /// Instantiates a given object in multiplayer
+    /// Spawn the instantiated object in multiplayer
+    /// </summary>
+    /// <param name="obj"></param>
+    public void SpawnObject(GameObject obj)
+    {
+        NetworkObject networkObject = obj.GetComponent<NetworkObject>();
+
+        if (networkObject != null)
+            networkObject.Spawn(true);
+        else 
+            Debug.LogError("Error. NetworkObject cannot be found attached to object: " + obj.name); 
+    }
+
+    /// <summary>
+    /// Instantiates a given object and spawns it in multiplayer
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="position">The position to spawn at</param>
     /// <param name="rotation">The rotation to spawn with</param>
     /// <returns></returns>
-    public NetworkObject SpawnObject(GameObject obj, Vector3 position, Quaternion rotation)
+    public void CreateObject(GameObject obj, Vector3 position, Quaternion rotation)
     {
-        SpawnObject(obj);
-        _previousSpawnedObject.transform.position = position;
-        _previousSpawnedObject.transform.rotation = rotation;
-        return _previousSpawnedObject;
+        CreateObjectServerRpc(GetIndexFromObject(obj), position, rotation);
     }
 
     /// <summary>
-    /// Instantiates a given object in multiplayer
+    /// Instantiates a given object and spawns it in multiplayer
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="hand">The hand to set the items parents to</param>
     /// <returns></returns>
-    public NetworkObject SpawnObject(GameObject obj, PlayerHand hand)
+    public void CreateObject(GameObject obj, PlayerHand hand)
     {
-        SpawnObjectWithParentServerRpc(GetIndexFromObject(obj), hand.GetNetworkObject());
-        return _previousSpawnedObject;
+        CreateObjectWithParentServerRpc(GetIndexFromObject(obj), hand.GetNetworkObject());
     }
 
     [ServerRpc(RequireOwnership = false)]
-    void SpawnObjectServerRpc(int objectIndex)
+    void CreateObjectServerRpc(int objectIndex)
     {
-        GameObject material = Instantiate(GetObjectFromIndex(objectIndex));
-        NetworkObject networkObject = material.GetComponent<NetworkObject>();
-        networkObject.GetComponent<NetworkObject>().Spawn(true);
-
-        _previousSpawnedObject = networkObject;
+        GameObject obj = Instantiate(GetObjectFromIndex(objectIndex));
+        NetworkObject networkObject = obj.GetComponent<NetworkObject>();
+        networkObject.Spawn(true);
     }
 
     [ServerRpc(RequireOwnership = false)]
-    void SpawnObjectWithParentServerRpc(int objectIndex, NetworkObjectReference handNetworkObjectReference)
+    void CreateObjectServerRpc(int objectIndex, Vector3 position, Quaternion rotation)
+    {
+        GameObject obj = Instantiate(GetObjectFromIndex(objectIndex));
+        obj.transform.position = position;
+        obj.transform.rotation = rotation;
+
+        NetworkObject networkObject = obj.GetComponent<NetworkObject>();
+        networkObject.Spawn(true);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void CreateObjectWithParentServerRpc(int objectIndex, NetworkObjectReference handNetworkObjectReference)
     {
         handNetworkObjectReference.TryGet(out NetworkObject handNetworkObject);
 
-        GameObject material = Instantiate(GetObjectFromIndex(objectIndex));
-        NetworkObject networkObject = material.GetComponent<NetworkObject>();
-        networkObject.GetComponent<NetworkObject>().Spawn(true);
+        GameObject obj = Instantiate(GetObjectFromIndex(objectIndex));
+        NetworkObject networkObject = obj.GetComponent<NetworkObject>();
+        networkObject.Spawn(true);
 
         PlayerHand hand = handNetworkObject.GetComponent<PlayerHand>();
         hand.SetItem(networkObject.GetComponent<Item>());
-
-        _previousSpawnedObject = networkObject;
     }
 
     /// <summary>
