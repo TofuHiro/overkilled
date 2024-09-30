@@ -2360,6 +2360,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1849391250}
+  - component: {fileID: 1849391251}
   - component: {fileID: 1849391249}
   m_Layer: 0
   m_Name: Enemy Spawn Manager
@@ -2383,6 +2384,7 @@ MonoBehaviour:
   _enemySpawns:
   - EnemyPrefabs:
     - {fileID: 4163672175636474596, guid: 1a96fd14499e83e4fb5db6d51502343d, type: 3}
+    SpawnSequentially: 0
     EnemySpawnPoints:
     - {fileID: 439261438}
     - {fileID: 440509358}
@@ -2391,6 +2393,7 @@ MonoBehaviour:
     SpawnFrequency: 3
   - EnemyPrefabs:
     - {fileID: 3012940866497903167, guid: c24a5d6696155314885bba0561f22733, type: 3}
+    SpawnSequentially: 0
     EnemySpawnPoints:
     - {fileID: 689254224}
     - {fileID: 475999149}
@@ -2414,6 +2417,27 @@ Transform:
   - {fileID: 1088273429}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1849391251
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1849391248}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 1110942358
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!1 &1923484925
 GameObject:
   m_ObjectHideFlags: 0

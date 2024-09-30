@@ -1,9 +1,10 @@
 using SurvivalGame;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public class EnemySpawnManager : MonoBehaviour, IStartInvoke
+public class EnemySpawnManager : NetworkBehaviour, IStartInvoke
 {
     [System.Serializable]
     class EnemySpawn
@@ -87,17 +88,30 @@ public class EnemySpawnManager : MonoBehaviour, IStartInvoke
 
         Instance = this;
 
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        if (!IsServer)
+            return;
+
         foreach (var enemySpawn in _enemySpawns)
             enemySpawn.SetNextTimeToSpawn(enemySpawn.SpawnFrequency);
     }
 
     public void InvokeStart()
     {
+        if (!IsServer)
+            return;
+
         GameManager.Instance.OnGameStateChange += GameManager_OnGameStateChange;
     }
 
     void Update()
     {
+        if (!IsServer)
+            return;
+
         if (_spawnerActive)
             _timer += Time.deltaTime;
 
