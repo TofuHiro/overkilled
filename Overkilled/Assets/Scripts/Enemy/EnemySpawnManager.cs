@@ -138,7 +138,7 @@ public class EnemySpawnManager : MonoBehaviour, IStartInvoke
     {
         Vector3 spawnPoint = enemySpawn.GetRandomSpawnPoint().position;
         GameObject enemyPrefab = enemySpawn.GetNextEnemyPrefab();
-        MultiplayerManager.Instance.SpawnObject(enemyPrefab, spawnPoint, Quaternion.identity);
+        MultiplayerManager.Instance.CreateObject(enemyPrefab, spawnPoint, Quaternion.identity);
     }
 
     void OnDrawGizmos()

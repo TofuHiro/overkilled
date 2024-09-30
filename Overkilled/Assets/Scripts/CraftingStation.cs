@@ -118,9 +118,10 @@ public class CraftingStation : CounterTop
             holder.SetItem(null);
             MultiplayerManager.Instance.DestroyObject(item.gameObject);
         }
-        
-        NetworkObject productNetworkObject = MultiplayerManager.Instance.SpawnObject(_validRecipe.product.prefabReference);
-        Item product = productNetworkObject.GetComponent<Item>();
+
+        GameObject productObject = Instantiate(_validRecipe.product.prefabReference);
+        MultiplayerManager.Instance.SpawnObject(productObject);
+        Item product = productObject.GetComponent<Item>();
         _holders[0].SetItem(product);
     }
 
