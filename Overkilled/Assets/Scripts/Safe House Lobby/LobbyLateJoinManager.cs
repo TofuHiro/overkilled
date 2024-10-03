@@ -26,6 +26,7 @@ public class LobbyLateJoinManager : NetworkBehaviour
         Instance = this;
 
         _itemHoldersToSync = new List<ItemHolder>();
+        _playerItemHoldersToSync = new List<ItemHolder>();
     }
 
     void Start()

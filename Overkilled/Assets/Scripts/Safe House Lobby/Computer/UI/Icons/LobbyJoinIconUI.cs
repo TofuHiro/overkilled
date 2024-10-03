@@ -4,6 +4,11 @@ public class LobbyJoinIconUI : ComputerIconUI
     {
         GameLobby.Instance.OnCreateLobbySuccess += Hide;
         GameLobby.Instance.OnJoinSuccess += Hide;
+
+        if (GameLobby.Instance.InLobby)
+        {
+            Hide();
+        }
     }
 
     void OnDestroy()

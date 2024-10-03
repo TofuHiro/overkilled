@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace SurvivalGame
 {
@@ -108,8 +109,6 @@ namespace SurvivalGame
 
             _playerReadyDictionary = new Dictionary<ulong, bool>();
             _playerPausedDictionary = new Dictionary<ulong, bool>();
-
-            OnGameStateChange += CalculateGrade;
         }
 
         public override void OnNetworkSpawn()
@@ -129,6 +128,8 @@ namespace SurvivalGame
 
         public override void OnNetworkDespawn()
         {
+            PlayerController.OnPlayerSpawn -= PlayerController_OnPlayerSpawn;
+
             Time.timeScale = 1f;
             _currentGameState.OnValueChanged -= OnStateChange;
             _isGamePaused.OnValueChanged -= OnGamePausedChange;
@@ -163,21 +164,6 @@ namespace SurvivalGame
             player.OnPlayerPauseInput += TogglePauseGame;
         }
 
-        void TestPauseOnPlayerDisconnect(NetworkManager manager, ConnectionEventData data)
-        {
-            if (data.EventType == ConnectionEvent.ClientDisconnected)
-                _autoTestGamePausedState = true;
-        }
-
-        void TestPlayersReadyOnPlayerDisconnect(NetworkManager manager, ConnectionEventData data)
-        {
-            if (_currentGameState.Value != GameState.WaitingForPlayers)
-                return;
-
-            if (data.EventType == ConnectionEvent.ClientDisconnected)
-                _autoTestGameReadyStart = true;
-        }
-
         void SpawnPlayers(string sceneName, UnityEngine.SceneManagement.LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
         {
             foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
@@ -187,11 +173,6 @@ namespace SurvivalGame
             }
 
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= SpawnPlayers;
-        }
-
-        void OnStateChange(GameState previousValue, GameState newValue)
-        {
-            OnGameStateChange?.Invoke();
         }
 
         void Update()
@@ -238,6 +219,10 @@ namespace SurvivalGame
             }
         }
 
+
+        #region Readying
+
+
         void SetLocalPlayerReady()
         {
             if (_currentGameState.Value != GameState.WaitingForPlayers)
@@ -276,6 +261,22 @@ namespace SurvivalGame
                 Debug.Log("Game starting");
             }
         }
+
+        void TestPlayersReadyOnPlayerDisconnect(NetworkManager manager, ConnectionEventData data)
+        {
+            if (_currentGameState.Value != GameState.WaitingForPlayers)
+                return;
+
+            if (data.EventType == ConnectionEvent.ClientDisconnected)
+                _autoTestGameReadyStart = true;
+        }
+
+
+        #endregion
+
+
+        #region Pausing
+
 
         void OnGamePausedChange(bool previousValue, bool newValue)
         {
@@ -339,10 +340,31 @@ namespace SurvivalGame
             _isGamePaused.Value = false;
         }
 
+        void TestPauseOnPlayerDisconnect(NetworkManager manager, ConnectionEventData data)
+        {
+            if (data.EventType == ConnectionEvent.ClientDisconnected)
+                _autoTestGamePausedState = true;
+        }
+
+
+        #endregion
+
+
+        void OnStateChange(GameState previousValue, GameState newValue)
+        {
+            if (GameEnded)
+                EndGame();
+
+            OnGameStateChange?.Invoke();
+        }
+
+        void EndGame()
+        {
+            CalculateGrade();
+        }
+
         void CalculateGrade()
         {
-            if (!GameEnded) return;
-
             if (Bank.Instance.CurrentBalance >= _currentLevelPreset.fiveStarsMinimum)
                 LevelGrade = Grade.FiveStars;
             else if (Bank.Instance.CurrentBalance >= _currentLevelPreset.fourStarsMinimum)
@@ -355,6 +377,16 @@ namespace SurvivalGame
                 LevelGrade = Grade.OneStar;
             else
                 LevelGrade = Grade.NoStars;
+        }
+
+        public void ReturnToLobby()
+        {
+            Loader.LoadSceneNetwork(Loader.Scene.SafeHouseScene);
+        }
+
+        public void RestartGame()
+        {
+            Loader.LoadLevel(MultiplayerManager.Instance.GetCurrentLevel());
         }
     }
 }

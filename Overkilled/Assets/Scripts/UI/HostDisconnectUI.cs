@@ -1,21 +1,22 @@
-using SurvivalGame;
-using Unity.Netcode;
+using Unity.Services.Lobbies.Models;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class HostDisconnectUI : MonoBehaviour
 {
-    [Tooltip("The quit button on the Host Disconnect UI")]
-    [SerializeField] Button _quitButton;
+    [Tooltip("The return to lobby button on the Pause Screen UI")]
+    [SerializeField] Button _toLobbyButton;
+    [Tooltip("The return to menu on the Pause Screen UI")]
+    [SerializeField] Button _toMenuButton;
+
+    //Return to lobby?
 
     void Awake()
     {
-        _quitButton.onClick.AddListener(() => 
-        {
-            NetworkManager.Singleton.Shutdown();
-            SceneManager.LoadScene(Loader.Scene.MainMenuScene.ToString());
-        });
+        _toLobbyButton.onClick.AddListener(ToLobby);
+
+        _toMenuButton.onClick.AddListener(ToMenu);
     }
 
     void Start()
@@ -30,6 +31,20 @@ public class HostDisconnectUI : MonoBehaviour
     void OnDestroy()
     {
         MultiplayerManager.Instance.OnLocalDisconnect -= Show;
+    }
+
+    async void ToLobby()
+    {
+        await MultiplayerManager.Instance.LeaveMultiplayer();
+
+        SceneManager.LoadScene(Loader.Scene.SafeHouseScene.ToString());
+    }
+
+    async void ToMenu()
+    {
+        await MultiplayerManager.Instance.LeaveMultiplayer();
+
+        SceneManager.LoadScene(Loader.Scene.MainMenuScene.ToString());
     }
 
     void Show()

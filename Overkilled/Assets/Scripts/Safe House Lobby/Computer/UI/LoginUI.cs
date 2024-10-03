@@ -26,8 +26,15 @@ public class LoginUI : MonoBehaviour
 
     void Start()
     {
-        _playerNameInputField.text = MultiplayerManager.Instance.GetPlayerName();
+        if (GameLobby.Instance.InLobby)
+        {
+            gameObject.SetActive(false);
+        }
+        else
+        {
+            _playerNameInputField.text = MultiplayerManager.Instance.GetPlayerName();
 
-        gameObject.SetActive(true);
+            gameObject.SetActive(true);
+        }
     }
 }

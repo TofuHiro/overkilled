@@ -10,8 +10,10 @@ public class PauseScreenUI : MonoBehaviour
     [SerializeField] Button _resumeButton;
     [Tooltip("The restart button on the Pause Screen UI")]
     [SerializeField] Button _restartButton;
-    [Tooltip("The quit button on the Pause Screen UI")]
-    [SerializeField] Button _quitButton;
+    [Tooltip("The return to lobby button on the Pause Screen UI")]
+    [SerializeField] Button _toLobbyButton;
+    [Tooltip("The return to menu on the Pause Screen UI")]
+    [SerializeField] Button _toMenuButton;
 
     void Awake()
     {
@@ -25,11 +27,19 @@ public class PauseScreenUI : MonoBehaviour
             //GameManager restart
         });
 
-        _quitButton.onClick.AddListener(() => 
+        _toLobbyButton.onClick.AddListener(() =>
         {
-            NetworkManager.Singleton.Shutdown();
-            SceneManager.LoadScene(Loader.Scene.MainMenuScene.ToString());
+            if (NetworkManager.Singleton.IsServer)
+            {
+                Loader.LoadSceneNetwork(Loader.Scene.SafeHouseScene);
+            }
+            else
+            {
+                ToLobbyLocal();
+            }
         });
+
+        _toMenuButton.onClick.AddListener(ToMenu);
     }
 
     void Start()
@@ -40,9 +50,25 @@ public class PauseScreenUI : MonoBehaviour
         Hide();    
     }
 
+    async void ToLobbyLocal()
+    {
+        await MultiplayerManager.Instance.LeaveMultiplayer();
+
+        SceneManager.LoadScene(Loader.Scene.SafeHouseScene.ToString());
+    }
+
+    async void ToMenu()
+    {
+        await MultiplayerManager.Instance.LeaveMultiplayer();
+
+        SceneManager.LoadScene(Loader.Scene.MainMenuScene.ToString());
+    }
+
     void Show()
     {
         gameObject.SetActive(true);
+
+        _restartButton.gameObject.SetActive(NetworkManager.Singleton.IsServer);
     }
 
     void Hide()

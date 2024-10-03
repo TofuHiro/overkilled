@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Unity.Netcode;
 using Unity.Services.Authentication;
 using UnityEngine;
@@ -21,6 +22,7 @@ public class MultiplayerManager : NetworkBehaviour
     public event Action OnPlayerDataNetworkListChange;
 
     NetworkList<PlayerData> _playerDataNetworkList;
+    Loader.Level _currentLevel;
     string _playerName;
 
     void Awake()
@@ -43,10 +45,7 @@ public class MultiplayerManager : NetworkBehaviour
     /// Get the local player's name
     /// </summary>
     /// <returns></returns>
-    public string GetPlayerName()
-    {
-        return _playerName;
-    }
+    public string GetPlayerName() { return _playerName; }
 
     /// <summary>
     /// Set the local player's name
@@ -57,6 +56,16 @@ public class MultiplayerManager : NetworkBehaviour
         _playerName = newName;
         PlayerPrefs.SetString(PLAYER_PREFS_PLAYER_NAME_MULTIPLAYER, _playerName);////Temp for possible steam implementation
     }
+    /// <summary>
+    /// Get the current level to play
+    /// </summary>
+    /// <returns></returns>
+    public Loader.Level GetCurrentLevel() { return _currentLevel; }
+    /// <summary>
+    /// Set the level to be played
+    /// </summary>
+    /// <param name="level"></param>
+    public void SetCurrentLevel(Loader.Level level) { _currentLevel = level; }
 
     void PlayerDataNetworkList_OnListChanged(NetworkListEvent<PlayerData> changeEvent)
     {
@@ -69,6 +78,11 @@ public class MultiplayerManager : NetworkBehaviour
         NetworkManager.Singleton.OnConnectionEvent += Server_OnClientConnect;
         NetworkManager.Singleton.OnConnectionEvent += Server_OnClientDisconnect;
         NetworkManager.Singleton.StartHost();
+
+        _playerDataNetworkList.Clear();
+        AddPlayerToNetworkList(NetworkManager.ServerClientId);
+        SetPlayerIdServerRpc(AuthenticationService.Instance.PlayerId);
+        SetPlayerNameServerRpc(GetPlayerName());
     }
 
     void SetConnectionApproval(NetworkManager.ConnectionApprovalRequest request, NetworkManager.ConnectionApprovalResponse response)
@@ -95,13 +109,8 @@ public class MultiplayerManager : NetworkBehaviour
         if (data.EventType == ConnectionEvent.ClientConnected)
         {
             AddPlayerToNetworkList(data.ClientId);
-
-            //Init host data
-            if (data.ClientId == NetworkManager.ServerClientId)
-            {
-                SetPlayerIdServerRpc(AuthenticationService.Instance.PlayerId);
-                SetPlayerNameServerRpc(GetPlayerName());
-            }
+            SetPlayerIdServerRpc(AuthenticationService.Instance.PlayerId);
+            SetPlayerNameServerRpc(GetPlayerName());
         }
     }
 
@@ -164,6 +173,28 @@ public class MultiplayerManager : NetworkBehaviour
     public bool IsPlayerIndexConnected(int index)
     {
         return index < _playerDataNetworkList.Count;
+    }
+
+    public async Task LeaveMultiplayer()
+    {
+        try
+        {
+            NetworkManager.Singleton.ConnectionApprovalCallback -= SetConnectionApproval;
+            NetworkManager.Singleton.OnConnectionEvent -= Server_OnClientConnect;
+            NetworkManager.Singleton.OnConnectionEvent -= Server_OnClientDisconnect;
+
+            NetworkManager.Singleton.OnConnectionEvent -= Client_OnLocalDisconnect;
+            NetworkManager.Singleton.OnConnectionEvent -= Client_OnLocalConnect;
+
+            if (NetworkManager.IsClient)
+                NetworkManager.Singleton.Shutdown();
+
+            await GameLobby.Instance.LeaveLobby();
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
+        }
     }
 
 
@@ -367,5 +398,6 @@ public class MultiplayerManager : NetworkBehaviour
 
 
     #endregion
+
 
 }
