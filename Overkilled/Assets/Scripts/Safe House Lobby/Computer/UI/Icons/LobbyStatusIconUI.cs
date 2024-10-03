@@ -5,6 +5,19 @@ public class LobbyStatusIconUI : ComputerIconUI
         GameLobby.Instance.OnCreateLobbySuccess += Show;
         GameLobby.Instance.OnJoinSuccess += Show;
 
-        Hide();
+        if (GameLobby.Instance.InLobby)
+        {
+            Show();
+        }
+        else
+        {
+            Hide();
+        }
+    }
+
+    void OnDestroy()
+    {
+        GameLobby.Instance.OnCreateLobbySuccess -= Show;
+        GameLobby.Instance.OnJoinSuccess -= Show;
     }
 }

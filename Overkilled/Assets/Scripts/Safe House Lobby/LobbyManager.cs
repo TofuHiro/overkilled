@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class LobbyManager : NetworkBehaviour
 {
@@ -40,16 +40,44 @@ public class LobbyManager : NetworkBehaviour
     {
         GameLobby.Instance.OnCreateLobbySuccess += MultiplayerSwitch;
         GameLobby.Instance.OnJoinSuccess += MultiplayerSwitch;
+        GameLobby.Instance.OnCreateLobbyFailed += StartLocalHost;
+        GameLobby.Instance.OnJoinFailed += StartLocalHost;
+        GameLobby.Instance.OnQuickJoinFailed += StartLocalHost;
+        GameLobby.Instance.OnCreateLobbyStarted += EndLocalHost;
+        GameLobby.Instance.OnJoinStarted += EndLocalHost;
 
-        //Local network - Unity Transport
-        NetworkManager.Singleton.StartHost();
+        if (!GameLobby.Instance.InLobby)
+        {
+            //Local network - Unity Transport
+            StartLocalHost();
+        }
+        else
+        {
+            if (IsServer)
+            {
+                //Spawn all players
+                foreach (ulong cliendId in NetworkManager.ConnectedClientsIds)
+                    SpawnClient(cliendId);
+            }
+        }
+    }
+
+    public override void OnDestroy()
+    {
+        GameLobby.Instance.OnCreateLobbySuccess -= MultiplayerSwitch;
+        GameLobby.Instance.OnJoinSuccess -= MultiplayerSwitch;
+        GameLobby.Instance.OnCreateLobbyFailed -= StartLocalHost;
+        GameLobby.Instance.OnJoinFailed -= StartLocalHost;
+        GameLobby.Instance.OnQuickJoinFailed -= StartLocalHost;
+        GameLobby.Instance.OnCreateLobbyStarted -= EndLocalHost;
+        GameLobby.Instance.OnJoinStarted -= EndLocalHost;
     }
 
     public override void OnNetworkSpawn()
     {
         if (IsServer)
         {
-            NetworkManager.Singleton.OnConnectionEvent += SpawnClient;
+            NetworkManager.Singleton.OnConnectionEvent += NetworkManager_OnConnectionEvent;
         }
     }
 
@@ -57,8 +85,20 @@ public class LobbyManager : NetworkBehaviour
     {
         if (IsServer)
         {
-            NetworkManager.Singleton.OnConnectionEvent -= SpawnClient;
+            NetworkManager.Singleton.OnConnectionEvent -= NetworkManager_OnConnectionEvent;
         }
+    }
+    
+    void StartLocalHost()
+    {
+        NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData("127.0.0.1", 7777);
+
+        NetworkManager.Singleton.StartHost();
+    }
+
+    void EndLocalHost()
+    {
+        NetworkManager.Singleton.Shutdown();
     }
 
     void MultiplayerSwitch()
@@ -66,18 +106,18 @@ public class LobbyManager : NetworkBehaviour
         OnSwitchToMultiplayer?.Invoke(NetworkManager.IsServer);
     }
 
-    void SpawnClient(NetworkManager manager, ConnectionEventData data)
+    void NetworkManager_OnConnectionEvent(NetworkManager manager, ConnectionEventData data)
     {
         if (data.EventType == ConnectionEvent.ClientConnected)
         {
-            GameObject playerObject = Instantiate(_playerPrefab);
-            playerObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(data.ClientId, true);
+            SpawnClient(data.ClientId);
         }
     }
 
-    public void EndLocalHost()
+    void SpawnClient(ulong clientId)
     {
-        NetworkManager.Singleton.Shutdown();
+        GameObject playerObject = Instantiate(_playerPrefab);
+        playerObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
     }
 
     public void StartGame()
@@ -93,8 +133,7 @@ public class LobbyManager : NetworkBehaviour
             return;
         }
 
-        GameLobby.Instance.DeleteLobby();
-
+        MultiplayerManager.Instance.SetCurrentLevel(_selectedLevel);
         Loader.LoadLevel(_selectedLevel);
     }
 
@@ -103,10 +142,7 @@ public class LobbyManager : NetworkBehaviour
     /// </summary>
     public void ReloadLobby()
     {
-        Destroy(NetworkManager.Singleton.gameObject);
-        Destroy(MultiplayerManager.Instance.gameObject);
-
-        SceneManager.LoadScene(Loader.Scene.SafeHouseScene.ToString());
+        Loader.LoadScene(Loader.Scene.SafeHouseScene);
     }
 
     /// <summary>

@@ -7,10 +7,7 @@ public class PlayerKickedUI : MonoBehaviour
 
     void Awake()
     {
-        _returnHomeButton.onClick.AddListener(() =>
-        {
-            LobbyManager.Instance.ReloadLobby();
-        });
+        _returnHomeButton.onClick.AddListener(Quit);
     }
 
     void Start()
@@ -18,6 +15,18 @@ public class PlayerKickedUI : MonoBehaviour
         MultiplayerManager.Instance.OnLocalDisconnect += Show;
 
         Hide();
+    }
+
+    void OnDestroy()
+    {
+        MultiplayerManager.Instance.OnLocalDisconnect -= Show;
+    }
+
+    async void Quit()
+    {
+        await MultiplayerManager.Instance.LeaveMultiplayer();
+
+        LobbyManager.Instance.ReloadLobby();
     }
 
     void Show()

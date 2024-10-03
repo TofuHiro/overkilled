@@ -40,21 +40,37 @@ public class PlayerReadyManager : NetworkBehaviour
 
     void Start()
     {
-        LobbyManager.Instance.OnSwitchToMultiplayer += LobbyManager_OnSwitchToMultiplayer;
+        if (IsServer)
+        {
+            //Players already connected returning to lobby from game.
+            if (GameLobby.Instance.InLobby)
+            {
+                foreach (ulong clientId in NetworkManager.ConnectedClientsIds)
+                {
+                    _playerReadyDictionary[clientId] = false;
+                    _allPlayersReady = false;
+                }
+
+                SyncDictionaryServerRpc();
+            }
+        }
     }
 
-    void LobbyManager_OnSwitchToMultiplayer(bool isHost)
+    public override void OnNetworkSpawn()
     {
-        if (isHost)
+        if (IsServer)
         {
             NetworkManager.Singleton.OnConnectionEvent += NetworkManager_Server_OnConnectionEvent;
-            _playerReadyDictionary.Add(NetworkManager.ServerClientId, false);
         }
     }
 
     public override void OnNetworkDespawn()
     {
-        NetworkManager.Singleton.OnConnectionEvent -= NetworkManager_Server_OnConnectionEvent;
+        if (IsServer)
+        {
+            NetworkManager.Singleton.OnConnectionEvent -= NetworkManager_Server_OnConnectionEvent;
+            _playerReadyDictionary = new Dictionary<ulong, bool>();
+        }
     }
 
     void Update()
@@ -67,7 +83,7 @@ public class PlayerReadyManager : NetworkBehaviour
     {
         if (data.EventType == ConnectionEvent.ClientConnected)
         {
-            _playerReadyDictionary.Add(data.ClientId, false);
+            _playerReadyDictionary[data.ClientId] = false;
             _allPlayersReady = false;
 
             SyncDictionaryServerRpc();

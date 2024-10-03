@@ -20,6 +20,8 @@ public class GameLobby : MonoBehaviour
 
     public static GameLobby Instance { get; private set; }
 
+    public bool InLobby { get { return _joinedLobby != null; } }
+
     /// <summary>
     /// Invoked when lobby creation has started
     /// </summary>
@@ -66,8 +68,19 @@ public class GameLobby : MonoBehaviour
         }
 
         Instance = this;
+        DontDestroyOnLoad(gameObject);
 
         InitializeUnityAuthentication();
+    }
+
+    void Start()
+    {
+        MultiplayerManager.Instance.OnLocalDisconnect += MultiplayerManager_OnLocalDisconnect;
+    }
+
+    void MultiplayerManager_OnLocalDisconnect()
+    {
+        _joinedLobby = null;
     }
 
     async void InitializeUnityAuthentication()
@@ -176,8 +189,6 @@ public class GameLobby : MonoBehaviour
 
         try
         {
-            LobbyManager.Instance.EndLocalHost();
-
             CreateLobbyOptions options = new CreateLobbyOptions
             {
                 IsPrivate = isPrivate,
@@ -218,8 +229,6 @@ public class GameLobby : MonoBehaviour
 
         try
         {
-            LobbyManager.Instance.EndLocalHost();
-
             _joinedLobby = await LobbyService.Instance.QuickJoinLobbyAsync();
 
             string relayJoinCode = _joinedLobby.Data[KEY_RELAY_JOIN_CODE].Value;
@@ -249,8 +258,6 @@ public class GameLobby : MonoBehaviour
 
         try
         {
-            LobbyManager.Instance.EndLocalHost();
-
             _joinedLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode);
 
             string relayJoinCode = _joinedLobby.Data[KEY_RELAY_JOIN_CODE].Value;
@@ -280,8 +287,6 @@ public class GameLobby : MonoBehaviour
 
         try
         {
-            LobbyManager.Instance.EndLocalHost();
-
             _joinedLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyId);
 
             string relayJoinCode = _joinedLobby.Data[KEY_RELAY_JOIN_CODE].Value;
@@ -333,7 +338,7 @@ public class GameLobby : MonoBehaviour
     /// <summary>
     /// Leave the current lobby this player is in
     /// </summary>
-    public async void LeaveLobby()
+    public async Task LeaveLobby()
     {
         if (_joinedLobby != null)
         {
@@ -405,8 +410,8 @@ public class GameLobby : MonoBehaviour
         }
     }
 
-    void OnApplicationQuit()
+    async void OnApplicationQuit()
     {
-        LeaveLobby();
+        await LeaveLobby();
     }
 }

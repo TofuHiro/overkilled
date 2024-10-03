@@ -45,6 +45,12 @@ public class LevelButtonUI : MonoBehaviour, IStartInvoke
         _selectedOverlay.SetActive(false);
     }
 
+    void OnDestroy()
+    {
+        LobbyManager.Instance.OnSwitchToMultiplayer -= LobbyManager_OnSwitchToMultiplayer;
+        LobbyManager.Instance.OnLevelChange -= LobbyManager_Client_OnLevelChange;
+    }
+
     void LobbyManager_OnSwitchToMultiplayer(bool isHost)
     {
         _button.enabled = isHost;

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using Unity.Netcode;
 using Unity.Services.Lobbies.Models;
@@ -23,12 +21,7 @@ public class LobbyStatusUI : ComputerWindowUI
     {
         base.Awake();
 
-        _leaveButton.onClick.AddListener(() =>
-        {
-            GameLobby.Instance.LeaveLobby();
-            NetworkManager.Singleton.Shutdown();
-            LobbyManager.Instance.ReloadLobby();
-        });
+        _leaveButton.onClick.AddListener(Quit);
 
         _readyButton.onClick.AddListener(() =>
         {
@@ -46,7 +39,25 @@ public class LobbyStatusUI : ComputerWindowUI
         GameLobby.Instance.OnCreateLobbySuccess += UpdateLobby;
         GameLobby.Instance.OnJoinSuccess += UpdateLobby;
 
+        if (GameLobby.Instance.InLobby)
+        {
+            _startButton.gameObject.SetActive(NetworkManager.Singleton.IsServer);
+        }
+
         Hide();
+    }
+
+    void OnDestroy()
+    {
+        GameLobby.Instance.OnCreateLobbySuccess -= UpdateLobby;
+        GameLobby.Instance.OnJoinSuccess -= UpdateLobby;
+    }
+
+    async void Quit()
+    {
+        await MultiplayerManager.Instance.LeaveMultiplayer();
+
+        LobbyManager.Instance.ReloadLobby();
     }
 
     void UpdateLobby()
