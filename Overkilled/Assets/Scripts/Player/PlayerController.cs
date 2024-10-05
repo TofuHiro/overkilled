@@ -103,9 +103,12 @@ public class PlayerController : NetworkBehaviour
 
         if (GameManager.Instance != null)
         {
+            if (GameManager.Instance.IsWaiting)
+                _canMove = false;
+
             GameManager.Instance.OnGameStateChange += GameManager_OnGameStateChange;
-            GameManager.Instance.OnLocalGamePause += GameManager_OnLocalGamePause;
-            GameManager.Instance.OnLocalGameUnpause += GameManager_OnLocalGameUnpause;
+            GameManager.Instance.OnMultiplayerGamePause += GameManager_OnMultiplayerGamePause;
+            GameManager.Instance.OnMultiplayerGameUnpause += GameManager_OnMultiplayerGameUnpause;
         }
     }
 
@@ -119,13 +122,13 @@ public class PlayerController : NetworkBehaviour
             _canMove = false;
     }
 
-    void GameManager_OnLocalGamePause()
+    void GameManager_OnMultiplayerGamePause()
     {
         if (GameManager.Instance.IsPaused)
             _canMove = false;
     }
 
-    void GameManager_OnLocalGameUnpause()
+    void GameManager_OnMultiplayerGameUnpause()
     {
         if (!GameManager.Instance.IsPaused)
             _canMove = true;
