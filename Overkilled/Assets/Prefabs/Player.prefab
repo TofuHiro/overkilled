@@ -44,6 +44,7 @@ GameObject:
   - component: {fileID: 5434053555850789758}
   - component: {fileID: 8804239417119206262}
   - component: {fileID: 6348215906972809333}
+  - component: {fileID: 8128548005166071266}
   - component: {fileID: 2428191017155514310}
   - component: {fileID: 7167128930439726913}
   - component: {fileID: 3610093696613412845}
@@ -95,7 +96,7 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.4
+  m_Radius: 0.2
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 1, z: 0}
@@ -178,6 +179,29 @@ MonoBehaviour:
   InLocalSpace: 0
   Interpolate: 1
   SlerpPosition: 0
+--- !u!136 &8128548005166071266
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8211705792208053782}
+  m_Material: {fileID: 13400000, guid: 5b7424f5c3bcb58458799586bd6e2037, type: 2}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.2
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!114 &2428191017155514310
 MonoBehaviour:
   m_ObjectHideFlags: 0

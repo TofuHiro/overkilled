@@ -164,11 +164,11 @@ namespace SurvivalGame
             player.OnPlayerPauseInput += TogglePauseGame;
         }
 
-        void SpawnPlayers(string sceneName, UnityEngine.SceneManagement.LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
+        void SpawnPlayers(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
         {
             foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
             {
-                GameObject playerObject = Instantiate(_playerPrefab);
+                GameObject playerObject = Instantiate(_playerPrefab, PlayerSpawnManager.Instance.GetNextSpawnPosition(), Quaternion.identity);
                 playerObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
             }
 

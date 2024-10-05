@@ -116,7 +116,7 @@ public class LobbyManager : NetworkBehaviour
 
     void SpawnClient(ulong clientId)
     {
-        GameObject playerObject = Instantiate(_playerPrefab);
+        GameObject playerObject = Instantiate(_playerPrefab, PlayerSpawnManager.Instance.GetNextSpawnPosition(), Quaternion.identity);
         playerObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
     }
 
