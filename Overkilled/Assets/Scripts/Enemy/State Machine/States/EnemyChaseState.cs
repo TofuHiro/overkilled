@@ -7,18 +7,16 @@ public class EnemyChaseState : EnemyState
 
     public override void EnterState()
     {
-        base.EnterState();
+       
     }
 
     public override void ExitState()
     {
-        base.ExitState();
+        
     }
 
     public override void FrameUpdate()
     {
-        base.FrameUpdate();
-
         if (!_enemy.HasTarget)
             _stateMachine.ChangeState(_enemy.IdleState);
 
@@ -30,7 +28,7 @@ public class EnemyChaseState : EnemyState
 
     public override void PhysicsUpdate()
     {
-        base.PhysicsUpdate();
+        
     }
 
     public override void AnimationTriggerEvent(EnemyController.AnimationTriggerType triggerType)

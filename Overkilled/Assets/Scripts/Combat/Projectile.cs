@@ -69,7 +69,7 @@ public class Projectile : NetworkBehaviour
         //Damage
         IDamagable damagable = target.GetComponent<IDamagable>();
         if (damagable != null)
-            CombatManager.Instance.DamageTarget(damagable, _damage);
+            CombatManager.Instance.DamageTarget(damagable, _damage, _projectileSO.entityTarget);
 
         //Apply Force
         Rigidbody rb = target.GetComponent<Rigidbody>();

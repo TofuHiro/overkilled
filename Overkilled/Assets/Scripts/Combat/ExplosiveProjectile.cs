@@ -56,7 +56,7 @@ public class ExplosiveProjectile : Projectile
             //Damage
             IDamagable damagable = collider.GetComponent<IDamagable>();
             if (damagable != null)
-                CombatManager.Instance.DamageTarget(damagable, _explosiveProjectile.explosionDamage);
+                CombatManager.Instance.DamageTarget(damagable, _explosiveProjectile.explosionDamage, _projectileSO.entityTarget);
 
             //Apply Force
             Rigidbody rb = collider.GetComponent<Rigidbody>();

@@ -23,9 +23,12 @@ public class CombatManager : MonoBehaviour
     /// </summary>
     /// <param name="damagable">The damagable target</param>
     /// <param name="damage">The damage value</param>
-    public void DamageTarget(IDamagable damagable, float damage)
+    public void DamageTarget(IDamagable damagable, float damage, EntityType entityTarget)
     {
-        DamageTargetServerRpc(damagable.GetNetworkObject(), damage);
+        if (damagable.GetEntityType() == entityTarget || damagable.GetEntityType() == EntityType.All)
+        {
+            DamageTargetServerRpc(damagable.GetNetworkObject(), damage);
+        }
     }
 
     [ServerRpc(RequireOwnership = false)]
