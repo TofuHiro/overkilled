@@ -25,13 +25,28 @@ public class EnemyTargetFinder : MonoBehaviour
 
     void Start()
     {
-        PlayerList.OnPlayerListUpdate += SetPlayerReferences;
+        PlayerList.OnPlayerListUpdate += PlayerList_OnPlayerListUpdate;
+        PlayerList.OnPlayerAliveUpdate += PlayerList_OnPlayerAliveUpdate;
+
         SetPlayerReferences();
+    }
+
+    void PlayerList_OnPlayerListUpdate()
+    {
+        SetPlayerReferences();
+        PollClosestPlayer();
+    }
+
+    void PlayerList_OnPlayerAliveUpdate()
+    {
+        SetPlayerReferences();
+        PollClosestPlayer();
     }
 
     void OnDestroy()
     {
-        PlayerList.OnPlayerListUpdate -= SetPlayerReferences;
+        PlayerList.OnPlayerListUpdate -= PlayerList_OnPlayerListUpdate;
+        PlayerList.OnPlayerAliveUpdate -= PlayerList_OnPlayerAliveUpdate;
     }
 
     /// <summary>
@@ -40,6 +55,8 @@ public class EnemyTargetFinder : MonoBehaviour
     /// <returns></returns>
     public GameObject GetClosestPlayer()
     {
+        SetPlayerReferences();
+        PollClosestPlayer();
         return _closestPlayer;
     }
 
@@ -56,7 +73,7 @@ public class EnemyTargetFinder : MonoBehaviour
 
     void SetPlayerReferences()
     {
-        _playerReferences = PlayerList.GetPlayers();
+        _playerReferences = PlayerList.GetAlivePlayers();
     }
 
     void PollClosestPlayer()

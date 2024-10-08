@@ -5,17 +5,24 @@ using UnityEngine;
 
 public class ObjectHealth : NetworkBehaviour, IDamagable
 {
+    [Tooltip("The type of entity this object is")]
+    [SerializeField] EntityType _entityType;
     [Tooltip("The maximum possible health for this object")]
-    [SerializeField] float _maxHealth;
+    [SerializeField] protected float _maxHealth;
 
     float _currentHealth;
     NetworkObject _networkObject;
 
-    void Start()
+    protected virtual void Start()
     {
         _networkObject = GetComponent<NetworkObject>();
 
         _currentHealth = _maxHealth;
+    }
+
+    public EntityType GetEntityType()
+    {
+        return _entityType;
     }
 
     public float GetHealth()
@@ -51,7 +58,7 @@ public class ObjectHealth : NetworkBehaviour, IDamagable
 
     public virtual void Die()
     {
-        
+        MultiplayerManager.Instance.DestroyObject(gameObject);
     }
 
     public NetworkObject GetNetworkObject()

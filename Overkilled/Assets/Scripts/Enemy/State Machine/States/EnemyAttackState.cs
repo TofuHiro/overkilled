@@ -12,21 +12,20 @@ public class EnemyAttackState : EnemyState
 
     public override void EnterState()
     {
-        base.EnterState();
-
         _timer = 0f;
-        //start attack anim
+        //start attack anim?
         _enemy.Attack();
     }
 
     public override void ExitState()
     {
-        base.ExitState();
+        
     }
 
     public override void FrameUpdate()
     {
-        base.FrameUpdate();
+        if (!_enemy.HasTarget)
+            _stateMachine.ChangeState(_enemy.IdleState);
 
         _timer += Time.deltaTime;
 
@@ -36,13 +35,11 @@ public class EnemyAttackState : EnemyState
 
     public override void PhysicsUpdate()
     {
-        base.PhysicsUpdate();
+        
     }
 
     public override void AnimationTriggerEvent(EnemyController.AnimationTriggerType triggerType)
     {
-        base.AnimationTriggerEvent(triggerType);
-
         if (triggerType != EnemyController.AnimationTriggerType.Attack)
             return;
 

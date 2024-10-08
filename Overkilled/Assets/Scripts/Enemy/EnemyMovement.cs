@@ -16,7 +16,7 @@ public class EnemyMovement : MonoBehaviour
     NavMeshAgent _navAgent;
     float _timer = 0f;
 
-    void Start()
+    void Awake()
     {
         _navAgent = GetComponent<NavMeshAgent>();
         _navAgent.speed = _speed;
@@ -43,6 +43,8 @@ public class EnemyMovement : MonoBehaviour
     /// <param name="target"></param>
     public void SetTarget(Transform target)
     {
+        if (target == null)
+            return;
         if (_timer < _pathDrawRate)
             return;
 

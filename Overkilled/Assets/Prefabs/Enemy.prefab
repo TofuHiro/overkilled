@@ -212,7 +212,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0efdad82c6249843888f5887c9c83b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _weaponSO: {fileID: 11400000, guid: 9903b8c7dc4bcc74896e20498b17ffe7, type: 2}
+  _weaponSO: {fileID: 11400000, guid: 9e987a0c2a46f154889fd848a54aecd1, type: 2}
   _swingPoint: {fileID: 3977467273962074644}
 --- !u!1 &2413281693045033764
 GameObject:
@@ -457,7 +457,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3410840022
+  GlobalObjectIdHash: 4090905520
   InScenePlacedSourceGlobalObjectIdHash: 3053083862
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -538,6 +538,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ba3a865172c6c747aa23519cbb8c42b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _entityType: 3
   _maxHealth: 50
 --- !u!114 &4478401957151353810
 MonoBehaviour:

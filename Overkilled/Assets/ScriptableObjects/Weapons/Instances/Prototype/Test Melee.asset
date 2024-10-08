@@ -17,6 +17,7 @@ MonoBehaviour:
   attackFrequency: 0.5
   durability: 15
   semiAutomatic: 0
+  entityTarget: 3
   areaOfAttack: {x: 2, y: 1, z: 1}
   heavyKnockbackForce: 14
   heavyDamage: 35

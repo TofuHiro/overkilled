@@ -89,7 +89,12 @@ public class EnemyController : NetworkBehaviour
     /// <returns>Returns true if this enemy is within range to perform an attack</returns>
     public bool CheckCanAttack()
     {
-        float dist = Vector3.Distance(_targetFinder.GetClosestPlayer().transform.position, transform.position);
+        GameObject closestPlayer = _targetFinder.GetClosestPlayer();
+
+        if (closestPlayer == null)
+            return false;
+
+        float dist = Vector3.Distance(closestPlayer.transform.position, transform.position);
         if (dist <= _attackDistance)
             return true;
         else
@@ -101,7 +106,8 @@ public class EnemyController : NetworkBehaviour
     /// </summary>
     public void TargetPlayer()
     {
-        _movement.SetTarget(_targetFinder.GetClosestPlayer().transform);
+        GameObject closestPlayer = _targetFinder.GetClosestPlayer();
+        _movement.SetTarget(closestPlayer ? closestPlayer.transform : null);
         _rotation.SetLookDirection(_movement.GetDirection());
     }
 

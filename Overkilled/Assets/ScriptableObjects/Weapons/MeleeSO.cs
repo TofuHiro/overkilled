@@ -3,6 +3,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "New Melee", menuName = "Weapons/New Melee")]
 public class MeleeSO : WeaponSO
 {
+    [Tooltip("The entity types this weapon can damage")]
+    public EntityType entityTarget;
     [Header("Melee")]
     [Tooltip("The size of the 3D space to check for collisions")]
     public Vector3 areaOfAttack;

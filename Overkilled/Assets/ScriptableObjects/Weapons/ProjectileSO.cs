@@ -3,6 +3,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "New Projectile", menuName = "Weapons/Projectiles/New Projectile")]
 public class ProjectileSO : ScriptableObject
 {
+    [Tooltip("The entity types this weapon can damage")]
+    public EntityType entityTarget;
     [Tooltip("Prefab of the projectile to spawn")]
     public GameObject prefab;
     [Tooltip("The initial velocity of the projectile when fired")]

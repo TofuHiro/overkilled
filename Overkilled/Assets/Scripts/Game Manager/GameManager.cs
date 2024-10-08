@@ -379,6 +379,13 @@ namespace SurvivalGame
                 LevelGrade = Grade.NoStars;
         }
 
+        public void FailGame()
+        {
+            _currentGameState.Value = GameState.GameEnded;
+
+            //
+        }
+
         public void ReturnToLobby()
         {
             Loader.LoadSceneNetwork(Loader.Scene.SafeHouseScene);

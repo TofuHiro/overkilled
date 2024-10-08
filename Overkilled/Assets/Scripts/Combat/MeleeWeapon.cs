@@ -46,7 +46,7 @@ public class MeleeWeapon : Weapon
             IDamagable damagable = collider.GetComponent<IDamagable>();
             if (damagable != null)
             {
-                CombatManager.Instance.DamageTarget(damagable, damage);
+                CombatManager.Instance.DamageTarget(damagable, damage, _meleeSO.entityTarget);
                 hit = true;
             }
 
