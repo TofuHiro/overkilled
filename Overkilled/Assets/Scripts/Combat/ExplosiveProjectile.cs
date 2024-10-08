@@ -1,4 +1,5 @@
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class ExplosiveProjectile : Projectile
 {
@@ -62,6 +63,11 @@ public class ExplosiveProjectile : Projectile
             Rigidbody rb = collider.GetComponent<Rigidbody>();
             if (rb != null)
                 CombatManager.Instance.AddExplosiveForce(rb, _explosiveProjectile.explosionForce, transform.position, _explosiveProjectile.explosionRadius);
+
+            //Stun
+            IStunnable stunnable = collider.GetComponent<IStunnable>();
+            if (stunnable != null)
+                CombatManager.Instance.StunTarget(stunnable, _projectileSO.stunTime, false);
         }
 
         MultiplayerManager.Instance.DestroyObject(gameObject);
