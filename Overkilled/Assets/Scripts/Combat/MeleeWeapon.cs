@@ -72,7 +72,7 @@ public class MeleeWeapon : Weapon
         return colliders;
     }
 
-    void StunTargets<T>(T[] targets) where T : MonoBehaviour
+    void StunTargets<T>(T[] targets) where T : Component
     {
         foreach (T target in targets)
         {
