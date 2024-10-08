@@ -76,6 +76,11 @@ public class Projectile : NetworkBehaviour
         if (rb != null)
             CombatManager.Instance.AddHitForce(rb, _directionOfTravel * _knockbackForce, hitPoint);
 
+        //Stun
+        IStunnable stunnable = target.GetComponent<IStunnable>();
+        if (stunnable != null)
+            CombatManager.Instance.StunTarget(stunnable, _projectileSO.stunTime, false);
+
         MultiplayerManager.Instance.DestroyObject(gameObject);
     }
 }

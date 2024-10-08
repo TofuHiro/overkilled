@@ -24,7 +24,8 @@ public class MeleeWeapon : Weapon
         if (_isSecondaryAttacking)
         {
             //Heavy Attack
-            Swing(_meleeSO.heavyAreaOfAttack, _meleeSO.heavyDamage, _meleeSO.heavyKnockbackForce, 2);
+            Collider[] colliders = Swing(_meleeSO.heavyAreaOfAttack, _meleeSO.heavyDamage, _meleeSO.heavyKnockbackForce, 2);
+            StunTargets(colliders);
             SetNextTimeAttack(_meleeSO.heavyAttackFrequency);
         }
         else
@@ -35,7 +36,15 @@ public class MeleeWeapon : Weapon
         }
     }
 
-    void Swing(Vector3 areaOfAttack, float damage, float knockbackForce, int durabilityConsumption)
+    /// <summary>
+    /// Attempt to attack entities in the given area
+    /// </summary>
+    /// <param name="areaOfAttack">The area to swing at</param>
+    /// <param name="damage">The damage to inflict</param>
+    /// <param name="knockbackForce">The knockback force to apply to entity hit</param>
+    /// <param name="durabilityConsumption">The durability to decrement by with a successful hit</param>
+    /// <returns>Returns an array of all colliders hit</returns>
+    Collider[] Swing(Vector3 areaOfAttack, float damage, float knockbackForce, int durabilityConsumption)
     {
         Collider[] colliders = Physics.OverlapBox(_swingPoint.position, areaOfAttack / 2f);
 
@@ -59,6 +68,19 @@ public class MeleeWeapon : Weapon
         //Only reduce durability if damagable hit
         if (hit)
             DecreaseDurablity(durabilityConsumption);
+
+        return colliders;
+    }
+
+    void StunTargets<T>(T[] targets) where T : MonoBehaviour
+    {
+        foreach (T target in targets)
+        {
+            //Stun
+            IStunnable stunnable = target.GetComponent<IStunnable>();
+            if (stunnable != null)
+                CombatManager.Instance.StunTarget(stunnable, _meleeSO.stunTime, _meleeSO.flattenTarget);
+        }
     }
 
     public override void SetSecondaryAttackState(bool state)

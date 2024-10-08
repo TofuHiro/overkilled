@@ -88,4 +88,22 @@ public class CombatManager : MonoBehaviour
 
         rigidbody.AddExplosionForce(explosiveForce, explosionPosition, explosionRadius, 0f, ForceMode.Impulse);
     }
+
+    public void StunTarget(IStunnable stunnable, float stunTime, bool flatten)
+    {
+        NetworkObject networkObject = stunnable.GetNetworkObject();
+        if (networkObject != null)
+            StunTargetServerRpc(networkObject, stunTime, flatten);
+        else
+            Debug.LogError("Network Object could not be found for object " + name);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void StunTargetServerRpc(NetworkObjectReference targetNetworkObjectReference, float stunTime, bool flatten)
+    {
+        targetNetworkObjectReference.TryGet(out NetworkObject targetNetworkObject);
+        IStunnable stunnable = targetNetworkObject.GetComponent<IStunnable>();
+
+        stunnable.Stun(stunTime, flatten);
+    }
 }

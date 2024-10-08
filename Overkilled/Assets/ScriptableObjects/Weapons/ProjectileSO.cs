@@ -13,4 +13,8 @@ public class ProjectileSO : ScriptableObject
     public bool pointCollision;
     [Tooltip("Whether this projectile is affected by gravity")]
     public bool projectileGravity;
+
+    [Header("Stun")]
+    [Tooltip("The stun time applied to targets")]
+    public float stunTime;
 }
