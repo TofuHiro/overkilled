@@ -18,8 +18,6 @@ public class MeleeSO : WeaponSO
     public Vector3 heavyAreaOfAttack;
     [Tooltip("The frequency (seconds) this weapon can perform heavy attacks")]
     public float heavyAttackFrequency;
-
-    [Header("Stun")]
     [Tooltip("The stun time applied to targets")]
     public float stunTime;
     [Tooltip("The visual effect of flattening targets when hit with heavy attacks")]

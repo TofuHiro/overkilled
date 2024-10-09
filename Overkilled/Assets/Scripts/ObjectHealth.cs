@@ -35,7 +35,7 @@ public class ObjectHealth : NetworkBehaviour, IDamagable
         SetHealthServerRpc(value);
     }
 
-    public void TakeDamage(float damage)
+    public virtual void TakeDamage(float damage)
     {
         _currentHealth = Mathf.Clamp(_currentHealth - damage, 0f, _maxHealth);
 

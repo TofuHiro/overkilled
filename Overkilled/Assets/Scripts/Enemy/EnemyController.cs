@@ -33,13 +33,17 @@ public class EnemyController : NetworkBehaviour
     public EnemyIdleState IdleState { get; private set; }
     public EnemyChaseState ChaseState { get; private set; }
     public EnemyAttackState AttackState { get; private set; }
+    public EnemyStaggeredState StaggeredState { get; private set; }
+    public EnemyStunnedState StunnedState { get; private set; }
 
+    EnemyHealth _health;
     PlayerRotation _rotation;
     EnemyTargetFinder _targetFinder;
     EnemyMovement _movement;
 
     void Awake()
     {
+        _health = GetComponent<EnemyHealth>();
         _rotation = GetComponent<PlayerRotation>();
         _targetFinder = GetComponent<EnemyTargetFinder>();
         _movement = GetComponent<EnemyMovement>();
@@ -48,18 +52,51 @@ public class EnemyController : NetworkBehaviour
         IdleState = new EnemyIdleState(this, StateMachine);
         ChaseState = new EnemyChaseState(this, StateMachine);
         AttackState = new EnemyAttackState(this, StateMachine, _attackDuration);
+        StaggeredState = new EnemyStaggeredState(this, StateMachine, _health.GetStaggerTime());
+        StunnedState = new EnemyStunnedState(this, StateMachine);
 
         StateMachine.Initialize(IdleState);
+
+        _health.OnDamage += Health_OnDamage;
+        _health.OnStun += Health_OnStun;
+        _health.OnFlatten += Health_OnFlatten;
+    }
+
+    void Health_OnDamage(float value)
+    {
+        StateMachine.ChangeState(StaggeredState);
+    }
+
+    void Health_OnStun(float value)
+    {
+        Debug.Log("Stunned");
+        StunnedState.SetStunTime(value);
+        StateMachine.ChangeState(StunnedState);
+    }
+    
+    void Health_OnFlatten(float value)
+    {
+        //Kinematic?
+        Debug.Log("Flatten");
     }
 
     public override void OnNetworkSpawn()
     {
-        GameManager.Instance.OnGameStateChange += Stop;    
+        GameManager.Instance.OnGameStateChange += GameManager_OnGameStateChange;
     }
 
     public override void OnNetworkDespawn()
     {
-        GameManager.Instance.OnGameStateChange -= Stop;
+        GameManager.Instance.OnGameStateChange -= GameManager_OnGameStateChange;
+    }
+
+    void GameManager_OnGameStateChange()
+    {
+        if (GameManager.Instance.GameEnded)
+        {
+            Stop();
+            StateMachine.ChangeState(IdleState);
+        }
     }
 
     void Update()
@@ -120,12 +157,8 @@ public class EnemyController : NetworkBehaviour
         _weapon.Attack();
     }
 
-    void Stop()
+    public void Stop()
     {
-        if (GameManager.Instance.GameEnded)
-        {
-            _movement.Stop();
-            StateMachine.ChangeState(IdleState);
-        }
+        _movement.Stop();
     }
 }

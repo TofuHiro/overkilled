@@ -23,5 +23,5 @@ MonoBehaviour:
   heavyDamage: 35
   heavyAreaOfAttack: {x: 2, y: 2, z: 2}
   heavyAttackFrequency: 1.2
-  stunTime: 1
+  stunTime: 3
   flattenTarget: 1

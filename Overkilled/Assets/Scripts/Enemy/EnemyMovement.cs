@@ -58,6 +58,7 @@ public class EnemyMovement : MonoBehaviour
     /// </summary>
     public void Stop()
     {
-        _navAgent.isStopped = true;
+        if (_navAgent.hasPath)
+            _navAgent.isStopped = true;
     }
 }
