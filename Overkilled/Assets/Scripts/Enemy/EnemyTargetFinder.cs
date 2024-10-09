@@ -55,8 +55,6 @@ public class EnemyTargetFinder : MonoBehaviour
     /// <returns></returns>
     public GameObject GetClosestPlayer()
     {
-        SetPlayerReferences();
-        PollClosestPlayer();
         return _closestPlayer;
     }
 

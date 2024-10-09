@@ -2626,21 +2626,25 @@ MonoBehaviour:
   - EnemyPrefabs:
     - {fileID: 4163672175636474596, guid: 1a96fd14499e83e4fb5db6d51502343d, type: 3}
     SpawnSequentially: 0
+    FirstSpawnDelay: 0
+    SpawnFrequency: 3
     EnemySpawnPoints:
     - {fileID: 439261438}
     - {fileID: 440509358}
     - {fileID: 2141648319}
     ShowSpawnPointGizmos: 1
-    SpawnFrequency: 3
   - EnemyPrefabs:
     - {fileID: 3012940866497903167, guid: c24a5d6696155314885bba0561f22733, type: 3}
     SpawnSequentially: 0
+    FirstSpawnDelay: 0
+    SpawnFrequency: 6
     EnemySpawnPoints:
     - {fileID: 689254224}
     - {fileID: 475999149}
     - {fileID: 623631998}
     ShowSpawnPointGizmos: 1
-    SpawnFrequency: 6
+  _maxEnemyCountBase: 8
+  _enemyCountMultiplierPerPlayer: 1.5
 --- !u!4 &1849391250
 Transform:
   m_ObjectHideFlags: 0

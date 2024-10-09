@@ -934,11 +934,14 @@ MonoBehaviour:
   - EnemyPrefabs:
     - {fileID: 4163672175636474596, guid: 1a96fd14499e83e4fb5db6d51502343d, type: 3}
     SpawnSequentially: 0
+    FirstSpawnDelay: 1
+    SpawnFrequency: 2
     EnemySpawnPoints:
     - {fileID: 720709677}
     - {fileID: 2088164959}
     ShowSpawnPointGizmos: 1
-    SpawnFrequency: 8
+  _maxEnemyCountBase: 2
+  _enemyCountMultiplierPerPlayer: 2
 --- !u!114 &864868220
 MonoBehaviour:
   m_ObjectHideFlags: 0

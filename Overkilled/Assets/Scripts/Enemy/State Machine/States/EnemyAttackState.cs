@@ -24,13 +24,15 @@ public class EnemyAttackState : EnemyState
 
     public override void FrameUpdate()
     {
-        if (!_enemy.HasTarget)
-            _stateMachine.ChangeState(_enemy.IdleState);
-
         _timer += Time.deltaTime;
 
-        if (_timer > _attackDuration)
+        if (_timer < _attackDuration)
+            return;
+        
+        if (_enemy.HasTarget)
             _enemy.StateMachine.ChangeState(_enemy.ChaseState);
+        else
+            _stateMachine.ChangeState(_enemy.IdleState);
     }
 
     public override void PhysicsUpdate()
@@ -43,6 +45,6 @@ public class EnemyAttackState : EnemyState
         if (triggerType != EnemyController.AnimationTriggerType.Attack)
             return;
 
-        _enemy.Attack();
+        //_enemy.Attack();
     }
 }
