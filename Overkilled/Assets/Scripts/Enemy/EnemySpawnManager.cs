@@ -76,13 +76,15 @@ public class EnemySpawnManager : NetworkBehaviour, IStartInvoke
     }
 
     [SerializeField] EnemySpawn[] _enemySpawns;
-    [SerializeField] int _maxEnemyCount;
+    [SerializeField] int _maxEnemyCountBase;
+    [SerializeField] float _enemyCountMultiplierPerPlayer = 1.5f;
 
     public static EnemySpawnManager Instance { get; private set; }
 
     bool _spawnerActive = false;
     float _timer = 0f;
     int _currentEnemyCount;
+    int _maxEnemyCount;
 
     void Awake()
     {
@@ -104,6 +106,8 @@ public class EnemySpawnManager : NetworkBehaviour, IStartInvoke
             enemySpawn.SetNextTimeToSpawn(enemySpawn.FirstSpawnDelay);
 
         EnemyHealth.OnDeath += EnemyHealth_OnDeath;
+        
+        _maxEnemyCount = _maxEnemyCountBase + (int)(_enemyCountMultiplierPerPlayer * (NetworkManager.Singleton.ConnectedClients.Count - 1));
     }
 
     public override void OnNetworkDespawn()
