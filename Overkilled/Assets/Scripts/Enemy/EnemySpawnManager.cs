@@ -18,14 +18,18 @@ public class EnemySpawnManager : NetworkBehaviour, IStartInvoke
             "otherwise, enemies will be randomly picked from the EnemyPrefabs array.")]
         public bool SpawnSequentially;
 
+        [Tooltip("The delay for the first enemy spawn")]
+        public float FirstSpawnDelay;
+
+        [Tooltip("The frequency to spawn enemy after the first initial spawn")]
+        public float SpawnFrequency;
+
+        [Header("Spawn Points")]
         [Tooltip("The set of spawn points to use to spawn this set of enemies. The spawn points are chosen randomly")]
         public Transform[] EnemySpawnPoints;
 
         [Tooltip("If true, the spawn points set in the Enemy Spawn Points array will be highlighted with gizmo cubes")]
         public bool ShowSpawnPointGizmos;
-
-        [Tooltip("The frequency to spawn an enemy in this set")]
-        public float SpawnFrequency;
 
         float _nextTimeToSpawn;
         int _spawnIndex = 0;
@@ -72,11 +76,13 @@ public class EnemySpawnManager : NetworkBehaviour, IStartInvoke
     }
 
     [SerializeField] EnemySpawn[] _enemySpawns;
+    [SerializeField] int _maxEnemyCount;
 
     public static EnemySpawnManager Instance { get; private set; }
 
     bool _spawnerActive = false;
     float _timer = 0f;
+    int _currentEnemyCount;
 
     void Awake()
     {
@@ -87,7 +93,6 @@ public class EnemySpawnManager : NetworkBehaviour, IStartInvoke
         }
 
         Instance = this;
-
     }
 
     public override void OnNetworkSpawn()
@@ -96,7 +101,19 @@ public class EnemySpawnManager : NetworkBehaviour, IStartInvoke
             return;
 
         foreach (var enemySpawn in _enemySpawns)
-            enemySpawn.SetNextTimeToSpawn(enemySpawn.SpawnFrequency);
+            enemySpawn.SetNextTimeToSpawn(enemySpawn.FirstSpawnDelay);
+
+        EnemyHealth.OnDeath += EnemyHealth_OnDeath;
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        EnemyHealth.OnDeath -= EnemyHealth_OnDeath;
+    }
+
+    void EnemyHealth_OnDeath()
+    {
+        _currentEnemyCount--;
     }
 
     public void InvokeStart()
@@ -110,6 +127,9 @@ public class EnemySpawnManager : NetworkBehaviour, IStartInvoke
     void Update()
     {
         if (!IsServer)
+            return;
+
+        if (_currentEnemyCount >= _maxEnemyCount)
             return;
 
         if (_spawnerActive)
@@ -144,6 +164,8 @@ public class EnemySpawnManager : NetworkBehaviour, IStartInvoke
             {
                 SpawnEnemy(enemySpawn);
                 enemySpawn.SetNextTimeToSpawn(_timer + enemySpawn.SpawnFrequency);
+
+                _currentEnemyCount++;
             }
         }
     }
@@ -165,6 +187,6 @@ public class EnemySpawnManager : NetworkBehaviour, IStartInvoke
         foreach (EnemySpawn enemySpawn in _enemySpawns)
             if (enemySpawn.ShowSpawnPointGizmos)
                 foreach (Transform spawnPoint in enemySpawn.EnemySpawnPoints)
-                    Gizmos.DrawCube(spawnPoint.position, new Vector3(.2f, .4f, .2f));
+                    Gizmos.DrawCube(spawnPoint.position, new Vector3(.2f, 2f, .2f));
     }
 }

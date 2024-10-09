@@ -14,6 +14,7 @@ public class EnemyHealth : ObjectHealth, IStunnable
     public event EnemyDamageAction OnDamage;
     public event EnemyDamageAction OnStun;
     public event EnemyDamageAction OnFlatten;
+    public static event Action OnDeath;
 
     public float GetStaggerTime() { return _staggerTime; }
 
@@ -38,5 +39,7 @@ public class EnemyHealth : ObjectHealth, IStunnable
     public override void Die()
     {
         base.Die();
+
+        OnDeath?.Invoke();
     }
 }
