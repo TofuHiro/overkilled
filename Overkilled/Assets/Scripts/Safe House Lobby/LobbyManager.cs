@@ -134,6 +134,7 @@ public class LobbyManager : NetworkBehaviour
         }
 
         MultiplayerManager.Instance.SetCurrentLevel(_selectedLevel);
+        GameLobby.Instance.LockLobby();
         Loader.LoadLevel(_selectedLevel);
     }
 
