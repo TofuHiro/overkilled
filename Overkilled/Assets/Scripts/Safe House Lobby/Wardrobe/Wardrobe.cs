@@ -19,12 +19,8 @@ public class Wardrobe : MonoBehaviour, IInteractable
 
     void Start()
     {
-        LobbyInterface.Instance.OnUICancel += Close;
-    }
-
-    void OnDestroy()
-    {
-        LobbyInterface.Instance.OnUICancel -= Close;
+        LobbyInterface.Instance.OnUICancel += Hide;
+        LobbyInterface.Instance.OnMenuToggle += Hide;
     }
 
     public void Interact(PlayerInteraction player)
@@ -35,7 +31,7 @@ public class Wardrobe : MonoBehaviour, IInteractable
         LobbyInterface.Instance.ToggleInterface(true);
     }
 
-    void Close()
+    void Hide()
     {
         if (!IsWardrobeOpen)
             return;

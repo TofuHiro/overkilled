@@ -13,6 +13,11 @@ public class LobbyInterface : MonoBehaviour
     public bool IsInterfaceOpen { get; private set; }
 
     /// <summary>
+    /// Invoked when local player toggles menu button
+    /// </summary>
+    public event Action OnMenuToggle;
+
+    /// <summary>
     /// Invoked when local player cancel action is invoked
     /// </summary>
     public event Action OnUICancel;
@@ -40,13 +45,16 @@ public class LobbyInterface : MonoBehaviour
     void Player_OnPlayerSpawn(PlayerController player)
     {
         _currentPlayerInstance = player;
+        _currentPlayerInstance.OnUICancelInput += PlayerController_OnUICancelInput;
+        _currentPlayerInstance.OnMenuInput += PlayerController_OnMenuInput;
         ToggleInterface(IsInterfaceOpen);
     }
 
     void OnDestroy()
     {
         PlayerController.OnPlayerSpawn -= Player_OnPlayerSpawn;
-        _currentPlayerInstance.OnUICancelInput -= Close;
+        _currentPlayerInstance.OnUICancelInput -= PlayerController_OnUICancelInput;
+        _currentPlayerInstance.OnMenuInput -= PlayerController_OnMenuInput;
     }
 
     /// <summary>
@@ -58,18 +66,15 @@ public class LobbyInterface : MonoBehaviour
         IsInterfaceOpen = state;
 
         _currentPlayerInstance.SetUIControls(state);
-        if (state)
-        {
-            _currentPlayerInstance.OnUICancelInput += Close;
-        }
-        else
-        {
-            _currentPlayerInstance.OnUICancelInput -= Close;
-        }
     }
 
-    void Close()
+    void PlayerController_OnUICancelInput()
     {
         OnUICancel?.Invoke();
+    }
+
+    void PlayerController_OnMenuInput()
+    {
+        OnMenuToggle?.Invoke();
     }
 }

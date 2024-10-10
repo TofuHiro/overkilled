@@ -39,17 +39,25 @@ public class Computer : MonoBehaviour, IInteractable
     void Start()
     {
         LobbyInterface.Instance.OnUICancel += Close;
-    }
-
-    void OnDestroy()
-    {
-        LobbyInterface.Instance.OnUICancel -= Close;
+        LobbyInterface.Instance.OnMenuToggle += LobbyInterface_OnMenuToggle;
     }
 
     public void Interact(PlayerInteraction player)
     {
-        _computerUI.Show();
+        Show();
+    }
 
+    void LobbyInterface_OnMenuToggle()
+    {
+        if (!IsComputerOpen && !LobbyInterface.Instance.IsInterfaceOpen)
+            Show();
+        else if (IsComputerOpen)
+            Hide();
+    }
+
+    void Show()
+    {
+        _computerUI.Show();
         LobbyInterface.Instance.ToggleInterface(true);
     }
 
@@ -59,15 +67,15 @@ public class Computer : MonoBehaviour, IInteractable
             return;
 
         if (HasWindowOpen)
-        {
             CloseTopWindow();
-        }
         else
-        {
-            _computerUI.Hide();
+            Hide();
+    }
 
-            LobbyInterface.Instance.ToggleInterface(false);
-        }
+    void Hide()
+    {
+        _computerUI.Hide();
+        LobbyInterface.Instance.ToggleInterface(false);
     }
 
     void CloseTopWindow()

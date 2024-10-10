@@ -17,7 +17,8 @@ public class Calender : MonoBehaviour, IInteractable
 
     void Start()
     {
-        LobbyInterface.Instance.OnUICancel += Close;
+        LobbyInterface.Instance.OnUICancel += Hide;
+        LobbyInterface.Instance.OnMenuToggle += Hide;
         LobbyManager.Instance.OnLevelChange += UpdateCalenderText;
     }
 
@@ -37,7 +38,7 @@ public class Calender : MonoBehaviour, IInteractable
         _calenderText.text = text;
     }
 
-    void Close()
+    void Hide()
     {
         if (!IsCalenderOpen)
             return;

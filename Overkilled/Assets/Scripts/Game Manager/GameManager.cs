@@ -161,7 +161,7 @@ namespace SurvivalGame
         void PlayerController_OnPlayerSpawn(PlayerController player)
         {
             player.OnPlayerInteractInput += SetLocalPlayerReady;
-            player.OnPlayerPauseInput += TogglePauseGame;
+            player.OnMenuInput += TogglePauseGame;
         }
 
         void SpawnPlayers(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)

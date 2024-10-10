@@ -62,7 +62,7 @@
                 {
                     "name": "Pause",
                     "type": "Button",
-                    "id": "9d4561db-a668-4434-835b-941f43d71e44",
+                    "id": "54de268a-dcd4-42be-9780-f65907379ce7",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -226,7 +226,18 @@
                 },
                 {
                     "name": "",
-                    "id": "8db5dcc4-4ece-42cb-ab69-07c78f467c13",
+                    "id": "cb58cb73-d6ed-4078-9a98-a67ed9dbd572",
+                    "path": "*/{Menu}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Joystick;Touch;XR;Gamepad;Keyboard&Mouse",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0221ad78-8c74-4b94-a7c0-8d0ff957514d",
                     "path": "<Keyboard>/escape",
                     "interactions": "",
                     "processors": "",
@@ -596,7 +607,18 @@
                     "path": "*/{Cancel}",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Keyboard&Mouse;Gamepad;Touch;Joystick;XR",
+                    "groups": "Gamepad;Touch;Joystick;XR",
+                    "action": "Cancel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "dd9e8589-9882-4130-af98-0f22903fe225",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
                     "action": "Cancel",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -697,6 +719,45 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "RightClick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Lobby Menu",
+            "id": "8e31b3fc-69b0-41d1-ae67-c8cea2264352",
+            "actions": [
+                {
+                    "name": "Menu",
+                    "type": "Button",
+                    "id": "3806b562-f035-4f1a-867c-87d7db7b2fd6",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "8f4e3921-5bf0-4780-8d86-a337eeace50f",
+                    "path": "*/{Menu}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "XR;Joystick;Touch;Gamepad;Keyboard&Mouse",
+                    "action": "Menu",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e3e26b7f-67ee-45ca-b736-be5166861641",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Menu",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
