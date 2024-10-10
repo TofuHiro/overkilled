@@ -10,13 +10,12 @@ public class LoginUI : MonoBehaviour
     [SerializeField] Button _loginButton;
     [Tooltip("The input field to enter the player's name")]
     [SerializeField] TMP_InputField _playerNameInputField;
+    [Tooltip("The taskbar object to show after logging in")]
+    [SerializeField] GameObject _taskBar;
 
     void Awake()
     {
-        _loginButton.onClick.AddListener(() =>
-        {
-            gameObject.SetActive(false);
-        });
+        _loginButton.onClick.AddListener(Hide);
 
         _playerNameInputField.onValueChanged.AddListener((string newText) =>
         {
@@ -28,13 +27,25 @@ public class LoginUI : MonoBehaviour
     {
         if (GameLobby.Instance.InLobby)
         {
-            gameObject.SetActive(false);
+            Hide();
         }
         else
         {
             _playerNameInputField.text = MultiplayerManager.Instance.GetPlayerName();
 
-            gameObject.SetActive(true);
+            Show();
         }
+    }
+
+    void Show()
+    {
+        gameObject.SetActive(true);
+        _taskBar.SetActive(false);
+    }
+
+    void Hide()
+    {
+        gameObject.SetActive(false);
+        _taskBar.SetActive(true);
     }
 }

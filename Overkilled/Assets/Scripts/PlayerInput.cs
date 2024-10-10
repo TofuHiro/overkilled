@@ -84,7 +84,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                 {
                     ""name"": ""Pause"",
                     ""type"": ""Button"",
-                    ""id"": ""9d4561db-a668-4434-835b-941f43d71e44"",
+                    ""id"": ""54de268a-dcd4-42be-9780-f65907379ce7"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -248,7 +248,18 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""8db5dcc4-4ece-42cb-ab69-07c78f467c13"",
+                    ""id"": ""cb58cb73-d6ed-4078-9a98-a67ed9dbd572"",
+                    ""path"": ""*/{Menu}"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Joystick;Touch;XR;Gamepad;Keyboard&Mouse"",
+                    ""action"": ""Pause"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0221ad78-8c74-4b94-a7c0-8d0ff957514d"",
                     ""path"": ""<Keyboard>/escape"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -618,7 +629,18 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""path"": ""*/{Cancel}"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse;Gamepad;Touch;Joystick;XR"",
+                    ""groups"": ""Gamepad;Touch;Joystick;XR"",
+                    ""action"": ""Cancel"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""dd9e8589-9882-4130-af98-0f22903fe225"",
+                    ""path"": ""<Keyboard>/tab"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Cancel"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -723,6 +745,45 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""Lobby Menu"",
+            ""id"": ""8e31b3fc-69b0-41d1-ae67-c8cea2264352"",
+            ""actions"": [
+                {
+                    ""name"": ""Menu"",
+                    ""type"": ""Button"",
+                    ""id"": ""3806b562-f035-4f1a-867c-87d7db7b2fd6"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""8f4e3921-5bf0-4780-8d86-a337eeace50f"",
+                    ""path"": ""*/{Menu}"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""XR;Joystick;Touch;Gamepad;Keyboard&Mouse"",
+                    ""action"": ""Menu"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e3e26b7f-67ee-45ca-b736-be5166861641"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Menu"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": [
@@ -807,6 +868,9 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         m_UI_ScrollWheel = m_UI.FindAction("ScrollWheel", throwIfNotFound: true);
         m_UI_MiddleClick = m_UI.FindAction("MiddleClick", throwIfNotFound: true);
         m_UI_RightClick = m_UI.FindAction("RightClick", throwIfNotFound: true);
+        // Lobby Menu
+        m_LobbyMenu = asset.FindActionMap("Lobby Menu", throwIfNotFound: true);
+        m_LobbyMenu_Menu = m_LobbyMenu.FindAction("Menu", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -1060,6 +1124,52 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         }
     }
     public UIActions @UI => new UIActions(this);
+
+    // Lobby Menu
+    private readonly InputActionMap m_LobbyMenu;
+    private List<ILobbyMenuActions> m_LobbyMenuActionsCallbackInterfaces = new List<ILobbyMenuActions>();
+    private readonly InputAction m_LobbyMenu_Menu;
+    public struct LobbyMenuActions
+    {
+        private @PlayerInput m_Wrapper;
+        public LobbyMenuActions(@PlayerInput wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Menu => m_Wrapper.m_LobbyMenu_Menu;
+        public InputActionMap Get() { return m_Wrapper.m_LobbyMenu; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(LobbyMenuActions set) { return set.Get(); }
+        public void AddCallbacks(ILobbyMenuActions instance)
+        {
+            if (instance == null || m_Wrapper.m_LobbyMenuActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_LobbyMenuActionsCallbackInterfaces.Add(instance);
+            @Menu.started += instance.OnMenu;
+            @Menu.performed += instance.OnMenu;
+            @Menu.canceled += instance.OnMenu;
+        }
+
+        private void UnregisterCallbacks(ILobbyMenuActions instance)
+        {
+            @Menu.started -= instance.OnMenu;
+            @Menu.performed -= instance.OnMenu;
+            @Menu.canceled -= instance.OnMenu;
+        }
+
+        public void RemoveCallbacks(ILobbyMenuActions instance)
+        {
+            if (m_Wrapper.m_LobbyMenuActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(ILobbyMenuActions instance)
+        {
+            foreach (var item in m_Wrapper.m_LobbyMenuActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_LobbyMenuActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public LobbyMenuActions @LobbyMenu => new LobbyMenuActions(this);
     private int m_KeyboardMouseSchemeIndex = -1;
     public InputControlScheme KeyboardMouseScheme
     {
@@ -1125,5 +1235,9 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         void OnScrollWheel(InputAction.CallbackContext context);
         void OnMiddleClick(InputAction.CallbackContext context);
         void OnRightClick(InputAction.CallbackContext context);
+    }
+    public interface ILobbyMenuActions
+    {
+        void OnMenu(InputAction.CallbackContext context);
     }
 }

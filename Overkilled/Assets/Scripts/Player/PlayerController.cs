@@ -27,9 +27,13 @@ public class PlayerController : NetworkBehaviour
     /// </summary>
     public event PlayerInputAction OnPlayerInteractInput;
     /// <summary>
+    /// Invoked when the menu button is pressed by the player while in the lobby scene
+    /// </summary>
+    public event PlayerInputAction OnMenuInput;
+    /// <summary>
     /// Invoked when the pause key is pressed by the player
     /// </summary>
-    public event PlayerInputAction OnPlayerPauseInput;
+    public event PlayerInputAction OnPauseInput;
     /// <summary>
     /// Invoked when the cancel key for UI elements is pressed by the player
     /// </summary>
@@ -67,6 +71,12 @@ public class PlayerController : NetworkBehaviour
 
         _input.UI.Cancel.performed += Cancel;
 
+        if (LobbyManager.Instance != null)
+        {
+            _input.LobbyMenu.Enable();
+            _input.LobbyMenu.Menu.performed += Menu;
+        }
+
         if (IsOwner)
         {
             LocalInstance = this;
@@ -89,9 +99,15 @@ public class PlayerController : NetworkBehaviour
         _input.Player.AltFire.started -= SecondaryAttack;
         _input.Player.AltFire.canceled -= SecondaryAttack;
         _input.Player.Pause.performed -= Pause;
-
+        
         _input.UI.Disable();
         _input.UI.Cancel.performed -= Cancel;
+
+        if (LobbyManager.Instance != null)
+        {
+            _input.LobbyMenu.Disable();
+            _input.LobbyMenu.Menu.performed -= Menu;
+        }
     }
 
     void Start()
@@ -248,11 +264,12 @@ public class PlayerController : NetworkBehaviour
 
         if (context.performed)
         {
-            OnPlayerPauseInput?.Invoke();
+            OnPauseInput?.Invoke();
         }
     }
 
     #endregion
+
 
     #region UI Controls
 
@@ -268,4 +285,21 @@ public class PlayerController : NetworkBehaviour
     }
 
     #endregion
+
+
+    #region Lobby Menu Controls
+
+    void Menu(InputAction.CallbackContext context)
+    {
+        if (!IsOwner)
+            return;
+
+        if (context.performed)
+        {
+            OnMenuInput?.Invoke();
+        }
+    }
+
+    #endregion
+
 }
