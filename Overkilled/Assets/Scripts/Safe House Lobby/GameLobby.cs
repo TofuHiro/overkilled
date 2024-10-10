@@ -58,6 +58,7 @@ public class GameLobby : MonoBehaviour
     Lobby _joinedLobby;
     float _heartBeatTimer, _maxHeartBeatTime = 15f;
     float _listLobbiesTimer, _maxListLobbiesTimer = 1.5f;
+    bool _hostLobbyIsPrivate;
 
     void Awake()
     {
@@ -189,6 +190,8 @@ public class GameLobby : MonoBehaviour
 
         try
         {
+            _hostLobbyIsPrivate = isPrivate;
+
             CreateLobbyOptions options = new CreateLobbyOptions
             {
                 IsPrivate = isPrivate,
@@ -403,6 +406,38 @@ public class GameLobby : MonoBehaviour
 
             QueryResponse queryResponse = await LobbyService.Instance.QueryLobbiesAsync(options);
             OnLobbyListChanged?.Invoke(queryResponse.Results);
+        }
+        catch (LobbyServiceException e)
+        {
+            Debug.LogException(e);
+        }
+    }
+
+    public async void LockLobby()
+    {
+        try
+        {
+            await LobbyService.Instance.UpdateLobbyAsync(_joinedLobby.Id, new UpdateLobbyOptions
+            {
+                IsPrivate = true,
+                IsLocked = true,
+            });
+        }
+        catch (LobbyServiceException e)
+        {
+            Debug.LogException(e);
+        }
+    }
+
+    public async void UnlockLobby()
+    {
+        try
+        {
+            await LobbyService.Instance.UpdateLobbyAsync(_joinedLobby.Id, new UpdateLobbyOptions
+            {
+                IsPrivate = _hostLobbyIsPrivate,
+                IsLocked = false,
+            });
         }
         catch (LobbyServiceException e)
         {

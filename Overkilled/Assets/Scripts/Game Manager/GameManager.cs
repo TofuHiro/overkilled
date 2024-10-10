@@ -389,6 +389,7 @@ namespace SurvivalGame
         public void ReturnToLobby()
         {
             Loader.LoadSceneNetwork(Loader.Scene.SafeHouseScene);
+            GameLobby.Instance.UnlockLobby();
         }
 
         public void RestartGame()
