@@ -24,7 +24,7 @@ public class PauseScreenUI : MonoBehaviour
 
         _restartButton.onClick.AddListener(() => 
         {
-            //GameManager restart
+            Loader.LoadLevel(MultiplayerManager.Instance.GetCurrentLevel());
         });
 
         _toLobbyButton.onClick.AddListener(() =>
