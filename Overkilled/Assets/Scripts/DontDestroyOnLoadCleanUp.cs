@@ -12,5 +12,8 @@ public class DontDestroyOnLoadCleanUp : MonoBehaviour
 
         if (MultiplayerManager.Instance != null)
             Destroy(MultiplayerManager.Instance.gameObject);
+
+        if (GameLobby.Instance != null)
+            Destroy(GameLobby.Instance.gameObject);
     }
 }
