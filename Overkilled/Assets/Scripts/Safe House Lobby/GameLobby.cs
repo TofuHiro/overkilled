@@ -415,6 +415,9 @@ public class GameLobby : MonoBehaviour
 
     public async void LockLobby()
     {
+        if (_joinedLobby == null)
+            return;
+
         try
         {
             await LobbyService.Instance.UpdateLobbyAsync(_joinedLobby.Id, new UpdateLobbyOptions
@@ -431,6 +434,9 @@ public class GameLobby : MonoBehaviour
 
     public async void UnlockLobby()
     {
+        if (_joinedLobby == null)
+            return;
+
         try
         {
             await LobbyService.Instance.UpdateLobbyAsync(_joinedLobby.Id, new UpdateLobbyOptions

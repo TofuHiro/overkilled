@@ -40,20 +40,10 @@ public class PostGameUI : MonoBehaviour
             GameManager.Instance.ReturnToLobby();
         });
 
-        _returnToLobbyClientButton.onClick.AddListener(Leave);
-    }
-
-    async void Leave()
-    {
-        try
+        _returnToLobbyClientButton.onClick.AddListener(() =>
         {
-            await MultiplayerManager.Instance.LeaveMultiplayer();
-            Loader.LoadScene(Loader.Scene.SafeHouseScene);
-        }
-        catch (Exception e)
-        {
-            Debug.LogException(e);
-        }
+            GameManager.Instance.LeaveTeamToLobby();
+        });
     }
 
     void Start()
