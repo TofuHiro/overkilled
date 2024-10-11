@@ -133,9 +133,35 @@ public class LobbyManager : NetworkBehaviour
             return;
         }
 
+        if (IsServer)
+            GameLobby.Instance.LockLobby();
         MultiplayerManager.Instance.SetCurrentLevel(_selectedLevel);
-        GameLobby.Instance.LockLobby();
         Loader.LoadLevel(_selectedLevel);
+    }
+
+    public void StartSoloGame()
+    {
+        if (_selectedLevel == Loader.Level.None)
+        {
+            Debug.Log("Level not selected");
+            return;
+        }
+
+        MultiplayerManager.Instance.SetCurrentLevel(_selectedLevel);
+        Loader.LoadLevel(_selectedLevel);
+    }
+
+    public async void LeaveLobby()
+    {
+        try
+        {
+            await MultiplayerManager.Instance.LeaveMultiplayer();
+            ReloadLobby();
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e);
+        }
     }
 
     /// <summary>

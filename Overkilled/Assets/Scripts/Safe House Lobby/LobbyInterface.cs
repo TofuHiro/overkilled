@@ -33,20 +33,20 @@ public class LobbyInterface : MonoBehaviour
         }
 
         Instance = this;
+        
+        PlayerController.OnPlayerSpawn += Player_OnPlayerSpawn;
     }
 
     void Start()
     {
-        PlayerController.OnPlayerSpawn += Player_OnPlayerSpawn;
-
         _currentPlayerInstance = PlayerController.LocalInstance;
     }
 
     void Player_OnPlayerSpawn(PlayerController player)
     {
         _currentPlayerInstance = player;
-        _currentPlayerInstance.OnUICancelInput += PlayerController_OnUICancelInput;
-        _currentPlayerInstance.OnMenuInput += PlayerController_OnMenuInput;
+        player.OnUICancelInput += PlayerController_OnUICancelInput;
+        player.OnMenuInput += PlayerController_OnMenuInput;
         ToggleInterface(IsInterfaceOpen);
     }
 

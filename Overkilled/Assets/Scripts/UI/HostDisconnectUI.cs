@@ -1,6 +1,5 @@
-using Unity.Services.Lobbies.Models;
+using SurvivalGame;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class HostDisconnectUI : MonoBehaviour
@@ -14,9 +13,15 @@ public class HostDisconnectUI : MonoBehaviour
 
     void Awake()
     {
-        _toLobbyButton.onClick.AddListener(ToLobby);
+        _toLobbyButton.onClick.AddListener(() =>
+        {
+            GameManager.Instance.LeaveTeamToLobby();
+        });
 
-        _toMenuButton.onClick.AddListener(ToMenu);
+        _toMenuButton.onClick.AddListener(() =>
+        {
+            GameManager.Instance.ReturnToMenu();
+        });
     }
 
     void Start()
@@ -31,20 +36,6 @@ public class HostDisconnectUI : MonoBehaviour
     void OnDestroy()
     {
         MultiplayerManager.Instance.OnLocalDisconnect -= Show;
-    }
-
-    async void ToLobby()
-    {
-        await MultiplayerManager.Instance.LeaveMultiplayer();
-
-        SceneManager.LoadScene(Loader.Scene.SafeHouseScene.ToString());
-    }
-
-    async void ToMenu()
-    {
-        await MultiplayerManager.Instance.LeaveMultiplayer();
-
-        SceneManager.LoadScene(Loader.Scene.MainMenuScene.ToString());
     }
 
     void Show()

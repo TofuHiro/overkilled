@@ -21,7 +21,10 @@ public class LobbyStatusUI : ComputerWindowUI
     {
         base.Awake();
 
-        _leaveButton.onClick.AddListener(Quit);
+        _leaveButton.onClick.AddListener(() =>
+        {
+            LobbyManager.Instance.LeaveLobby();
+        });
 
         _readyButton.onClick.AddListener(() =>
         {
@@ -40,9 +43,7 @@ public class LobbyStatusUI : ComputerWindowUI
         GameLobby.Instance.OnJoinSuccess += UpdateLobby;
 
         if (GameLobby.Instance.InLobby)
-        {
-            _startButton.gameObject.SetActive(NetworkManager.Singleton.IsServer);
-        }
+            UpdateLobby();
 
         Hide();
     }
@@ -51,13 +52,6 @@ public class LobbyStatusUI : ComputerWindowUI
     {
         GameLobby.Instance.OnCreateLobbySuccess -= UpdateLobby;
         GameLobby.Instance.OnJoinSuccess -= UpdateLobby;
-    }
-
-    async void Quit()
-    {
-        await MultiplayerManager.Instance.LeaveMultiplayer();
-
-        LobbyManager.Instance.ReloadLobby();
     }
 
     void UpdateLobby()

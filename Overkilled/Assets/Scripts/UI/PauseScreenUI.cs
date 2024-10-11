@@ -1,7 +1,6 @@
 using SurvivalGame;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class PauseScreenUI : MonoBehaviour
@@ -24,22 +23,18 @@ public class PauseScreenUI : MonoBehaviour
 
         _restartButton.onClick.AddListener(() => 
         {
-            Loader.LoadLevel(MultiplayerManager.Instance.GetCurrentLevel());
+            GameManager.Instance.RestartGame();
         });
 
         _toLobbyButton.onClick.AddListener(() =>
         {
-            if (NetworkManager.Singleton.IsServer)
-            {
-                Loader.LoadSceneNetwork(Loader.Scene.SafeHouseScene);
-            }
-            else
-            {
-                ToLobbyLocal();
-            }
+            GameManager.Instance.ReturnToLobby();
         });
 
-        _toMenuButton.onClick.AddListener(ToMenu);
+        _toMenuButton.onClick.AddListener(() =>
+        {
+            GameManager.Instance.ReturnToMenu();
+        });
     }
 
     void Start()
@@ -47,21 +42,7 @@ public class PauseScreenUI : MonoBehaviour
         GameManager.Instance.OnLocalGamePause += Show;
         GameManager.Instance.OnLocalGameUnpause += Hide;
 
-        Hide();    
-    }
-
-    async void ToLobbyLocal()
-    {
-        await MultiplayerManager.Instance.LeaveMultiplayer();
-
-        SceneManager.LoadScene(Loader.Scene.SafeHouseScene.ToString());
-    }
-
-    async void ToMenu()
-    {
-        await MultiplayerManager.Instance.LeaveMultiplayer();
-
-        SceneManager.LoadScene(Loader.Scene.MainMenuScene.ToString());
+        Hide();
     }
 
     void Show()

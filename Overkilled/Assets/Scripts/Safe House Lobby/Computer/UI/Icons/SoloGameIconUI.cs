@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HostGameQuickMenuButtono : QuickMenuButtonUI
+public class SoloGameIconUI : MonoBehaviour
 {
     void Start()
     {
@@ -19,5 +19,15 @@ public class HostGameQuickMenuButtono : QuickMenuButtonUI
     {
         GameLobby.Instance.OnCreateLobbySuccess -= Hide;
         GameLobby.Instance.OnJoinSuccess -= Hide;
+    }
+
+    void Show()
+    {
+        gameObject.SetActive(true);
+    }
+
+    void Hide()
+    {
+        gameObject.SetActive(false);
     }
 }

@@ -33,7 +33,7 @@ namespace SurvivalGame
         /// Returns true if the game is starting or counting down to start
         /// </summary>
         public bool IsStarting { get { return _currentGameState.Value == GameState.StartingGame; } }
-        
+
         /// <summary>
         /// Returns true if the game has started
         /// </summary>
@@ -94,7 +94,7 @@ namespace SurvivalGame
 
         bool _isLocalPlayerReady = false, _isLocalPlayerPaused = false;
         bool _autoTestGamePausedState, _autoTestGameReadyStart;
-        
+
         LevelPreset _currentLevelPreset;
 
         void Awake()
@@ -144,7 +144,7 @@ namespace SurvivalGame
 
         void Start()
         {
-            Init();    
+            Init();
         }
 
         void Init()
@@ -152,9 +152,12 @@ namespace SurvivalGame
             _currentLevelPreset = LevelSetter.Instance.GetPreset();
 
             LevelCameraController.Instance.SetFocusMode(_currentLevelPreset.useCameraFocusMode);
-            _currentGameState.Value = GameState.WaitingForPlayers;
-            _countdownTimer.Value = _gameStartCountdownTime;
-            _gameTimer.Value = _currentLevelPreset.timeLimit;
+
+            if (IsServer)
+                _currentGameState.Value = GameState.WaitingForPlayers;
+                _countdownTimer.Value = _gameStartCountdownTime;
+                _gameTimer.Value = _currentLevelPreset.timeLimit;
+            
             OnGameInitialize?.Invoke(_currentLevelPreset);
         }
 
@@ -239,7 +242,7 @@ namespace SurvivalGame
         void SetPlayerReadyServerRpc(ServerRpcParams serverRpcParams = default)
         {
             _playerReadyDictionary[serverRpcParams.Receive.SenderClientId] = true;
-           
+
             TestReadyToStartGame();
         }
 
@@ -386,10 +389,55 @@ namespace SurvivalGame
             //
         }
 
-        public void ReturnToLobby()
+        public async void ReturnToLobby()
         {
-            Loader.LoadSceneNetwork(Loader.Scene.SafeHouseScene);
-            GameLobby.Instance.UnlockLobby();
+            //Host and online
+            if (GameLobby.Instance.InLobby && IsServer)
+            {
+                Loader.LoadSceneNetwork(Loader.Scene.SafeHouseScene);
+
+                if (IsServer)
+                    GameLobby.Instance.UnlockLobby();
+            }
+            //Local or client
+            else 
+            {
+                try
+                {
+                    await MultiplayerManager.Instance.LeaveMultiplayer();
+                    Loader.LoadScene(Loader.Scene.SafeHouseScene);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+            }
+        }
+
+        public async void LeaveTeamToLobby()
+        {
+            try
+            {
+                await MultiplayerManager.Instance.LeaveMultiplayer();
+                Loader.LoadScene(Loader.Scene.SafeHouseScene);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+        }
+
+        public async void ReturnToMenu()
+        {
+            try
+            {
+                await MultiplayerManager.Instance.LeaveMultiplayer();
+                Loader.LoadScene(Loader.Scene.MainMenuScene);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
 
         public void RestartGame()
