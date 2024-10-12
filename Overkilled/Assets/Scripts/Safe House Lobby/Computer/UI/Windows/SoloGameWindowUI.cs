@@ -23,7 +23,7 @@ public class SoloGameWindowUI : ComputerWindowUI
     {
         LobbyManager.Instance.OnLevelChange += LobbyManager_OnLevelChange;
 
-        Hide();    
+        Hide();
     }
 
     void LobbyManager_OnLevelChange(Loader.Level level)

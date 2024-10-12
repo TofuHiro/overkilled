@@ -6,7 +6,7 @@ using UnityEngine;
 public class Calender : MonoBehaviour, IInteractable
 {
     [Tooltip("The UI to toggle the display for")]
-    [SerializeField] LevelSelectUI _levelSelectUI;
+    [SerializeField] LevelSelectGalleryUI _levelSelectUI;
     [Tooltip("The world space text to display the currently selected level")]
     [SerializeField] TMP_Text _calenderText;
 

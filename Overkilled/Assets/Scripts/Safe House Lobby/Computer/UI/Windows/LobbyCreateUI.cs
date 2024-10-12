@@ -31,7 +31,7 @@ public class LobbyCreateUI : ComputerWindowUI
 
     void Start()
     {
-        GameLobby.Instance.OnCreateLobbySuccess += GameLobby_OnLobbySuccess; ;
+        GameLobby.Instance.OnCreateLobbySuccess += GameLobby_OnLobbySuccess;
         GameLobby.Instance.OnJoinSuccess += GameLobby_OnLobbySuccess;
 
         Hide();

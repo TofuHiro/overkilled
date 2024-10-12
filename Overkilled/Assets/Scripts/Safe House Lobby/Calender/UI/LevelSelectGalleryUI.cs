@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LevelSelectUI : MonoBehaviour
+public class LevelSelectGalleryUI : MonoBehaviour
 {
     [Tooltip("Navigation button to go to the previous page")]
     [SerializeField] Button _prevPageButton;
     [Tooltip("Navigation button to go to the next page")]
     [SerializeField] Button _nextPageButton;
-    [Tooltip("The set of month objects to cycle through")]
-    [SerializeField] GameObject[] _monthPages;
+    [Tooltip("The parent for the set of month objects to cycle through")]
+    [SerializeField] Transform _monthsParent;
+
+    GameObject[] _monthPages;
 
     int _pageIndex = 0;
 
@@ -25,6 +27,12 @@ public class LevelSelectUI : MonoBehaviour
         {
             SwitchPage(_pageIndex + 1);
         });
+
+        List<GameObject> pages = new List<GameObject>();
+        foreach (Transform page in _monthsParent)
+            pages.Add(page.gameObject);
+
+        _monthPages = pages.ToArray();
     }
 
     void Start()

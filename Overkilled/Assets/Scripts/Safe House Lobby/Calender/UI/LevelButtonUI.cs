@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LevelButtonUI : MonoBehaviour, IStartInvoke
+public class LevelButtonUI : MonoBehaviour
 {
     [Tooltip("The level this button will set the selected level to")]
     [SerializeField] Loader.Level _level;
@@ -11,8 +11,6 @@ public class LevelButtonUI : MonoBehaviour, IStartInvoke
     [SerializeField] GameObject _lockedOverlay;
     [Tooltip("The UI element to display that this level is currently selected")]
     [SerializeField] GameObject _selectedOverlay;
-
-    static GameObject s_currentSelectedOverlay;
 
     Button _button;
     bool _isLocked = false;
@@ -27,17 +25,10 @@ public class LevelButtonUI : MonoBehaviour, IStartInvoke
                 return;
 
             LobbyManager.Instance.SetLevel(_level);
-
-            SetSelectedOverlay();
         });
     }
 
     void Start()
-    {
-        //InvokeStart
-    }
-
-    public void InvokeStart()
     {
         LobbyManager.Instance.OnSwitchToMultiplayer += LobbyManager_OnSwitchToMultiplayer;
         LobbyManager.Instance.OnLevelChange += LobbyManager_Client_OnLevelChange;
@@ -64,17 +55,12 @@ public class LevelButtonUI : MonoBehaviour, IStartInvoke
     {
         if (level == _level)
         {
-            SetSelectedOverlay();
+            _selectedOverlay.SetActive(true);
         }
-    }
-
-    void SetSelectedOverlay()
-    {
-        if (s_currentSelectedOverlay != null)
-            s_currentSelectedOverlay.SetActive(false);
-
-        s_currentSelectedOverlay = _selectedOverlay;
-        s_currentSelectedOverlay.SetActive(true);
+        else
+        {
+            _selectedOverlay.SetActive(false);
+        }
     }
 
     public void ToggleLock(bool state)
