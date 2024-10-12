@@ -16,12 +16,12 @@ public class ComputerIconUI : MonoBehaviour
         });  
     }
 
-    protected void Show()
+    void Show()
     {
         gameObject.SetActive(true);
     }
 
-    protected void Hide()
+    void Hide()
     {
         gameObject.SetActive(false);
     }

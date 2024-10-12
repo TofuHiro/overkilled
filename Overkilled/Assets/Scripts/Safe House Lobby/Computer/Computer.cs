@@ -8,8 +8,6 @@ public class Computer : MonoBehaviour, IInteractable
 
     [Tooltip("The computer UI to display")]
     [SerializeField] ComputerUI _computerUI;
-    [Tooltip("Cover to prevent player from opening windows")]
-    [SerializeField] GameObject _coverObject;
 
     /// <summary>
     /// If the computer currently has any windows open
@@ -92,8 +90,6 @@ public class Computer : MonoBehaviour, IInteractable
     public void CloseWindow(ComputerWindowUI window)
     {
         _openedWindows.Remove(window);
-
-        _coverObject.SetActive(_openedWindows.Count > 0);
     }
 
     /// <summary>
@@ -105,7 +101,6 @@ public class Computer : MonoBehaviour, IInteractable
         if (!_openedWindows.Contains(window))
         {
             _openedWindows.Add(window);
-            _coverObject.SetActive(true);
         }
     }
 }
