@@ -94,26 +94,6 @@ public abstract class Weapon : NetworkBehaviour
         _isSecondaryAttacking = state;
     }
 
-    /// <summary>
-    /// Action performed on this weapon's pickup
-    /// </summary>
-    public void OnPickup()
-    {
-        SetAttackState(false);
-        SetSecondaryAttackState(false);
-
-        _nextTimeToAttack = _timer + _weaponSO.attackFrequency;
-    }
-
-    /// <summary>
-    /// Action performed on this weapon's drop
-    /// </summary>
-    public void OnDrop()
-    {
-        SetAttackState(false);
-        SetSecondaryAttackState(false);
-    }
-
     protected void SetNextTimeAttack(float delay)
     {
         _nextTimeToAttack = _timer + delay;

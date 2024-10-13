@@ -1,3 +1,4 @@
+using System;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -6,6 +7,13 @@ public class PlayerHand : NetworkBehaviour
 {
     [Tooltip("Force applied to objects when dropping them")]
     [SerializeField] float _dropThrowForce = 5f;
+
+    public event Action OnWeaponPickUp;
+    public event Action OnWeaponDrop;
+
+    public delegate void AttackAction(float movementSpeedMultiplier);
+    public event AttackAction OnSecondaryAttackStart;
+    public event AttackAction OnSecondaryAttackStop;
 
     /// <summary>
     /// Whether this hand is holding an item
@@ -53,6 +61,12 @@ public class PlayerHand : NetworkBehaviour
             return;
 
         _currentWeapon.SetSecondaryAttackState(state);
+
+        float movementSpeedMultiplier = _currentWeapon.GetWeaponInfo().secondaryAttackMovementSpeedMultiplier;
+        if (state)
+            OnSecondaryAttackStart?.Invoke(movementSpeedMultiplier);
+        else
+            OnSecondaryAttackStop?.Invoke(movementSpeedMultiplier);
     }
 
     /// <summary>
@@ -76,7 +90,13 @@ public class PlayerHand : NetworkBehaviour
         _holder.SetItem(newItem);
 
         _currentWeapon = newItem.GetComponent<Weapon>();
-        _currentWeapon?.OnPickup();
+        if (_currentWeapon != null)
+        {
+            SetAttackState(false);
+            SetSecondaryAttackState(false);
+
+            OnWeaponPickUp?.Invoke();
+        }
     }
 
     /// <summary>
@@ -101,8 +121,11 @@ public class PlayerHand : NetworkBehaviour
 
         if (_currentWeapon != null)
         {
-            _currentWeapon.OnDrop();
+            SetAttackState(false);
+            SetSecondaryAttackState(false);
             _currentWeapon = null;
+
+            OnWeaponDrop?.Invoke();
         }
     }
 

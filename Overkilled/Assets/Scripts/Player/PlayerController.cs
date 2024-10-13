@@ -1,5 +1,6 @@
 using SurvivalGame;
 using System;
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -43,20 +44,35 @@ public class PlayerController : NetworkBehaviour
     PlayerRotation _rotation;
     PlayerStamina _stamina;
     PlayerInteraction _interaction;
+    PlayerHand _hand;
     PlayerVisuals _visuals;
 
     PlayerInput _input;
+    Camera _camera;
 
     bool _canMove;
+    bool _canSprint = true;
+    bool _toggleManualLook;
+    Plane _groundPlane = new Plane(Vector3.down, 0);
+
+    void Start()
+    {
+        /*PlayerData playerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
+        _visuals.SetPlayerModel(playerData.PlayerModelId);*/
+    }
 
     public override void OnNetworkSpawn()
     {
+        _canMove = true;
+
         _input = new PlayerInput();
+        _camera = Camera.main;
 
         _motor = GetComponent<PlayerMotor>();
         _rotation = GetComponent<PlayerRotation>();
         _stamina = GetComponent<PlayerStamina>();
         _interaction = GetComponent<PlayerInteraction>();
+        _hand = GetComponent<PlayerHand>();
         _visuals = GetComponentInChildren<PlayerVisuals>();
 
         _input.Player.Enable();
@@ -77,19 +93,32 @@ public class PlayerController : NetworkBehaviour
             _input.LobbyMenu.Menu.performed += Menu;
         }
 
+        if (GameManager.Instance != null)
+        {
+            if (GameManager.Instance.IsWaiting)
+                _canMove = false;
+
+            GameManager.Instance.OnGameStateChange += GameManager_OnGameStateChange;
+            GameManager.Instance.OnMultiplayerGamePause += GameManager_OnMultiplayerGamePause;
+            GameManager.Instance.OnMultiplayerGameUnpause += GameManager_OnMultiplayerGameUnpause;
+        }
+
+        _hand.OnWeaponPickUp += PlayerHand_OnWeaponPickUp;
+        _hand.OnWeaponDrop += PlayerHand_OnWeaponDrop;
+        _hand.OnSecondaryAttackStart += PlayerHand_OnSecondaryAttackStart;
+        _hand.OnSecondaryAttackStop += PlayerHand_OnSecondaryAttackStop;
+
+        PlayerList.AddPlayer(gameObject);
+
         if (IsOwner)
         {
             LocalInstance = this;
             OnPlayerSpawn?.Invoke(this);
         }
-
-        PlayerList.AddPlayer(gameObject);
     }
 
     public override void OnNetworkDespawn()
     {
-        PlayerList.RemovePlayer(gameObject);
-
         _input.Player.Disable();
         _input.Player.Sprint.started -= ToggleSprint;
         _input.Player.Sprint.canceled -= ToggleSprint;
@@ -108,24 +137,15 @@ public class PlayerController : NetworkBehaviour
             _input.LobbyMenu.Disable();
             _input.LobbyMenu.Menu.performed -= Menu;
         }
-    }
-
-    void Start()
-    {
-        _canMove = true;
-
-        /*PlayerData playerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
-        _visuals.SetPlayerModel(playerData.PlayerModelId);*/
 
         if (GameManager.Instance != null)
         {
-            if (GameManager.Instance.IsWaiting)
-                _canMove = false;
-
-            GameManager.Instance.OnGameStateChange += GameManager_OnGameStateChange;
-            GameManager.Instance.OnMultiplayerGamePause += GameManager_OnMultiplayerGamePause;
-            GameManager.Instance.OnMultiplayerGameUnpause += GameManager_OnMultiplayerGameUnpause;
+            GameManager.Instance.OnGameStateChange -= GameManager_OnGameStateChange;
+            GameManager.Instance.OnMultiplayerGamePause -= GameManager_OnMultiplayerGamePause;
+            GameManager.Instance.OnMultiplayerGameUnpause -= GameManager_OnMultiplayerGameUnpause;
         }
+
+        PlayerList.RemovePlayer(gameObject);
     }
 
     void GameManager_OnGameStateChange()
@@ -141,13 +161,44 @@ public class PlayerController : NetworkBehaviour
     void GameManager_OnMultiplayerGamePause()
     {
         if (GameManager.Instance.IsPaused)
+        {
             _canMove = false;
+            SetUIControls(true);
+        }
     }
 
     void GameManager_OnMultiplayerGameUnpause()
     {
         if (!GameManager.Instance.IsPaused)
+        {
             _canMove = true;
+            SetUIControls(false);
+        }
+    }
+
+    void PlayerHand_OnWeaponPickUp()
+    {
+        _toggleManualLook = true;
+        _rotation.ToggleLockRotationSpeed(false);
+    }
+
+    void PlayerHand_OnWeaponDrop()
+    {
+        _toggleManualLook = false;
+        _rotation.ToggleLockRotationSpeed(true);
+    }
+
+    void PlayerHand_OnSecondaryAttackStart(float movementSpeedMultiplier)
+    {
+        _motor.AddMovementSpeedMultiplier(movementSpeedMultiplier);
+        _canSprint = false;
+        _stamina.SetSprint(false);
+    }
+
+    void PlayerHand_OnSecondaryAttackStop(float movementSpeedMultiplier)
+    {
+        _motor.RemoveMovementSpeedMultiplier(movementSpeedMultiplier);
+        _canSprint = true;
     }
 
     /// <summary>
@@ -212,13 +263,26 @@ public class PlayerController : NetworkBehaviour
         if (!IsOwner || !_canMove)
             return;
 
-        Vector2 input = _input.Player.Move.ReadValue<Vector2>();
-        _rotation.SetLookDirection(input);
+        if (_toggleManualLook)
+        {
+            Vector3 screenPosition = Input.mousePosition;
+            Ray ray = _camera.ScreenPointToRay(screenPosition);
+            if (_groundPlane.Raycast(ray, out float distance))
+            {
+                Vector3 dir = (ray.GetPoint(distance) - transform.position).normalized;
+                _rotation.SetLookDirection(dir);
+            }
+        }
+        else
+        {
+            Vector2 input = _input.Player.Move.ReadValue<Vector2>();
+            _rotation.SetLookDirection(input);
+        }
     }
 
     void ToggleSprint(InputAction.CallbackContext context)
     {
-        if (!IsOwner || !_canMove)
+        if (!IsOwner || !_canMove || !_canSprint)
             return;
 
         if (context.started)
