@@ -20,7 +20,7 @@ public class LobbyPlayerCardUI : MonoBehaviour
         {
             PlayerData playerData = MultiplayerManager.Instance.GetPlayerDataFromPlayerIndex(_playerIndex);
             GameLobby.Instance.KickPlayer(playerData.playerId.ToString());
-            MultiplayerManager.Instance.KickPlayer(playerData.clientId);
+            MultiplayerManager.Instance.KickPlayer(playerData.clientId, "You have been kicked");
         });
     }
 
@@ -45,6 +45,9 @@ public class LobbyPlayerCardUI : MonoBehaviour
 
             _readyText.text = PlayerReadyManager.Instance.IsPlayerReady(playerData.clientId) ? "Ready" : "Not Ready";
             _playerNameText.text = playerData.playerName.ToString();
+
+            if (playerData.clientId == NetworkManager.Singleton.LocalClientId)
+                _playerNameText.text += " (Me)";
 
             //Server only + non host
             _kickButton.gameObject.SetActive(NetworkManager.Singleton.IsServer && _playerIndex > 0);

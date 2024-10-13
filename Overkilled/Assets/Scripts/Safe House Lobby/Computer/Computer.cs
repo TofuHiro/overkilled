@@ -98,9 +98,13 @@ public class Computer : MonoBehaviour, IInteractable
     /// <param name="window"></param>
     public void AddWindow(ComputerWindowUI window)
     {
-        if (!_openedWindows.Contains(window))
-        {
-            _openedWindows.Add(window);
-        }
+        //Place on top of all other windows
+        window.transform.SetAsLastSibling();
+
+        //Readding to add to end of list -> close top window will close this window
+        if (_openedWindows.Contains(window))
+            _openedWindows.Remove(window);
+
+        _openedWindows.Add(window);
     }
 }

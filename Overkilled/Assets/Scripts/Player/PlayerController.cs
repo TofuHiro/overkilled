@@ -177,6 +177,12 @@ public class PlayerController : NetworkBehaviour
         _canMove = state;
     }
 
+    public void SetPositionAndRotation(Vector3 position, Quaternion rotation)
+    {
+        transform.position = position;
+        transform.rotation = rotation;
+    }
+
     void Update()
     {
         if (!IsOwner)
