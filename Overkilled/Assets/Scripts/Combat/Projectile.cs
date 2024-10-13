@@ -58,9 +58,6 @@ public class Projectile : NetworkBehaviour
 
     protected virtual void OnCollisionEnter(Collision collision)
     {
-        if (_projectileSO.pointCollision)
-            return;
-
         HitTarget(collision.transform, transform.position);
     }
 

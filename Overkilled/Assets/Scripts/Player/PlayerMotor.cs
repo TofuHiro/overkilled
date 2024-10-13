@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -7,13 +8,19 @@ public class PlayerMotor : MonoBehaviour
     [SerializeField] float _moveForce = 200f;
     [Tooltip("Multiplier applied to movement when sprinting")]
     [SerializeField] float _sprintMultiplier = 1.4f;
-     
+    [Tooltip("The minimum speed debuff multiplier the player can have")]
+    [SerializeField] float _maximumSpeedMultiplier = 2f;
+    [Tooltip("The minimum speed debuff multiplier the player can have")]
+    [SerializeField] float _minimumSpeedMultiplier = .3f;
+
+    List<float> _speedMultipliers;
     Rigidbody _rb;
     Vector2 _currentDir;
     bool _isSprinting;
 
     void Awake()
     {
+        _speedMultipliers = new List<float>();
         _rb = GetComponent<Rigidbody>();
     }
 
@@ -27,6 +34,16 @@ public class PlayerMotor : MonoBehaviour
         _isSprinting = state;
     }
 
+    public void AddMovementSpeedMultiplier(float value)
+    {
+        _speedMultipliers.Add(value);
+    }
+
+    public void RemoveMovementSpeedMultiplier(float value)
+    {
+        _speedMultipliers.Remove(value);
+    }
+
     void FixedUpdate()
     {
         Movement();
@@ -38,6 +55,14 @@ public class PlayerMotor : MonoBehaviour
 
         if (_isSprinting)
             moveVel *= _sprintMultiplier;
+
+        //Speed multipliers
+        float totalMultiplier = 1f;
+        for (int i = 0; i < _speedMultipliers.Count; i++)
+            totalMultiplier += _speedMultipliers[i];
+
+        totalMultiplier = Mathf.Clamp(totalMultiplier, _minimumSpeedMultiplier, _maximumSpeedMultiplier);
+        moveVel *= totalMultiplier;
 
         _rb.AddForce(moveVel, ForceMode.Force);
     }

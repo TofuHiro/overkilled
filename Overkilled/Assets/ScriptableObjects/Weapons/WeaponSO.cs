@@ -12,4 +12,6 @@ public class WeaponSO : ScriptableObject
     public int durability;
     [Tooltip("If true, this weapon will only fire once per click/press")]
     public bool semiAutomatic;
+    [Tooltip("The multiplier to apply to the player's movement speed when the secondary attack mode is active")]
+    public float secondaryAttackMovementSpeedMultiplier;
 }
