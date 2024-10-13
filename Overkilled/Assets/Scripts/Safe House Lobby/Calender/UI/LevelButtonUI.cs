@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -30,28 +31,27 @@ public class LevelButtonUI : MonoBehaviour
 
     void Start()
     {
+        LobbyManager.Instance.OnLevelChange += LobbyManager_OnLevelChange;
         LobbyManager.Instance.OnSwitchToMultiplayer += LobbyManager_OnSwitchToMultiplayer;
-        LobbyManager.Instance.OnLevelChange += LobbyManager_Client_OnLevelChange;
+        GameLobby.Instance.OnCreateLobbySuccess += ToggleButton;
+        GameLobby.Instance.OnJoinSuccess += ToggleButton;
 
         _selectedOverlay.SetActive(false);
     }
 
     void OnDestroy()
     {
+        LobbyManager.Instance.OnLevelChange -= LobbyManager_OnLevelChange;
         LobbyManager.Instance.OnSwitchToMultiplayer -= LobbyManager_OnSwitchToMultiplayer;
-        LobbyManager.Instance.OnLevelChange -= LobbyManager_Client_OnLevelChange;
-    }
-
-    void LobbyManager_OnSwitchToMultiplayer(bool isHost)
-    {
-        _button.enabled = isHost;
+        GameLobby.Instance.OnCreateLobbySuccess -= ToggleButton;
+        GameLobby.Instance.OnJoinSuccess -= ToggleButton;
     }
 
     /// <summary>
     /// Client side display
     /// </summary>
     /// <param name="level"></param>
-    void LobbyManager_Client_OnLevelChange(Loader.Level level)
+    void LobbyManager_OnLevelChange(Loader.Level level)
     {
         if (level == _level)
         {
@@ -61,6 +61,17 @@ public class LevelButtonUI : MonoBehaviour
         {
             _selectedOverlay.SetActive(false);
         }
+    }
+
+    void LobbyManager_OnSwitchToMultiplayer(bool isHost)
+    {
+        _button.enabled = isHost;
+    }
+
+
+    void ToggleButton()
+    {
+        _button.enabled = NetworkManager.Singleton.IsServer;
     }
 
     public void ToggleLock(bool state)

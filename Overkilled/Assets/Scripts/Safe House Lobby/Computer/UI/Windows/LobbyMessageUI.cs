@@ -10,7 +10,6 @@ public class LobbyMessageUI : ComputerWindowUI
 
     void Start()
     {
-        MultiplayerManager.Instance.OnLocalDisconnect += MultiplayerManager_OnLocalDisconnect;
         GameLobby.Instance.OnCreateLobbyStarted += GameLobby_OnCreateLobbyStarted;
         GameLobby.Instance.OnCreateLobbySuccess += GameLobby_OnCreateLobbyCompleted;
         GameLobby.Instance.OnCreateLobbyFailed += GameLobby_OnCreateLobbyFailed;
@@ -24,7 +23,6 @@ public class LobbyMessageUI : ComputerWindowUI
 
     void OnDestroy()
     {
-        MultiplayerManager.Instance.OnLocalDisconnect -= MultiplayerManager_OnLocalDisconnect;
         GameLobby.Instance.OnCreateLobbyStarted -= GameLobby_OnCreateLobbyStarted;
         GameLobby.Instance.OnCreateLobbySuccess -= GameLobby_OnCreateLobbyCompleted;
         GameLobby.Instance.OnCreateLobbyFailed -= GameLobby_OnCreateLobbyFailed;
@@ -32,20 +30,6 @@ public class LobbyMessageUI : ComputerWindowUI
         GameLobby.Instance.OnQuickJoinFailed -= GameLobby_OnQuickJoinFailed;
         GameLobby.Instance.OnJoinFailed -= GameLobby_OnJoinFailed;
         GameLobby.Instance.OnJoinSuccess -= GameLobby_OnJoinSuccess;
-    }
-
-    void MultiplayerManager_OnLocalDisconnect()
-    {
-        string msg = NetworkManager.Singleton.DisconnectReason;
-        if (msg == "")
-        {
-            //Kick?
-            ShowMessage("Failed to connect");
-        }
-        else
-        {
-            ShowMessage(msg);
-        }
     }
 
     void GameLobby_OnCreateLobbyStarted()

@@ -37,17 +37,17 @@ public class LobbyCreateUI : ComputerWindowUI
         Hide();
     }
 
+    void OnDestroy()
+    {
+        GameLobby.Instance.OnCreateLobbySuccess -= GameLobby_OnLobbySuccess;
+        GameLobby.Instance.OnJoinSuccess -= GameLobby_OnLobbySuccess;
+    }
+
     void GameLobby_OnLobbySuccess()
     {
         Hide();
 
         _createLobbyButton.enabled = true;
-    }
-
-    void OnDestroy()
-    {
-        GameLobby.Instance.OnCreateLobbySuccess -= GameLobby_OnLobbySuccess;
-        GameLobby.Instance.OnJoinSuccess -= GameLobby_OnLobbySuccess;
     }
 
     public override void Hide()

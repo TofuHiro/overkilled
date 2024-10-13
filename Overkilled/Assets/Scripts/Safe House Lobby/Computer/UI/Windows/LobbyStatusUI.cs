@@ -23,6 +23,7 @@ public class LobbyStatusUI : ComputerWindowUI
 
         _leaveButton.onClick.AddListener(() =>
         {
+            _leaveButton.enabled = false;
             LobbyManager.Instance.LeaveLobby();
         });
 

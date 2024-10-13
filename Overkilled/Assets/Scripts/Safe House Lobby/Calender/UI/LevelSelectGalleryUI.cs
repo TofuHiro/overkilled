@@ -37,6 +37,9 @@ public class LevelSelectGalleryUI : MonoBehaviour
 
     void Start()
     {
+        foreach (GameObject page in _monthPages)
+            page.SetActive(false);
+
         _monthPages[0].SetActive(true);
 
         Hide();

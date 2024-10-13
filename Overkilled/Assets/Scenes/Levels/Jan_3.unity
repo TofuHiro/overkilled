@@ -2532,7 +2532,7 @@ MonoBehaviour:
   - EnemyPrefabs:
     - {fileID: 4163672175636474596, guid: 1a96fd14499e83e4fb5db6d51502343d, type: 3}
     SpawnSequentially: 0
-    FirstSpawnDelay: 0
+    FirstSpawnDelay: 1
     SpawnFrequency: 3
     EnemySpawnPoints:
     - {fileID: 439261438}
@@ -2542,7 +2542,7 @@ MonoBehaviour:
   - EnemyPrefabs:
     - {fileID: 3012940866497903167, guid: c24a5d6696155314885bba0561f22733, type: 3}
     SpawnSequentially: 0
-    FirstSpawnDelay: 0
+    FirstSpawnDelay: 2
     SpawnFrequency: 6
     EnemySpawnPoints:
     - {fileID: 689254224}

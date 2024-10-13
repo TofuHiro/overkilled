@@ -23,7 +23,11 @@ public class LobbyManager : NetworkBehaviour
     /// </summary>
     public event LobbyAction OnSwitchToMultiplayer;
 
+    public static event Action OnLobbyLoad;
+
     Loader.Level _selectedLevel;
+    Vector3 _currentPlayerPosition;
+    Quaternion _currentPlayerRotation;
 
     void Awake()
     {
@@ -38,11 +42,13 @@ public class LobbyManager : NetworkBehaviour
 
     void Start()
     {
-        GameLobby.Instance.OnCreateLobbySuccess += MultiplayerSwitch;
+        GameLobby.Instance.OnCreateLobbySuccess += GameLobby_OnCreateLobbySuccess;
         GameLobby.Instance.OnJoinSuccess += MultiplayerSwitch;
-        GameLobby.Instance.OnCreateLobbyFailed += StartLocalHost;
-        GameLobby.Instance.OnJoinFailed += StartLocalHost;
-        GameLobby.Instance.OnQuickJoinFailed += StartLocalHost;
+
+        GameLobby.Instance.OnCreateLobbyFailed += GameLobby_OnCreateLobbyFailed;
+        GameLobby.Instance.OnJoinFailed += GameLobby_OnJoinFailed;
+        GameLobby.Instance.OnQuickJoinFailed += GameLobby_OnQuickJoinFailed;
+
         GameLobby.Instance.OnCreateLobbyStarted += EndLocalHost;
         GameLobby.Instance.OnJoinStarted += EndLocalHost;
 
@@ -60,17 +66,47 @@ public class LobbyManager : NetworkBehaviour
                     SpawnClient(cliendId);
             }
         }
+
+        OnLobbyLoad?.Invoke();
     }
 
     public override void OnDestroy()
     {
-        GameLobby.Instance.OnCreateLobbySuccess -= MultiplayerSwitch;
+        GameLobby.Instance.OnCreateLobbySuccess -= GameLobby_OnCreateLobbySuccess;
         GameLobby.Instance.OnJoinSuccess -= MultiplayerSwitch;
-        GameLobby.Instance.OnCreateLobbyFailed -= StartLocalHost;
-        GameLobby.Instance.OnJoinFailed -= StartLocalHost;
-        GameLobby.Instance.OnQuickJoinFailed -= StartLocalHost;
+        GameLobby.Instance.OnCreateLobbyFailed -= GameLobby_OnCreateLobbyFailed;
+        GameLobby.Instance.OnJoinFailed -= GameLobby_OnJoinFailed;
+        GameLobby.Instance.OnQuickJoinFailed -= GameLobby_OnQuickJoinFailed;
         GameLobby.Instance.OnCreateLobbyStarted -= EndLocalHost;
         GameLobby.Instance.OnJoinStarted -= EndLocalHost;
+    }
+
+    void GameLobby_OnCreateLobbySuccess()
+    {
+        MultiplayerSwitch();
+
+        PlayerController.LocalInstance.SetPositionAndRotation(_currentPlayerPosition, _currentPlayerRotation);
+    }
+
+    void GameLobby_OnCreateLobbyFailed()
+    {
+        StartLocalHost();
+
+        PlayerController.LocalInstance.SetPositionAndRotation(_currentPlayerPosition, _currentPlayerRotation);
+    }
+
+    void GameLobby_OnJoinFailed()
+    {
+        StartLocalHost();
+
+        PlayerController.LocalInstance.SetPositionAndRotation(_currentPlayerPosition, _currentPlayerRotation);
+    }
+
+    void GameLobby_OnQuickJoinFailed()
+    {
+        StartLocalHost();
+
+        PlayerController.LocalInstance.SetPositionAndRotation(_currentPlayerPosition, _currentPlayerRotation);
     }
 
     public override void OnNetworkSpawn()
@@ -99,6 +135,9 @@ public class LobbyManager : NetworkBehaviour
     void EndLocalHost()
     {
         NetworkManager.Singleton.Shutdown();
+
+        _currentPlayerPosition = PlayerController.LocalInstance.transform.position;
+        _currentPlayerRotation = PlayerController.LocalInstance.transform.rotation;
     }
 
     void MultiplayerSwitch()

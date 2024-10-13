@@ -22,7 +22,20 @@ public class SoloGameWindowUI : ComputerWindowUI
     void Start()
     {
         LobbyManager.Instance.OnLevelChange += LobbyManager_OnLevelChange;
+        GameLobby.Instance.OnCreateLobbySuccess += GameLobby_OnLobbySuccess;
+        GameLobby.Instance.OnJoinSuccess += GameLobby_OnLobbySuccess;
 
+        Hide();
+    }
+
+    void OnDestroy()
+    {
+        GameLobby.Instance.OnCreateLobbySuccess -= GameLobby_OnLobbySuccess;
+        GameLobby.Instance.OnJoinSuccess -= GameLobby_OnLobbySuccess;
+    }
+
+    void GameLobby_OnLobbySuccess()
+    {
         Hide();
     }
 

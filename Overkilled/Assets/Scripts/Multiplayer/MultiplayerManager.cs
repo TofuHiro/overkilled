@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Unity.Netcode;
 using Unity.Services.Authentication;
@@ -19,11 +20,13 @@ public class MultiplayerManager : NetworkBehaviour
     /// Invoked when the local player is disconnect
     /// </summary>
     public event Action OnLocalDisconnect;
+    public event Action<string> OnLobbyReloadAfterDisconnect;
     public event Action OnPlayerDataNetworkListChange;
 
     NetworkList<PlayerData> _playerDataNetworkList;
     Loader.Level _currentLevel;
     string _playerName;
+    string _clientDisconnectReason;
 
     void Awake()
     {
@@ -147,12 +150,33 @@ public class MultiplayerManager : NetworkBehaviour
         NetworkManager.Singleton.StartClient();
     }
 
-    void Client_OnLocalDisconnect(NetworkManager manager, ConnectionEventData data)
+    async void Client_OnLocalDisconnect(NetworkManager manager, ConnectionEventData data)
     {
         if (data.EventType == ConnectionEvent.ClientDisconnected && data.ClientId == NetworkManager.Singleton.LocalClientId)
         {
-            OnLocalDisconnect?.Invoke();
+            try
+            {
+                OnLocalDisconnect?.Invoke();
+
+                //Set disconnect reason to show after client reloads lobby
+                _clientDisconnectReason = manager.DisconnectReason;
+                LobbyManager.OnLobbyLoad += LobbyManager_OnLobbyLoad;
+
+                await LeaveMultiplayer();
+
+                Loader.LoadScene(Loader.Scene.SafeHouseScene);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
+    }
+
+    void LobbyManager_OnLobbyLoad()
+    {
+        OnLobbyReloadAfterDisconnect?.Invoke(_clientDisconnectReason);
+        LobbyManager.OnLobbyLoad -= LobbyManager_OnLobbyLoad;
     }
 
     void Client_OnLocalConnect(NetworkManager manager, ConnectionEventData data)
@@ -162,12 +186,6 @@ public class MultiplayerManager : NetworkBehaviour
             SetPlayerIdServerRpc(AuthenticationService.Instance.PlayerId);
             SetPlayerNameServerRpc(GetPlayerName());
         }
-    }
-
-    public void KickPlayer(ulong clientId)
-    {
-        NetworkManager.Singleton.DisconnectClient(clientId);
-        RemovePlayerData(clientId);
     }
 
     public bool IsPlayerIndexConnected(int index)
@@ -186,6 +204,9 @@ public class MultiplayerManager : NetworkBehaviour
             NetworkManager.Singleton.OnConnectionEvent -= Client_OnLocalDisconnect;
             NetworkManager.Singleton.OnConnectionEvent -= Client_OnLocalConnect;
 
+            if (IsServer)
+                HostDisconnect();
+
             if (NetworkManager.IsClient)
                 NetworkManager.Singleton.Shutdown();
 
@@ -197,6 +218,19 @@ public class MultiplayerManager : NetworkBehaviour
         }
     }
 
+    public void HostDisconnect()
+    {
+        ulong[] clientIds = NetworkManager.ConnectedClientsIds.ToArray();
+        foreach (ulong clientId in clientIds)
+            if (clientId != NetworkManager.ServerClientId)
+                KickPlayer(clientId, "Host has disconnected");
+    }
+
+    public void KickPlayer(ulong clientId, string reason)
+    {
+        NetworkManager.Singleton.DisconnectClient(clientId, reason);
+        RemovePlayerData(clientId);
+    }
 
     #region Player Data
 
@@ -399,5 +433,11 @@ public class MultiplayerManager : NetworkBehaviour
 
     #endregion
 
+
+    void OnApplicationQuit()
+    {
+        if (IsServer)
+            HostDisconnect();
+    }
 
 }
