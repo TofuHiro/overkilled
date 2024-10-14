@@ -192,6 +192,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _moveForce: 40
   _sprintMultiplier: 1.4
+  _maximumSpeedMultiplier: 2
+  _minimumSpeedMultiplier: 0.3
 --- !u!114 &7167128930439726913
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -280,6 +282,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dropThrowForce: 5
+  _throwForce: 20
 --- !u!114 &7816694388690394052
 MonoBehaviour:
   m_ObjectHideFlags: 0

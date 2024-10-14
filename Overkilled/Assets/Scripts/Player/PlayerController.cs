@@ -2,6 +2,7 @@ using SurvivalGame;
 using System;
 using TMPro;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -83,6 +84,7 @@ public class PlayerController : NetworkBehaviour
         _input.Player.Fire.canceled += Attack;
         _input.Player.AltFire.started += SecondaryAttack;
         _input.Player.AltFire.canceled += SecondaryAttack;
+        _input.Player.Throw.performed += Throw;
         _input.Player.Pause.performed += Pause;
 
         _input.UI.Cancel.performed += Cancel;
@@ -325,6 +327,15 @@ public class PlayerController : NetworkBehaviour
             _interaction.SetSecondaryAttackState(true);
         else if (context.canceled)
             _interaction.SetSecondaryAttackState(false);
+    }
+
+    void Throw(InputAction.CallbackContext context)
+    {
+        if (!IsOwner || !_canMove)
+            return;
+
+        if (context.performed)
+            _interaction.Throw();
     }
 
     void Pause(InputAction.CallbackContext context)

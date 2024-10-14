@@ -7,6 +7,8 @@ public class PlayerHand : NetworkBehaviour
 {
     [Tooltip("Force applied to objects when dropping them")]
     [SerializeField] float _dropThrowForce = 5f;
+    [Tooltip("Force applied to objects when throwing them")]
+    [SerializeField] float _throwForce = 20f;
 
     public event Action OnWeaponPickUp;
     public event Action OnWeaponDrop;
@@ -107,6 +109,13 @@ public class PlayerHand : NetworkBehaviour
         Item item = _holder.GetItem();
         ReleaseItem();
         item.GetComponent<Rigidbody>().AddForce(transform.forward * _dropThrowForce, ForceMode.Impulse);
+    }
+
+    public void ThrowItem()
+    {
+        Item item = _holder.GetItem();
+        ReleaseItem();
+        item.GetComponent<Rigidbody>().AddForce(transform.forward * _throwForce, ForceMode.Impulse);
     }
 
     /// <summary>

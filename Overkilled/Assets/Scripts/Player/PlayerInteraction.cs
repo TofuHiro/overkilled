@@ -37,7 +37,7 @@ public class PlayerInteraction : MonoBehaviour
 
     void CheckInteractable()
     {
-        Physics.Raycast(transform.position + Vector3.up, transform.forward, out RaycastHit hit, _interactDistance, _hand.IsHoldingItem ? _armedLayerMask : _unarmedLayerMask);
+        Physics.Raycast(transform.position + Vector3.up, transform.forward, out RaycastHit hit, _interactDistance, IsHoldingItem ? _armedLayerMask : _unarmedLayerMask);
         if (hit.transform != null)
         {
             IInteractable interactable = hit.transform.GetComponent<IInteractable>();
@@ -59,9 +59,9 @@ public class PlayerInteraction : MonoBehaviour
     /// </summary>
     public void Interact()
     {
-        if (_hoveredInteract != null && _hand.IsHoldingItem)
+        if (_hoveredInteract != null && IsHoldingItem)
             _hoveredInteract.Interact(this);
-        else if (_hand.IsHoldingItem)
+        else if (IsHoldingItem)
             _hand.DropItem();
         else if (_hoveredInteract != null)
             _hoveredInteract.Interact(this);
@@ -69,7 +69,7 @@ public class PlayerInteraction : MonoBehaviour
 
     public void SetAttackState(bool state)
     {
-        if (_hand.IsHoldingItem)
+        if (IsHoldingItem)
             _hand.SetAttackState(state);
         else
             if (state)
@@ -78,8 +78,14 @@ public class PlayerInteraction : MonoBehaviour
 
     public void SetSecondaryAttackState(bool state)
     {
-        if (_hand.IsHoldingItem)
+        if (IsHoldingItem)
             _hand.SetSecondaryAttackState(state);
+    }
+
+    public void Throw()
+    {
+        if (IsHoldingItem)
+            _hand.ThrowItem();
     }
 
     void TryCraft()
