@@ -20,10 +20,15 @@ public class EnemyChaseState : EnemyState
         if (!_enemy.HasTarget)
             _stateMachine.ChangeState(_enemy.IdleState);
 
-        _enemy.TargetPlayer();
-
-        if (_enemy.CheckCanAttack())
-            _stateMachine.ChangeState(_enemy.AttackState);
+        if (!_enemy.InAttackRange)
+            _enemy.TargetPlayer();
+        else 
+        {
+            if (!_enemy.IsFacingTarget)
+                _enemy.FacePlayer();
+            else
+                _stateMachine.ChangeState(_enemy.AttackState);
+        }
     }
 
     public override void PhysicsUpdate()
