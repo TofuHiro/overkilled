@@ -199,7 +199,7 @@ public class LobbyManager : NetworkBehaviour
         }
         catch (Exception e)
         {
-            Debug.Log(e);
+            Debug.LogError("Error trying to leave lobby"+ "\n" + e);
         }
     }
 
