@@ -40,7 +40,7 @@ public class QuickMenuUI : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogException(e);
+            Debug.LogError("Error trying to leave lobby to menu" + "\n" + e);
         }
     }
 

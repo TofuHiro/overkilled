@@ -409,7 +409,7 @@ namespace SurvivalGame
                 }
                 catch (Exception e)
                 {
-                    Debug.LogException(e);
+                    Debug.LogError("Error trying to leave multiplayer" + "\n" + e);
                 }
             }
         }
@@ -423,7 +423,7 @@ namespace SurvivalGame
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                Debug.LogError("Error trying to leave multiplayer" + "\n" + e);
             }
         }
 
@@ -436,7 +436,7 @@ namespace SurvivalGame
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                Debug.LogError("Error trying to leave multiplayer" + "\n" + e);
             }
         }
 
