@@ -85,9 +85,8 @@ public class PlayerController : NetworkBehaviour
         _input.Player.AltFire.started += SecondaryAttack;
         _input.Player.AltFire.canceled += SecondaryAttack;
         _input.Player.Throw.performed += Throw;
-        _input.Player.Pause.performed += Pause;
 
-        _input.UI.Cancel.performed += Cancel;
+        _input.UI.Back.performed += Cancel;
 
         if (LobbyManager.Instance != null)
         {
@@ -103,6 +102,9 @@ public class PlayerController : NetworkBehaviour
             GameManager.Instance.OnGameStateChange += GameManager_OnGameStateChange;
             GameManager.Instance.OnMultiplayerGamePause += GameManager_OnMultiplayerGamePause;
             GameManager.Instance.OnMultiplayerGameUnpause += GameManager_OnMultiplayerGameUnpause;
+
+            _input.GameMenu.Enable();
+            _input.GameMenu.Pause.performed += Pause;
         }
 
         /*_hand.OnWeaponPickUp += PlayerHand_OnWeaponPickUp;
@@ -129,10 +131,9 @@ public class PlayerController : NetworkBehaviour
         _input.Player.Fire.canceled -= Attack;
         _input.Player.AltFire.started -= SecondaryAttack;
         _input.Player.AltFire.canceled -= SecondaryAttack;
-        _input.Player.Pause.performed -= Pause;
         
         _input.UI.Disable();
-        _input.UI.Cancel.performed -= Cancel;
+        _input.UI.Back.performed -= Cancel;
 
         if (LobbyManager.Instance != null)
         {
@@ -145,6 +146,9 @@ public class PlayerController : NetworkBehaviour
             GameManager.Instance.OnGameStateChange -= GameManager_OnGameStateChange;
             GameManager.Instance.OnMultiplayerGamePause -= GameManager_OnMultiplayerGamePause;
             GameManager.Instance.OnMultiplayerGameUnpause -= GameManager_OnMultiplayerGameUnpause;
+
+            _input.GameMenu.Disable();
+            _input.GameMenu.Pause.performed += Pause;
         }
 
         PlayerList.RemovePlayer(gameObject);
