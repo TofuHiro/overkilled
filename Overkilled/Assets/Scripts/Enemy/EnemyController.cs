@@ -28,7 +28,8 @@ public class EnemyController : NetworkBehaviour
     /// Whether if this enemy currently has a target or not
     /// </summary>
     public bool HasTarget { get { return _targetFinder.GetClosestPlayer() != null; } }
-
+    public bool InAttackRange { get { return CheckCanAttack(); } }
+    public bool IsFacingTarget { get { return CheckIsFacingTarget(); } }
     public EnemyStateMachine StateMachine { get; private set; }
     public EnemyIdleState IdleState { get; private set; }
     public EnemyChaseState ChaseState { get; private set; }
@@ -124,7 +125,7 @@ public class EnemyController : NetworkBehaviour
     /// Check if this enemy is within range to attack or not
     /// </summary>
     /// <returns>Returns true if this enemy is within range to perform an attack</returns>
-    public bool CheckCanAttack()
+    bool CheckCanAttack()
     {
         GameObject closestPlayer = _targetFinder.GetClosestPlayer();
 
@@ -138,6 +139,22 @@ public class EnemyController : NetworkBehaviour
             return false;
     }
 
+    bool CheckIsFacingTarget()
+    {
+        GameObject closestPlayer = _targetFinder.GetClosestPlayer();
+
+        if (closestPlayer == null)
+            return false;
+
+        Vector3 dirFromTarget = (closestPlayer.transform.position - transform.position).normalized;
+        float dotProd = Vector3.Dot(dirFromTarget, transform.forward);
+
+        if (dotProd > 0.9)
+            return true;
+        else
+            return false;
+    }
+
     /// <summary>
     /// Set this enemy to target the closest player and move towards it
     /// </summary>
@@ -146,6 +163,13 @@ public class EnemyController : NetworkBehaviour
         GameObject closestPlayer = _targetFinder.GetClosestPlayer();
         _movement.SetTarget(closestPlayer ? closestPlayer.transform : null);
         _rotation.SetLookDirection(_movement.GetDirection());
+    }
+
+    public void FacePlayer()
+    {
+        GameObject closestPlayer = _targetFinder.GetClosestPlayer();
+        Vector3 dirFromTarget = (closestPlayer.transform.position - transform.position).normalized;
+        _rotation.SetLookDirection(new Vector2(dirFromTarget.x, dirFromTarget.z));
     }
 
     /// <summary>
