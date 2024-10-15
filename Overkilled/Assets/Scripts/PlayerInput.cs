@@ -180,17 +180,6 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""8c8e490b-c610-4785-884f-f04217b23ca4"",
-                    ""path"": ""<Pointer>/delta"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": "";Keyboard&Mouse;Touch"",
-                    ""action"": ""Look"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""143bb1cd-cc10-4eca-a2f0-a3664166fe91"",
                     ""path"": ""<Gamepad>/rightTrigger"",
                     ""interactions"": """",
@@ -235,12 +224,34 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""a264271a-b806-4e68-abb2-721129238ec7"",
+                    ""path"": ""<Gamepad>/buttonWest"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Use"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""54393c61-487b-4357-8e74-bb7a50b98990"",
                     ""path"": ""<Keyboard>/e"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Use"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5252449c-a08c-4c62-b57f-35779a8e04d1"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Sprint"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -261,7 +272,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""path"": ""*/{Menu}"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Joystick;Touch;XR;Gamepad;Keyboard&Mouse"",
+                    ""groups"": ""Joystick;Touch;XR;Gamepad"",
                     ""action"": ""Pause"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -279,22 +290,22 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""94ad260a-d6a7-4af5-9b4d-ac87c2b545c7"",
-                    ""path"": ""<Keyboard>/q"",
+                    ""id"": ""f6cd2e2d-c6a4-4cc3-b660-3c32227f1938"",
+                    ""path"": ""<Gamepad>/buttonEast"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
+                    ""groups"": ""Gamepad"",
                     ""action"": ""Throw"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
-                    ""id"": ""f6cd2e2d-c6a4-4cc3-b660-3c32227f1938"",
-                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""id"": ""94ad260a-d6a7-4af5-9b4d-ac87c2b545c7"",
+                    ""path"": ""<Keyboard>/q"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Throw"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -798,7 +809,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""path"": ""*/{Menu}"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""XR;Joystick;Touch;Gamepad;Keyboard&Mouse"",
+                    ""groups"": ""XR;Joystick;Touch;Gamepad"",
                     ""action"": ""Menu"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false

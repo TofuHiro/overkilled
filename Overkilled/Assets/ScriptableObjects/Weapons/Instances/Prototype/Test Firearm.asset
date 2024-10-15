@@ -17,6 +17,7 @@ MonoBehaviour:
   attackFrequency: 0.3
   durability: 20
   semiAutomatic: 1
+  secondaryAttackMovementSpeedMultiplier: -0.35
   projectile: {fileID: 11400000, guid: e2118ffc5966e8f4f869281aa08fe860, type: 2}
   numberOfProjectiles: 1
   normalAimConeAngle: 40
