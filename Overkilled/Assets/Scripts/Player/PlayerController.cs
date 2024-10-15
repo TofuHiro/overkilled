@@ -103,8 +103,8 @@ public class PlayerController : NetworkBehaviour
             GameManager.Instance.OnMultiplayerGameUnpause += GameManager_OnMultiplayerGameUnpause;
         }
 
-        _hand.OnWeaponPickUp += PlayerHand_OnWeaponPickUp;
-        _hand.OnWeaponDrop += PlayerHand_OnWeaponDrop;
+        /*_hand.OnWeaponPickUp += PlayerHand_OnWeaponPickUp;
+        _hand.OnWeaponDrop += PlayerHand_OnWeaponDrop;*/
         _hand.OnSecondaryAttackStart += PlayerHand_OnSecondaryAttackStart;
         _hand.OnSecondaryAttackStop += PlayerHand_OnSecondaryAttackStop;
 
@@ -176,7 +176,7 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    void PlayerHand_OnWeaponPickUp()
+    /*void PlayerHand_OnWeaponPickUp()
     {
         _toggleManualLook = true;
         _rotation.ToggleLockRotationSpeed(false);
@@ -186,10 +186,15 @@ public class PlayerController : NetworkBehaviour
     {
         _toggleManualLook = false;
         _rotation.ToggleLockRotationSpeed(true);
-    }
+    }*/
 
     void PlayerHand_OnSecondaryAttackStart(float movementSpeedMultiplier)
     {
+        //Aiming
+        _toggleManualLook = true;
+        _rotation.ToggleLockRotationSpeed(false);
+
+        //Movement debuff
         _motor.AddMovementSpeedMultiplier(movementSpeedMultiplier);
         _canSprint = false;
         _stamina.SetSprint(false);
@@ -197,6 +202,11 @@ public class PlayerController : NetworkBehaviour
 
     void PlayerHand_OnSecondaryAttackStop(float movementSpeedMultiplier)
     {
+        //Aiming
+        _toggleManualLook = false;
+        _rotation.ToggleLockRotationSpeed(true);
+
+        //Movement debuff
         _motor.RemoveMovementSpeedMultiplier(movementSpeedMultiplier);
         _canSprint = true;
     }
