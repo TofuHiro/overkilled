@@ -160,10 +160,11 @@ namespace SurvivalGame
             LevelCameraController.Instance.SetFocusMode(_currentLevelPreset.useCameraFocusMode);
 
             if (IsServer)
+            {
                 _currentGameState.Value = GameState.WaitingForPlayers;
                 _countdownTimer.Value = _gameStartCountdownTime;
                 _gameTimer.Value = _currentLevelPreset.timeLimit;
-            
+            }
             
             OnGameInitialize?.Invoke(_currentLevelPreset);
         }
