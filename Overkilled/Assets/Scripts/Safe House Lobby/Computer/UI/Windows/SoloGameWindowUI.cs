@@ -21,7 +21,7 @@ public class SoloGameWindowUI : ComputerWindowUI
 
     void Start()
     {
-        LobbyManager.Instance.OnLevelChange += LobbyManager_OnLevelChange;
+        LevelSelectManager.Instance.OnLevelSelectChange += LevelSelectManager_OnLevelSelectChange;
         GameLobby.Instance.OnCreateLobbySuccess += GameLobby_OnLobbySuccess;
         GameLobby.Instance.OnJoinSuccess += GameLobby_OnLobbySuccess;
 
@@ -30,6 +30,7 @@ public class SoloGameWindowUI : ComputerWindowUI
 
     void OnDestroy()
     {
+        LevelSelectManager.Instance.OnLevelSelectChange -= LevelSelectManager_OnLevelSelectChange;
         GameLobby.Instance.OnCreateLobbySuccess -= GameLobby_OnLobbySuccess;
         GameLobby.Instance.OnJoinSuccess -= GameLobby_OnLobbySuccess;
     }
@@ -39,7 +40,7 @@ public class SoloGameWindowUI : ComputerWindowUI
         Hide();
     }
 
-    void LobbyManager_OnLevelChange(Loader.Level level)
+    void LevelSelectManager_OnLevelSelectChange(Level level)
     {
         string levelText = level.ToString();
         levelText = levelText.Replace("_", " ");

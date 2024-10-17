@@ -20,8 +20,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: fdf04c9ec9572874a8405051d2ed674f, type: 2}
   - {fileID: 11400000, guid: a0d4307cd9c0b6a4b97c1b528b2c9d14, type: 2}
   orderCreationRate: 6
-  fiveStarsMinimum: 150
-  fourStarsMinimum: 120
   threeStarsMinimum: 90
   twoStarsMinimum: 60
-  oneStarMinimum: 40
+  oneStarMinimum: 10

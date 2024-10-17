@@ -19,10 +19,6 @@ public class LevelPreset : ScriptableObject
     public float orderCreationRate;
 
     [Header("Money Grading")]
-    [Tooltip("Minimum money required for five star rating")]
-    public int fiveStarsMinimum;
-    [Tooltip("Minimum money required for four star rating")]
-    public int fourStarsMinimum;
     [Tooltip("Minimum money required for three star rating")]
     public int threeStarsMinimum;
     [Tooltip("Minimum money required for two star rating")]

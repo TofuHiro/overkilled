@@ -14,12 +14,17 @@ public class SelectedLevelTextUI : MonoBehaviour
 
     void Start()
     {
-        LobbyManager.Instance.OnLevelChange += LobbyManager_OnLevelChange;
+        LevelSelectManager.Instance.OnLevelSelectChange += LevelSelectManager_OnLevelSelectChange;
 
         SetLevelText("Not Selected");
     }
 
-    void LobbyManager_OnLevelChange(Loader.Level level)
+    void OnDestroy()
+    {
+        LevelSelectManager.Instance.OnLevelSelectChange -= LevelSelectManager_OnLevelSelectChange;
+    }
+
+    void LevelSelectManager_OnLevelSelectChange(Level level)
     {
         string levelText = level.ToString();
         levelText = levelText.Replace("_", " ");

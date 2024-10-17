@@ -1,9 +1,7 @@
 public enum Grade
 {
-    FiveStars,
-    FourStars,
-    ThreeStars,
-    TwoStars,
+    NoStars,
     OneStar,
-    NoStars
+    TwoStars,
+    ThreeStars,
 }

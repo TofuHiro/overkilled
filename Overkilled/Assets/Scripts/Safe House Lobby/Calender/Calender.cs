@@ -19,7 +19,12 @@ public class Calender : MonoBehaviour, IInteractable
     {
         LobbyInterface.Instance.OnUICancel += Hide;
         LobbyInterface.Instance.OnMenuToggle += Hide;
-        LobbyManager.Instance.OnLevelChange += UpdateCalenderText;
+        LevelSelectManager.Instance.OnLevelSelectChange += UpdateCalenderText;
+    }
+
+    void OnDestroy()
+    {
+        LevelSelectManager.Instance.OnLevelSelectChange -= UpdateCalenderText;
     }
 
     public void Interact(PlayerInteraction player)
@@ -29,7 +34,7 @@ public class Calender : MonoBehaviour, IInteractable
         LobbyInterface.Instance.ToggleInterface(true);
     }
 
-    void UpdateCalenderText(Loader.Level level)
+    void UpdateCalenderText(Level level)
     {
         string text = level.ToString();
         text = text.ToUpper();

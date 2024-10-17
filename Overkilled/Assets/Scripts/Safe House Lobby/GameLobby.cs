@@ -6,7 +6,6 @@ using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
 using Unity.Services.Authentication;
-using Unity.Services.Core;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using Unity.Services.Relay;
@@ -70,8 +69,6 @@ public class GameLobby : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
-
-        InitializeUnityAuthentication();
     }
 
     void Start()
@@ -82,18 +79,6 @@ public class GameLobby : MonoBehaviour
     void MultiplayerManager_OnLocalDisconnect()
     {
         _joinedLobby = null;
-    }
-
-    async void InitializeUnityAuthentication()
-    {
-        if (UnityServices.State != ServicesInitializationState.Initialized)
-        {
-            InitializationOptions options = new InitializationOptions();
-            options.SetProfile(UnityEngine.Random.Range(0, 10000).ToString());////Temp for testing
-
-            await UnityServices.InitializeAsync(options);
-            await AuthenticationService.Instance.SignInAnonymouslyAsync();
-        }
     }
 
     void Update()
