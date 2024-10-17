@@ -15,5 +15,11 @@ public class DontDestroyOnLoadCleanUp : MonoBehaviour
 
         if (GameLobby.Instance != null)
             Destroy(GameLobby.Instance.gameObject);
+
+        if (PersistentDataManager.Instance != null)
+            Destroy(PersistentDataManager.Instance.gameObject);
+
+        if (LevelSelectManager.Instance != null)
+            Destroy(LevelSelectManager.Instance.gameObject);
     }
 }

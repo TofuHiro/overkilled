@@ -17,10 +17,10 @@ public class LoginUI : MonoBehaviour
     {
         _loginButton.onClick.AddListener(Hide);
 
-        _playerNameInputField.onValueChanged.AddListener((string newText) =>
+        /*_playerNameInputField.onValueChanged.AddListener((string newText) =>
         {
             MultiplayerManager.Instance.SetPlayerName(newText);
-        });
+        });*/
     }
 
     void Start()

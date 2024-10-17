@@ -1,20 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class LevelButtonUI : MonoBehaviour
 {
     [Tooltip("The level this button will set the selected level to")]
-    [SerializeField] Loader.Level _level;
+    [SerializeField] Level _level;
     [Tooltip("The locked interface to display when this level is locked")]
     [SerializeField] GameObject _lockedOverlay;
     [Tooltip("The UI element to display that this level is currently selected")]
     [SerializeField] GameObject _selectedOverlay;
 
     Button _button;
-    bool _isLocked = false;
+    bool _isLocked = true;
 
     void Awake()
     {
@@ -25,33 +22,34 @@ public class LevelButtonUI : MonoBehaviour
             if (_isLocked)
                 return;
 
-            LobbyManager.Instance.SetLevel(_level);
+            LevelSelectManager.Instance.SetLevel(_level);
         });
+
+        LevelSelectManager.OnLevelUnlock += LevelSelectManager_OnLevelUnlock;
     }
 
     void Start()
     {
-        LobbyManager.Instance.OnLevelChange += LobbyManager_OnLevelChange;
-        LobbyManager.Instance.OnSwitchToMultiplayer += LobbyManager_OnSwitchToMultiplayer;
-        GameLobby.Instance.OnCreateLobbySuccess += ToggleButton;
-        GameLobby.Instance.OnJoinSuccess += ToggleButton;
+        LevelSelectManager.Instance.OnLevelSelectChange += LevelSelectManager_OnLevelSelectChange;
 
         _selectedOverlay.SetActive(false);
     }
 
     void OnDestroy()
     {
-        LobbyManager.Instance.OnLevelChange -= LobbyManager_OnLevelChange;
-        LobbyManager.Instance.OnSwitchToMultiplayer -= LobbyManager_OnSwitchToMultiplayer;
-        GameLobby.Instance.OnCreateLobbySuccess -= ToggleButton;
-        GameLobby.Instance.OnJoinSuccess -= ToggleButton;
+        LevelSelectManager.OnLevelUnlock -= LevelSelectManager_OnLevelUnlock;
+        LevelSelectManager.Instance.OnLevelSelectChange -= LevelSelectManager_OnLevelSelectChange;
     }
 
-    /// <summary>
-    /// Client side display
-    /// </summary>
-    /// <param name="level"></param>
-    void LobbyManager_OnLevelChange(Loader.Level level)
+    void LevelSelectManager_OnLevelUnlock(Level level)
+    {
+        if (level == _level)
+        {
+            ToggleLock(false);
+        }
+    }
+
+    void LevelSelectManager_OnLevelSelectChange(Level level)
     {
         if (level == _level)
         {
@@ -63,18 +61,7 @@ public class LevelButtonUI : MonoBehaviour
         }
     }
 
-    void LobbyManager_OnSwitchToMultiplayer(bool isHost)
-    {
-        _button.enabled = isHost;
-    }
-
-
-    void ToggleButton()
-    {
-        _button.enabled = NetworkManager.Singleton.IsServer;
-    }
-
-    public void ToggleLock(bool state)
+    void ToggleLock(bool state)
     {
         _isLocked = state;
         _lockedOverlay.SetActive(state);

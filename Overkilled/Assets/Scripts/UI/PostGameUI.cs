@@ -57,7 +57,7 @@ public class PostGameUI : MonoBehaviour
     {
         if (GameManager.Instance.GameEnded)
         {
-            _gradeText.text = GetGradeText(GameManager.Instance.LevelGrade);
+            _gradeText.text = GetGradeText(GameManager.Instance.GetGrade());
             Show();
         }
     }
@@ -67,10 +67,6 @@ public class PostGameUI : MonoBehaviour
     {
         switch (grade)
         {
-            case Grade.FiveStars:
-                return "Five Stars";
-            case Grade.FourStars:
-                return "Four Stars";
             case Grade.ThreeStars:
                 return "Three Stars";
             case Grade.TwoStars:

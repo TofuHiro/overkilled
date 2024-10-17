@@ -14,11 +14,6 @@ public static class Loader
         BaseLevelScene,
     }
 
-    public enum Level
-    {
-        None, Jan_1, Jan_2, Jan_3
-    }
-
     /// <summary>
     /// Load a scene locally
     /// </summary>

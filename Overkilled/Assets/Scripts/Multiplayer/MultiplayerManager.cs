@@ -24,7 +24,6 @@ public class MultiplayerManager : NetworkBehaviour
     public event Action OnPlayerDataNetworkListChange;
 
     NetworkList<PlayerData> _playerDataNetworkList;
-    Loader.Level _currentLevel;
     string _playerName;
     string _clientDisconnectReason;
 
@@ -59,16 +58,6 @@ public class MultiplayerManager : NetworkBehaviour
         _playerName = newName;
         PlayerPrefs.SetString(PLAYER_PREFS_PLAYER_NAME_MULTIPLAYER, _playerName);////Temp for possible steam implementation
     }
-    /// <summary>
-    /// Get the current level to play
-    /// </summary>
-    /// <returns></returns>
-    public Loader.Level GetCurrentLevel() { return _currentLevel; }
-    /// <summary>
-    /// Set the level to be played
-    /// </summary>
-    /// <param name="level"></param>
-    public void SetCurrentLevel(Loader.Level level) { _currentLevel = level; }
 
     void PlayerDataNetworkList_OnListChanged(NetworkListEvent<PlayerData> changeEvent)
     {
@@ -168,7 +157,7 @@ public class MultiplayerManager : NetworkBehaviour
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                Debug.LogError("Error trying to leave multiplayer" + "\n" + e);
             }
         }
     }
@@ -214,7 +203,7 @@ public class MultiplayerManager : NetworkBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogException(e);
+            Debug.LogError("Error trying to leave multiplaye" + "\n" + e);
         }
     }
 

@@ -77,7 +77,7 @@ public class LobbyLateJoinManager : NetworkBehaviour
 
 
         //Level Selection
-        SyncSelectedLevelClientRpc(LobbyManager.Instance.GetSelectedLevel(), clientRpcParams);
+        SyncSelectedLevelClientRpc(LevelSelectManager.Instance.CurrentLevel, clientRpcParams);
 
 
 
@@ -101,9 +101,9 @@ public class LobbyLateJoinManager : NetworkBehaviour
     }
 
     [ClientRpc]
-    void SyncSelectedLevelClientRpc(Loader.Level selectedLevel, ClientRpcParams clientRpcParams = default)
+    void SyncSelectedLevelClientRpc(Level selectedLevel, ClientRpcParams clientRpcParams = default)
     {
-        LobbyManager.Instance.SetLevel(selectedLevel);
+        LevelSelectManager.Instance.SetLevel(selectedLevel);
     }
 
     [ClientRpc]

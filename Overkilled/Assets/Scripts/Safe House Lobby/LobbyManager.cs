@@ -11,12 +11,6 @@ public class LobbyManager : NetworkBehaviour
 
     public static LobbyManager Instance { get; private set; }
 
-    public delegate void LevelSelectAction(Loader.Level level);
-    /// <summary>
-    /// Invoked when the selected level is changed
-    /// </summary>
-    public event LevelSelectAction OnLevelChange;
-
     public delegate void LobbyAction(bool isHost);
     /// <summary>
     /// Invoked when the lobby switches from local host to multiplayer. This can be when the player creates a new lobby or join a lobby
@@ -25,7 +19,6 @@ public class LobbyManager : NetworkBehaviour
 
     public static event Action OnLobbyLoad;
 
-    Loader.Level _selectedLevel;
     Vector3 _currentPlayerPosition;
     Quaternion _currentPlayerRotation;
 
@@ -166,7 +159,7 @@ public class LobbyManager : NetworkBehaviour
             Debug.Log("All players are not ready");
             return;
         }
-        if (_selectedLevel == Loader.Level.None)
+        if (LevelSelectManager.Instance.CurrentLevel == Level.None)
         {
             Debug.Log("Level not selected");
             return;
@@ -174,20 +167,19 @@ public class LobbyManager : NetworkBehaviour
 
         if (IsServer)
             GameLobby.Instance.LockLobby();
-        MultiplayerManager.Instance.SetCurrentLevel(_selectedLevel);
-        Loader.LoadLevel(_selectedLevel);
+        
+        Loader.LoadLevel(LevelSelectManager.Instance.CurrentLevel);
     }
 
     public void StartSoloGame()
     {
-        if (_selectedLevel == Loader.Level.None)
+        if (LevelSelectManager.Instance.CurrentLevel == Level.None)
         {
             Debug.Log("Level not selected");
             return;
         }
 
-        MultiplayerManager.Instance.SetCurrentLevel(_selectedLevel);
-        Loader.LoadLevel(_selectedLevel);
+        Loader.LoadLevel(LevelSelectManager.Instance.CurrentLevel);
     }
 
     public async void LeaveLobby()
@@ -209,34 +201,5 @@ public class LobbyManager : NetworkBehaviour
     public void ReloadLobby()
     {
         Loader.LoadScene(Loader.Scene.SafeHouseScene);
-    }
-
-    /// <summary>
-    /// Get the selected level
-    /// </summary>
-    /// <returns></returns>
-    public Loader.Level GetSelectedLevel()
-    {
-        return _selectedLevel;
-    }
-
-    /// <summary>
-    /// Set the selected level to a given level
-    /// </summary>
-    /// <param name="level"></param>
-    public void SetLevel(Loader.Level level)
-    {
-        _selectedLevel = level;
-        OnLevelChange?.Invoke(_selectedLevel);
-
-        if (IsServer)
-            SetLevelRpc(_selectedLevel);
-    }
-
-    [Rpc(SendTo.NotMe)]
-    void SetLevelRpc(Loader.Level level)
-    {
-        _selectedLevel = level;
-        OnLevelChange?.Invoke(level);
     }
 }

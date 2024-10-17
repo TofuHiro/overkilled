@@ -49,11 +49,6 @@ namespace SurvivalGame
         /// </summary>
         public bool IsPaused { get { return _isGamePaused.Value; } }
 
-        /// <summary>
-        /// The final grade given after the game has ended
-        /// </summary>
-        public Grade LevelGrade { get; private set; }
-
         public delegate void GameInitialize(LevelPreset preset);
         /// <summary>
         /// Invoked when the game settings are initialized
@@ -88,14 +83,25 @@ namespace SurvivalGame
         Dictionary<ulong, bool> _playerPausedDictionary;
 
         NetworkVariable<GameState> _currentGameState = new NetworkVariable<GameState>();
+        NetworkVariable<Grade> _finalGrade = new NetworkVariable<Grade>();
         NetworkVariable<float> _countdownTimer = new NetworkVariable<float>();
         NetworkVariable<float> _gameTimer = new NetworkVariable<float>();
         NetworkVariable<bool> _isGamePaused = new NetworkVariable<bool>(false);
+        NetworkVariable<bool> _gameFailed = new NetworkVariable<bool>(false);
 
         bool _isLocalPlayerReady = false, _isLocalPlayerPaused = false;
         bool _autoTestGamePausedState, _autoTestGameReadyStart;
-
+        
         LevelPreset _currentLevelPreset;
+
+        /// <summary>
+        /// Returns the calculated grade for the game
+        /// </summary>
+        /// <returns></returns>
+        public Grade GetGrade()
+        {
+            return _finalGrade.Value;
+        }
 
         void Awake()
         {
@@ -157,6 +163,7 @@ namespace SurvivalGame
                 _currentGameState.Value = GameState.WaitingForPlayers;
                 _countdownTimer.Value = _gameStartCountdownTime;
                 _gameTimer.Value = _currentLevelPreset.timeLimit;
+            
             
             OnGameInitialize?.Invoke(_currentLevelPreset);
         }
@@ -368,29 +375,40 @@ namespace SurvivalGame
 
         void CalculateGrade()
         {
-            if (Bank.Instance.CurrentBalance >= _currentLevelPreset.fiveStarsMinimum)
-                LevelGrade = Grade.FiveStars;
-            else if (Bank.Instance.CurrentBalance >= _currentLevelPreset.fourStarsMinimum)
-                LevelGrade = Grade.FourStars;
-            else if (Bank.Instance.CurrentBalance >= _currentLevelPreset.threeStarsMinimum)
-                LevelGrade = Grade.ThreeStars;
+            if (!IsServer)
+                return;
+
+            if (Bank.Instance.CurrentBalance >= _currentLevelPreset.threeStarsMinimum)
+            {
+                _finalGrade.Value = Grade.ThreeStars;
+            }
             else if (Bank.Instance.CurrentBalance >= _currentLevelPreset.twoStarsMinimum)
-                LevelGrade = Grade.TwoStars;
+            {
+                _finalGrade.Value = Grade.TwoStars;
+            }
             else if (Bank.Instance.CurrentBalance >= _currentLevelPreset.oneStarMinimum)
-                LevelGrade = Grade.OneStar;
+            {
+                _finalGrade.Value = Grade.OneStar;
+            }
             else
-                LevelGrade = Grade.NoStars;
+            {
+                _gameFailed.Value = true;
+                _finalGrade.Value = Grade.NoStars;
+            }
         }
 
         public void FailGame()
         {
-            _currentGameState.Value = GameState.GameEnded;
+            _gameFailed.Value = true;
 
-            //
+            _currentGameState.Value = GameState.GameEnded;
         }
 
         public async void ReturnToLobby()
         {
+            //Save progress on returning lobby if completed level
+            SaveGame();
+
             //Host and online
             if (GameLobby.Instance.InLobby && IsServer)
             {
@@ -414,7 +432,20 @@ namespace SurvivalGame
             }
         }
 
-        public async void LeaveTeamToLobby()
+        public void LeaveTeamToLobby()
+        {
+            //Save progress on returning lobby if completed level
+            if (GameEnded && !_gameFailed.Value)
+            {
+                PersistentDataManager.Instance.OnSave += PersistantDataManager_OnSave;
+                RequestSaveServerRpc();
+            }
+            else
+            {
+                PersistantDataManager_OnSave();
+            }
+        }
+        async void PersistantDataManager_OnSave()
         {
             try
             {
@@ -425,10 +456,15 @@ namespace SurvivalGame
             {
                 Debug.LogError("Error trying to leave multiplayer" + "\n" + e);
             }
+
+            PersistentDataManager.Instance.OnSave -= PersistantDataManager_OnSave;
         }
 
         public async void ReturnToMenu()
         {
+            //Save progress on returning lobby if completed level
+            SaveGame();
+
             try
             {
                 await MultiplayerManager.Instance.LeaveMultiplayer();
@@ -442,7 +478,40 @@ namespace SurvivalGame
 
         public void RestartGame()
         {
-            Loader.LoadLevel(MultiplayerManager.Instance.GetCurrentLevel());
+            //Save progress on returning lobby if completed level
+            SaveGame();
+
+            Loader.LoadLevel(LevelSelectManager.Instance.CurrentLevel);
+        }
+
+        void SaveGame()
+        {
+            if (GameEnded && !_gameFailed.Value)
+            {
+                SaveGameClientRpc(Bank.Instance.CurrentBalance, _finalGrade.Value);
+            }
+        }
+
+        //For players that leave team to lobby
+        [ServerRpc(RequireOwnership = false)]
+        void RequestSaveServerRpc(ServerRpcParams serverRpcParams = default)
+        {
+            ClientRpcParams clientRpcParams = new ClientRpcParams
+            {
+                Send = new ClientRpcSendParams
+                {
+                    TargetClientIds = new ulong[] { serverRpcParams.Receive.SenderClientId }
+                }
+            };
+            
+            SaveGameClientRpc(Bank.Instance.CurrentBalance, _finalGrade.Value, clientRpcParams);
+        }
+
+        [ClientRpc]
+        void SaveGameClientRpc(int currentScore, Grade finalGrade, ClientRpcParams clientRpcParams = default)
+        {
+            LevelSelectManager.Instance.CompleteCurrentLevel(currentScore, finalGrade);
+            PersistentDataManager.Instance.SaveGame();
         }
     }
 }
