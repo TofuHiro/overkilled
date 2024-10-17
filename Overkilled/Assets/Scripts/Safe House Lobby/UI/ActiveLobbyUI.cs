@@ -22,27 +22,44 @@ public class ActiveLobbyUI : MonoBehaviour
         
         _button.onClick.AddListener(() =>
         {
-            _button.enabled = false;
-
             GameLobby.Instance.JoinLobbyWithId(_lobby.Id);
         }); 
     }
 
     void Start()
     {
-        GameLobby.Instance.OnCreateLobbySuccess += GameLobby_OnLobbySuccess;
-        GameLobby.Instance.OnJoinSuccess += GameLobby_OnLobbySuccess;
+        GameLobby.Instance.OnCreateLobbyStarted += GameLobby_OnCreateLobbyStarted;
+        GameLobby.Instance.OnCreateLobbyFailed += GameLobby_OnCreateLobbyFailed;
+        GameLobby.Instance.OnJoinStarted += GameLobby_OnJoinStarted;
+        GameLobby.Instance.OnJoinFailed += GameLobby_OnJoinFailed;
 
         Hide();
     }
 
     void OnDestroy()
     {
-        GameLobby.Instance.OnCreateLobbySuccess -= GameLobby_OnLobbySuccess;
-        GameLobby.Instance.OnJoinSuccess -= GameLobby_OnLobbySuccess;
+        GameLobby.Instance.OnCreateLobbyStarted -= GameLobby_OnCreateLobbyStarted;
+        GameLobby.Instance.OnCreateLobbyFailed -= GameLobby_OnCreateLobbyFailed;
+        GameLobby.Instance.OnJoinStarted -= GameLobby_OnJoinStarted;
+        GameLobby.Instance.OnJoinFailed -= GameLobby_OnJoinFailed;
     }
 
-    void GameLobby_OnLobbySuccess()
+    void GameLobby_OnCreateLobbyStarted()
+    {
+        _button.enabled = false;
+    }
+    
+    void GameLobby_OnCreateLobbyFailed()
+    {
+        _button.enabled = true;
+    }
+
+    void GameLobby_OnJoinStarted()
+    {
+        _button.enabled = false;
+    }
+    
+    void GameLobby_OnJoinFailed()
     {
         _button.enabled = true;
     }
