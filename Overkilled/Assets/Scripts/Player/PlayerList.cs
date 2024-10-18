@@ -10,6 +10,7 @@ public static class PlayerList
     /// </summary>
     public static event Action OnPlayerListUpdate;
     public static event Action OnPlayerAliveUpdate;
+    public static event Action OnAllPlayersDead;
 
     static List<GameObject> s_playerList = new List<GameObject>();
     static Dictionary<GameObject, bool> s_playerAliveDictionary = new Dictionary<GameObject, bool>();
@@ -69,6 +70,14 @@ public static class PlayerList
     {
         s_playerAliveDictionary[player] = isAlive;
         OnPlayerAliveUpdate?.Invoke();
+
+        bool allPlayersAlive = true;
+        foreach (var playerAlive in s_playerAliveDictionary)
+            if (playerAlive.Value == false)
+                allPlayersAlive = false;
+
+        if (!allPlayersAlive)
+            OnAllPlayersDead?.Invoke();
     }
 
     /// <summary>

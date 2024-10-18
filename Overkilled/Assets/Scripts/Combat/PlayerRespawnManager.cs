@@ -50,9 +50,6 @@ public class PlayerRespawnManager : NetworkBehaviour
     {
         _downedPlayersReviveProgress.Add(player, 0f);
         PlayerList.SetPlayerAlive(player.gameObject, false);
-
-        if (PlayerList.GetAlivePlayers().Length == 0)
-            GameManager.Instance.FailGame();
     }
 
     void Update()

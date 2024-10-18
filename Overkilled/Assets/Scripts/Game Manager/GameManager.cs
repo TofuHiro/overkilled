@@ -120,9 +120,7 @@ namespace SurvivalGame
         public override void OnNetworkSpawn()
         {
             PlayerController.OnPlayerSpawn += PlayerController_OnPlayerSpawn;
-
-            _currentGameState.OnValueChanged += OnStateChange;
-            _isGamePaused.OnValueChanged += OnGamePausedChange;
+            PlayerList.OnAllPlayersDead += PlayerList_OnAllPlayersDead;
 
             if (IsServer)
             {
@@ -130,15 +128,15 @@ namespace SurvivalGame
                 NetworkManager.Singleton.OnConnectionEvent += TestPlayersReadyOnPlayerDisconnect;
                 NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += SpawnPlayers;
             }
+
+            _currentGameState.OnValueChanged += OnStateChange;
+            _isGamePaused.OnValueChanged += OnGamePausedChange;
         }
 
         public override void OnNetworkDespawn()
         {
             PlayerController.OnPlayerSpawn -= PlayerController_OnPlayerSpawn;
-
-            Time.timeScale = 1f;
-            _currentGameState.OnValueChanged -= OnStateChange;
-            _isGamePaused.OnValueChanged -= OnGamePausedChange;
+            PlayerList.OnAllPlayersDead -= PlayerList_OnAllPlayersDead;
 
             if (IsServer)
             {
@@ -146,6 +144,10 @@ namespace SurvivalGame
                 NetworkManager.Singleton.OnConnectionEvent -= TestPlayersReadyOnPlayerDisconnect;
                 NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= SpawnPlayers;
             }
+
+            Time.timeScale = 1f;
+            _currentGameState.OnValueChanged -= OnStateChange;
+            _isGamePaused.OnValueChanged -= OnGamePausedChange;
         }
 
         void Start()
@@ -173,6 +175,11 @@ namespace SurvivalGame
         {
             player.OnPlayerInteractInput += SetLocalPlayerReady;
             player.OnPauseInput += TogglePauseGame;
+        }
+
+        void PlayerList_OnAllPlayersDead()
+        {
+            FailGame();
         }
 
         void SpawnPlayers(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
