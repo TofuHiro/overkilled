@@ -51,6 +51,12 @@ public class LevelButtonUI : MonoBehaviour
 
     void LevelSelectManager_OnLevelSelectChange(Level level)
     {
+        if (level == Level.None)
+        {
+            _selectedOverlay.SetActive(false);
+            return;
+        }
+
         if (level == _level)
         {
             _selectedOverlay.SetActive(true);

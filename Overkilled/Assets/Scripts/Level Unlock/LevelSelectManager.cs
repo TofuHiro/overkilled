@@ -60,13 +60,13 @@ public class LevelSelectManager : NetworkBehaviour, IDataPersistence
     /// <param name="level"></param>
     public void SetLevel(Level level)
     {
-        OnLevelSelectChange?.Invoke(level);
-
         if (IsServer)
         {
             _currentLevel.Value = level;
             SetLevelRpc(level);
         }
+
+        OnLevelSelectChange?.Invoke(level);
     }
 
     [Rpc(SendTo.NotMe)]

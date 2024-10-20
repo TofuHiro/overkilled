@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using Unity.Services.Lobbies.Models;
@@ -12,11 +13,20 @@ public class LobbyJoinUI : ComputerWindowUI
     [SerializeField] Button _joinCodeButton;
     [Tooltip("The input field to enter a lobby code to join")]
     [SerializeField] TMP_InputField _joinCodeInputField;
+
     [Header("Lobby")]
     [Tooltip("The container holding all the lobby templates/active lobbies")]
     [SerializeField] Transform _lobbyContainer;
     [Tooltip("The template to use for displaying active lobbies")]
     [SerializeField] Transform _lobbyTemplate;
+
+    [Header("Search Settings")]
+    [Tooltip("Input field for lobby name to search for")]
+    [SerializeField] TMP_InputField _lobbyNameInputField;
+    [Tooltip("Toggle to show full lobbies")]
+    [SerializeField] Toggle _showFullLobbiesToggle;
+
+    public static event Action<bool> OnJoinLobbyToggle;
 
     //Used to track and reuse templates
     List<ActiveLobbyUI> _instantiatedLobbyTemplates;
@@ -37,14 +47,30 @@ public class LobbyJoinUI : ComputerWindowUI
             GameLobby.Instance.JoinLobbyWithCode(_joinCodeInputField.text);
         });
 
+        _lobbyNameInputField.onValueChanged.AddListener((text) =>
+        {
+            SetSearchSettings();
+        });
+
+        _showFullLobbiesToggle.onValueChanged.AddListener((isOn) =>
+        {
+            SetSearchSettings();
+        });
+
         _instantiatedLobbyTemplates = new List<ActiveLobbyUI>();
     }
 
     void Start()
     {
         GameLobby.Instance.OnLobbyListChanged += UpdateLobbyList;
+        GameLobby.Instance.OnCreateLobbyStarted += GameLobby_OnCreateLobbyStarted;
+        GameLobby.Instance.OnCreateLobbyFailed += GameLobby_OnCreateLobbyFailed;
         GameLobby.Instance.OnCreateLobbySuccess += GameLobby_OnLobbySuccess;
+        GameLobby.Instance.OnJoinStarted += GameLobby_OnJoinStarted;
+        GameLobby.Instance.OnJoinFailed += GameLobby_OnJoinFailed;
         GameLobby.Instance.OnJoinSuccess += GameLobby_OnLobbySuccess;
+
+        LevelSelectManager.Instance.OnLevelSelectChange += LevelSelectManager_OnLevelSelectChange;
 
         UpdateLobbyList(new List<Lobby>());
         Hide();
@@ -53,8 +79,39 @@ public class LobbyJoinUI : ComputerWindowUI
     void OnDestroy()
     {
         GameLobby.Instance.OnLobbyListChanged -= UpdateLobbyList;
-        GameLobby.Instance.OnCreateLobbySuccess -= GameLobby_OnLobbySuccess;
-        GameLobby.Instance.OnJoinSuccess -= GameLobby_OnLobbySuccess;
+        GameLobby.Instance.OnCreateLobbyStarted += GameLobby_OnCreateLobbyStarted;
+        GameLobby.Instance.OnCreateLobbyFailed += GameLobby_OnCreateLobbyFailed;
+        GameLobby.Instance.OnCreateLobbySuccess += GameLobby_OnLobbySuccess;
+        GameLobby.Instance.OnJoinStarted += GameLobby_OnJoinStarted;
+        GameLobby.Instance.OnJoinFailed += GameLobby_OnJoinFailed;
+        GameLobby.Instance.OnJoinSuccess += GameLobby_OnLobbySuccess;
+
+        LevelSelectManager.Instance.OnLevelSelectChange -= LevelSelectManager_OnLevelSelectChange;
+    }
+
+    void LevelSelectManager_OnLevelSelectChange(Level level)
+    {
+        SetSearchSettings();
+    }
+
+    void GameLobby_OnCreateLobbyStarted()
+    {
+        _joinCodeButton.enabled = false;
+    }
+
+    void GameLobby_OnCreateLobbyFailed()
+    {
+        _joinCodeButton.enabled = true;
+    }
+
+    void GameLobby_OnJoinStarted()
+    {
+        _joinCodeButton.enabled = false;
+    }
+
+    void GameLobby_OnJoinFailed()
+    {
+        _joinCodeButton.enabled = true;
     }
 
     void GameLobby_OnLobbySuccess()
@@ -87,5 +144,22 @@ public class LobbyJoinUI : ComputerWindowUI
                 _instantiatedLobbyTemplates[i].SetLobby(lobbyList[i]);
             }
         }
+    }
+
+    void SetSearchSettings()
+    {
+        GameLobby.Instance.SetSearchSettings(_lobbyNameInputField.text, _showFullLobbiesToggle.isOn, LevelSelectManager.Instance.CurrentLevel);
+    }
+
+    public override void Show()
+    {
+        OnJoinLobbyToggle?.Invoke(true);
+        base.Show();
+    }
+
+    public override void Hide()
+    {
+        OnJoinLobbyToggle?.Invoke(false);
+        base.Hide();
     }
 }
