@@ -15,6 +15,7 @@ using UnityEngine.SceneManagement;
 
 public class GameLobby : MonoBehaviour
 {
+    public const string KEY_SELECTED_LEVEL = "SelectedLevel";
     const string KEY_RELAY_JOIN_CODE = "RelayJoinCode";
 
     public static GameLobby Instance { get; private set; }
@@ -56,8 +57,17 @@ public class GameLobby : MonoBehaviour
 
     Lobby _joinedLobby;
     float _heartBeatTimer, _maxHeartBeatTime = 15f;
-    float _listLobbiesTimer, _maxListLobbiesTimer = 1.5f;
+    float _listLobbiesTimer, _maxListLobbiesTime = 2f;
+    float _changeLobbyLevelTimer, _maxUpdateLobbyTime = 1.1f;
+
     bool _hostLobbyIsPrivate;
+
+    bool _autoChangeLobbyLevel;
+    Level _hostSelectedLobbyLevel;
+
+    string _lobbyNameSearch;
+    bool _fullLobbiesSearch;
+    Level _searchSelectedLobbyLevel;
 
     void Awake()
     {
@@ -74,6 +84,7 @@ public class GameLobby : MonoBehaviour
     void Start()
     {
         MultiplayerManager.Instance.OnLocalDisconnect += MultiplayerManager_OnLocalDisconnect;
+        LevelSelectManager.Instance.OnLevelSelectChange += LevelSelectManager_OnLevelSelectChange;
     }
 
     void MultiplayerManager_OnLocalDisconnect()
@@ -81,10 +92,20 @@ public class GameLobby : MonoBehaviour
         _joinedLobby = null;
     }
 
+    void LevelSelectManager_OnLevelSelectChange(Level level)
+    {
+        if (_joinedLobby == null)
+            return;
+
+        _hostSelectedLobbyLevel = level;
+        _autoChangeLobbyLevel = true;
+    }
+
     void Update()
     {
         HandleLobbyHeartBeat();
         HandlePeriodicListLobbies();
+        HandleChangeLobbyLevel();
     }
 
     async void HandleLobbyHeartBeat()
@@ -96,7 +117,15 @@ public class GameLobby : MonoBehaviour
         if (_heartBeatTimer >= _maxHeartBeatTime)
         {
             _heartBeatTimer = 0;
-            await LobbyService.Instance.SendHeartbeatPingAsync(_joinedLobby.Id);
+
+            try
+            {
+                await LobbyService.Instance.SendHeartbeatPingAsync(_joinedLobby.Id);
+            }
+            catch (LobbyServiceException e)
+            {
+                Debug.LogException(e);
+            }
         }
     }
 
@@ -110,10 +139,24 @@ public class GameLobby : MonoBehaviour
             return;
 
         _listLobbiesTimer += Time.deltaTime;
-        if (_listLobbiesTimer >= _maxListLobbiesTimer)
+        if (_listLobbiesTimer >= _maxListLobbiesTime)
         {
             _listLobbiesTimer = 0;
             ListLobbies();
+        }
+    }
+
+    void HandleChangeLobbyLevel()
+    {
+        if (_joinedLobby == null)
+            return;
+
+        _changeLobbyLevelTimer += Time.deltaTime;
+        if (_autoChangeLobbyLevel && _changeLobbyLevelTimer >= _maxUpdateLobbyTime)
+        {
+            UpdateLobbyLevel(_hostSelectedLobbyLevel);
+            _changeLobbyLevelTimer = 0f;
+            _autoChangeLobbyLevel = false;
         }
     }
 
@@ -169,7 +212,7 @@ public class GameLobby : MonoBehaviour
     /// </summary>
     /// <param name="lobbyName">The name of the lobby</param>
     /// <param name="isPrivate">If the new lobby is private or public. Private lobbies require a code to join</param>
-    public async void CreateLobby(string lobbyName, bool isPrivate)
+    public async void CreateLobby(string lobbyName, bool isPrivate, int maxPlayers)
     {
         OnCreateLobbyStarted?.Invoke();
 
@@ -180,10 +223,13 @@ public class GameLobby : MonoBehaviour
             CreateLobbyOptions options = new CreateLobbyOptions
             {
                 IsPrivate = isPrivate,
-                
+                Data = new Dictionary<string, DataObject>
+                {
+                    { KEY_SELECTED_LEVEL, new DataObject(DataObject.VisibilityOptions.Public, _hostSelectedLobbyLevel.ToString(), DataObject.IndexOptions.S1) }
+                },
             };
 
-            _joinedLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, MultiplayerManager.MAX_PLAYER_COUNT, options);
+            _joinedLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, options);
 
             Allocation allocation = await AllocateRelay();
             string relayJoinCode = await GetRelayJoinCode(allocation);
@@ -376,13 +422,22 @@ public class GameLobby : MonoBehaviour
     {
         try
         {
+            bool nameEmpty = string.IsNullOrEmpty(_lobbyNameSearch);
+            bool anyLevel = _searchSelectedLobbyLevel == Level.None;
+
+            List<QueryFilter> filters = new List<QueryFilter>
+            {
+                new QueryFilter(QueryFilter.FieldOptions.AvailableSlots, "0", _fullLobbiesSearch ? QueryFilter.OpOptions.GE : QueryFilter.OpOptions.GT),
+            };
+            if (!nameEmpty)
+                filters.Add(new QueryFilter(QueryFilter.FieldOptions.Name, _lobbyNameSearch, QueryFilter.OpOptions.CONTAINS));
+            if (!anyLevel)
+                filters.Add(new QueryFilter(QueryFilter.FieldOptions.S1, _searchSelectedLobbyLevel.ToString(), QueryFilter.OpOptions.EQ));
+
             QueryLobbiesOptions options = new QueryLobbiesOptions
             {
-                Count = 20,
-                Filters = new List<QueryFilter>
-                {
-                    new QueryFilter(QueryFilter.FieldOptions.AvailableSlots, "0", QueryFilter.OpOptions.GT),
-                },
+                Count = 100,
+                Filters = filters,
                 Order = new List<QueryOrder>
                 {
                     new QueryOrder(false, QueryOrder.FieldOptions.AvailableSlots),
@@ -434,6 +489,31 @@ public class GameLobby : MonoBehaviour
         {
             Debug.LogException(e);
         }
+    }
+
+    async void UpdateLobbyLevel(Level level)
+    {
+        try
+        {
+            await LobbyService.Instance.UpdateLobbyAsync(_joinedLobby.Id, new UpdateLobbyOptions
+            {
+                Data = new Dictionary<string, DataObject>
+                {
+                    { KEY_SELECTED_LEVEL, new DataObject(DataObject.VisibilityOptions.Public, level.ToString(), DataObject.IndexOptions.S1) }
+                },
+            });
+        }
+        catch (LobbyServiceException e)
+        {
+            Debug.LogException(e);
+        }
+    }
+
+    public void SetSearchSettings(string lobbyName, bool showFullLobbies, Level selectedLobbyLevel)
+    {
+        _lobbyNameSearch = lobbyName;
+        _fullLobbiesSearch = showFullLobbies;
+        _searchSelectedLobbyLevel = selectedLobbyLevel;
     }
 
     async void OnApplicationQuit()
