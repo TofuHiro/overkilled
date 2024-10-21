@@ -23,8 +23,6 @@ public class LobbyJoinUI : ComputerWindowUI
     [Header("Search Settings")]
     [Tooltip("Input field for lobby name to search for")]
     [SerializeField] TMP_InputField _lobbyNameInputField;
-    [Tooltip("Toggle to show full lobbies")]
-    [SerializeField] Toggle _showFullLobbiesToggle;
 
     public static event Action<bool> OnJoinLobbyToggle;
 
@@ -48,11 +46,6 @@ public class LobbyJoinUI : ComputerWindowUI
         });
 
         _lobbyNameInputField.onValueChanged.AddListener((text) =>
-        {
-            SetSearchSettings();
-        });
-
-        _showFullLobbiesToggle.onValueChanged.AddListener((isOn) =>
         {
             SetSearchSettings();
         });
@@ -148,7 +141,7 @@ public class LobbyJoinUI : ComputerWindowUI
 
     void SetSearchSettings()
     {
-        GameLobby.Instance.SetSearchSettings(_lobbyNameInputField.text, _showFullLobbiesToggle.isOn, LevelSelectManager.Instance.CurrentLevel);
+        GameLobby.Instance.SetSearchSettings(_lobbyNameInputField.text, LevelSelectManager.Instance.CurrentLevel);
     }
 
     public override void Show()

@@ -66,7 +66,6 @@ public class GameLobby : MonoBehaviour
     Level _hostSelectedLobbyLevel;
 
     string _lobbyNameSearch;
-    bool _fullLobbiesSearch;
     Level _searchSelectedLobbyLevel;
 
     void Awake()
@@ -169,7 +168,7 @@ public class GameLobby : MonoBehaviour
     {
         try
         {
-            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(MultiplayerManager.MAX_PLAYER_COUNT - 1);
+            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(_joinedLobby.MaxPlayers - 1);
             return allocation;
         }
         catch (RelayServiceException e)
@@ -425,10 +424,7 @@ public class GameLobby : MonoBehaviour
             bool nameEmpty = string.IsNullOrEmpty(_lobbyNameSearch);
             bool anyLevel = _searchSelectedLobbyLevel == Level.None;
 
-            List<QueryFilter> filters = new List<QueryFilter>
-            {
-                new QueryFilter(QueryFilter.FieldOptions.AvailableSlots, "0", _fullLobbiesSearch ? QueryFilter.OpOptions.GE : QueryFilter.OpOptions.GT),
-            };
+            List<QueryFilter> filters = new List<QueryFilter>();
             if (!nameEmpty)
                 filters.Add(new QueryFilter(QueryFilter.FieldOptions.Name, _lobbyNameSearch, QueryFilter.OpOptions.CONTAINS));
             if (!anyLevel)
@@ -509,10 +505,9 @@ public class GameLobby : MonoBehaviour
         }
     }
 
-    public void SetSearchSettings(string lobbyName, bool showFullLobbies, Level selectedLobbyLevel)
+    public void SetSearchSettings(string lobbyName, Level selectedLobbyLevel)
     {
         _lobbyNameSearch = lobbyName;
-        _fullLobbiesSearch = showFullLobbies;
         _searchSelectedLobbyLevel = selectedLobbyLevel;
     }
 
