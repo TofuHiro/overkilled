@@ -8,7 +8,6 @@ using UnityEngine.SceneManagement;
 
 public class MultiplayerManager : NetworkBehaviour
 {
-    public const int MAX_PLAYER_COUNT = 4;
     const string PLAYER_PREFS_PLAYER_NAME_MULTIPLAYER = "PlayerNameMultiplayer";
 
     [Tooltip("Network prefab list used for spawning objects. It is used to find the index of an item by reference and spawned from this list")]
@@ -85,8 +84,8 @@ public class MultiplayerManager : NetworkBehaviour
             response.Reason = "Game has already started";
             return;
         }
-        
-        if (NetworkManager.Singleton.ConnectedClientsIds.Count >= MAX_PLAYER_COUNT)
+
+        if (NetworkManager.Singleton.ConnectedClientsIds.Count >= GameLobby.Instance.GetLobby().MaxPlayers)
         {
             response.Approved = false;
             response.Reason = "Lobby is full";
