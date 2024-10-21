@@ -72,12 +72,12 @@ public class LobbyJoinUI : ComputerWindowUI
     void OnDestroy()
     {
         GameLobby.Instance.OnLobbyListChanged -= UpdateLobbyList;
-        GameLobby.Instance.OnCreateLobbyStarted += GameLobby_OnCreateLobbyStarted;
-        GameLobby.Instance.OnCreateLobbyFailed += GameLobby_OnCreateLobbyFailed;
-        GameLobby.Instance.OnCreateLobbySuccess += GameLobby_OnLobbySuccess;
-        GameLobby.Instance.OnJoinStarted += GameLobby_OnJoinStarted;
-        GameLobby.Instance.OnJoinFailed += GameLobby_OnJoinFailed;
-        GameLobby.Instance.OnJoinSuccess += GameLobby_OnLobbySuccess;
+        GameLobby.Instance.OnCreateLobbyStarted -= GameLobby_OnCreateLobbyStarted;
+        GameLobby.Instance.OnCreateLobbyFailed -= GameLobby_OnCreateLobbyFailed;
+        GameLobby.Instance.OnCreateLobbySuccess -= GameLobby_OnLobbySuccess;
+        GameLobby.Instance.OnJoinStarted -= GameLobby_OnJoinStarted;
+        GameLobby.Instance.OnJoinFailed -= GameLobby_OnJoinFailed;
+        GameLobby.Instance.OnJoinSuccess -= GameLobby_OnLobbySuccess;
 
         LevelSelectManager.Instance.OnLevelSelectChange -= LevelSelectManager_OnLevelSelectChange;
     }
