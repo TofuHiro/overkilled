@@ -19,6 +19,8 @@ public class LobbyJoinUI : ComputerWindowUI
     [SerializeField] Transform _lobbyContainer;
     [Tooltip("The template to use for displaying active lobbies")]
     [SerializeField] Transform _lobbyTemplate;
+    [Tooltip("The scroll rect where the active lobby buttons are held")]
+    [SerializeField] ScrollRect _scrollRect;
 
     [Header("Search Settings")]
     [Tooltip("Input field for lobby name to search for")]
@@ -66,6 +68,7 @@ public class LobbyJoinUI : ComputerWindowUI
         LevelSelectManager.Instance.OnLevelSelectChange += LevelSelectManager_OnLevelSelectChange;
 
         UpdateLobbyList(new List<Lobby>());
+        _scrollRect.verticalNormalizedPosition = 1f; // 1 is Top
         Hide();
     }
 

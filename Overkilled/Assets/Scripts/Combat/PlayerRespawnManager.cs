@@ -84,6 +84,9 @@ public class PlayerRespawnManager : NetworkBehaviour
         playerNetworkObjectReference.TryGet(out NetworkObject playerNetworkObject);
         PlayerHealth player = playerNetworkObject.GetComponent<PlayerHealth>();
 
+        if (!_downedPlayersReviveProgress.ContainsKey(player))
+            return;
+
         _downedPlayersReviveProgress[player] += _reviveTick;
 
         if (_downedPlayersReviveProgress[player] >= _reviveMaxThreshold)
