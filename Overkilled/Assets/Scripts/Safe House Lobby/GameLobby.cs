@@ -489,6 +489,9 @@ public class GameLobby : MonoBehaviour
 
     async void UpdateLobbyLevel(Level level)
     {
+        if (!IsLobbyHost())
+            return;
+
         try
         {
             await LobbyService.Instance.UpdateLobbyAsync(_joinedLobby.Id, new UpdateLobbyOptions
