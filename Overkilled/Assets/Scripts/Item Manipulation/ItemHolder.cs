@@ -26,6 +26,12 @@ public class ItemHolder : NetworkBehaviour
         _networkObject = GetComponent<NetworkObject>();
     }
 
+    public override void OnNetworkSpawn()
+    {
+        _currentItem = null;
+        IsOccupied = false;
+    }
+
     /// <summary>
     /// Get the current item thats being held
     /// </summary>
@@ -59,27 +65,25 @@ public class ItemHolder : NetworkBehaviour
     /// <param name="item"></param>
     public void SetItem(Item item)
     {
-        SetItemServerRpc(item ? item.GetNetworkObject() : null, true);
-    }
-
-    /// <summary>
-    /// Specify whether to shrink the item using this item holders shrink scale settings or not
-    /// </summary>
-    /// <param name="item"></param>
-    /// <param name="useShrink"></param>
-    public void SetItem(Item item, bool useShrink)
-    {
-        SetItemServerRpc(item ? item.GetNetworkObject() : null, useShrink);
+        SetItemServerRpc(item ? item.GetNetworkObject() : null);
     }
 
     [ServerRpc(RequireOwnership = false)]
-    void SetItemServerRpc(NetworkObjectReference itemNetworkObjectReference, bool useShrink)
+    void SetItemServerRpc(NetworkObjectReference itemNetworkObjectReference)
     {
-        SetItemClientRpc(itemNetworkObjectReference, useShrink);
+        itemNetworkObjectReference.TryGet(out NetworkObject itemNetworkObject);
+        if (itemNetworkObject != null && !IsOccupied)
+        {
+            SetItemClientRpc(itemNetworkObjectReference);
+        }
+        else if (itemNetworkObject == null && IsOccupied)
+        {
+            SetItemClientRpc(new NetworkObjectReference());
+        }
     }
 
     [ClientRpc]
-    void SetItemClientRpc(NetworkObjectReference itemNetworkObjectReference, bool useShrink)
+    void SetItemClientRpc(NetworkObjectReference itemNetworkObjectReference)
     {
         itemNetworkObjectReference.TryGet(out NetworkObject itemNetworkObject);
 
@@ -88,11 +92,27 @@ public class ItemHolder : NetworkBehaviour
             Item item = itemNetworkObject.GetComponent<Item>();
             _currentItem = item;
             IsOccupied = true;
-            SetLockItem(true, useShrink);
+            SetLockItem(true, true);
         }
         else
         {
-            SetLockItem(false, useShrink);
+            SetLockItem(false, true);
+            _currentItem = null;
+            IsOccupied = false;
+        }
+    }
+
+    public void SyncHolder(Item item)
+    {
+        if (item != null)
+        {
+            _currentItem = item;
+            IsOccupied = true;
+            SetLockItem(true, false);
+        }
+        else 
+        {
+            SetLockItem(false, false);
             _currentItem = null;
             IsOccupied = false;
         }

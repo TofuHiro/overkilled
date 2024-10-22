@@ -383,12 +383,15 @@ public class MultiplayerManager : NetworkBehaviour
     void CreateObjectWithParentServerRpc(int objectIndex, NetworkObjectReference handNetworkObjectReference)
     {
         handNetworkObjectReference.TryGet(out NetworkObject handNetworkObject);
+        PlayerHand hand = handNetworkObject.GetComponent<PlayerHand>();
+
+        if (hand.IsHoldingItem)
+            return;
 
         GameObject obj = Instantiate(GetObjectFromIndex(objectIndex));
         NetworkObject networkObject = obj.GetComponent<NetworkObject>();
         networkObject.Spawn(true);
 
-        PlayerHand hand = handNetworkObject.GetComponent<PlayerHand>();
         hand.SetItem(networkObject.GetComponent<Item>());
     }
 
@@ -425,6 +428,12 @@ public class MultiplayerManager : NetworkBehaviour
     void OnApplicationQuit()
     {
         if (IsServer)
+            HostDisconnect();
+    }
+
+    void Update()
+    {
+        if (IsServer && NetworkManager.ShutdownInProgress)
             HostDisconnect();
     }
 

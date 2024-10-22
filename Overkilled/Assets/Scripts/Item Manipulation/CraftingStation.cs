@@ -10,26 +10,26 @@ public class CraftingStation : CounterTop
 
     NetworkVariable<float> _craftProgress = new NetworkVariable<float>(0f);
     CraftRecipeSO _validRecipe;
-    bool _isCrafting;
     bool _hasValidRecipe;
+    bool _isCrafting;
 
     public override void Interact(PlayerInteraction player)
     {
         base.Interact(player);
-        StopCraftingServerRpc();
-        SetValidRecipeServerRpc();
+        InteractServerRpc();
     }
 
     [ServerRpc(RequireOwnership = false)]
-    void SetValidRecipeServerRpc()
+    void InteractServerRpc()
     {
-        SetValidRecipeClientRpc();
+        StopCrafting();
+        SetValidRecipe();
     }
-    [ClientRpc]
-    void SetValidRecipeClientRpc()
+
+    void SetValidRecipe()
     {
         _validRecipe = _recipeSet.GetValidRecipe(_holders, NumberOfItemsOnCounter);
-        if (_validRecipe != null )
+        if (_validRecipe != null)
             _hasValidRecipe = true;
     }
 
@@ -53,12 +53,18 @@ public class CraftingStation : CounterTop
     /// </summary>
     public void Craft()
     {
+        CraftServerRpc();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void CraftServerRpc()
+    {
         if (_hasValidRecipe)
         {
             if (!_isCrafting)
-                BeginCraftingServerRpc();
+                _isCrafting = true;
             else
-                SpeedUpCraftServerRpc();
+                _craftProgress.Value += .5f;
         }
         else
         {
@@ -66,45 +72,22 @@ public class CraftingStation : CounterTop
         }
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    void BeginCraftingServerRpc()
-    {
-        BeginCraftingClientRpc();
-    }
-    [ClientRpc]
-    void BeginCraftingClientRpc()
-    {
-        _isCrafting = true;
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    void StopCraftingServerRpc()
+    void StopCrafting()
     {
         if (!_isCrafting)
             return;
 
         _craftProgress.Value = 0f;
 
-        StopCraftingClientRpc();
-    }
-    [ClientRpc]
-    void StopCraftingClientRpc()
-    {
         _isCrafting = false;
         _hasValidRecipe = false;
         _validRecipe = null;
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    void SpeedUpCraftServerRpc()
-    {
-        _craftProgress.Value += .5f;
-    }
-
     void CompleteCraft()
     {
         SpawnProduct();
-        StopCraftingServerRpc();
+        StopCrafting();
     }
 
     void SpawnProduct()

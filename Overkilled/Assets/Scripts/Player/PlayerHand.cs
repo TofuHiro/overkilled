@@ -107,21 +107,23 @@ public class PlayerHand : NetworkBehaviour
     public void DropItem()
     {
         Item item = _holder.GetItem();
-        ReleaseItem();
         ThrowItemServerRpc(item.GetNetworkObject(), _dropThrowForce);
     }
 
     public void ThrowItem()
     {
         Item item = _holder.GetItem();
-        ReleaseItem();
         ThrowItemServerRpc(item.GetNetworkObject(), _throwForce);
     }
 
     [ServerRpc(RequireOwnership = false)]
     void ThrowItemServerRpc(NetworkObjectReference itemObjectReference, float force)
     {
-        ThrowItemClientRpc(itemObjectReference, force);
+        if (_holder.GetItem() != null)
+        {
+            ReleaseItem();
+            ThrowItemClientRpc(itemObjectReference, force);
+        }
     }
 
     [ClientRpc]
@@ -129,7 +131,7 @@ public class PlayerHand : NetworkBehaviour
     {
         itemObjectReference.TryGet(out NetworkObject itemNetworkObject);
         Item item = itemNetworkObject.GetComponent<Item>();
-
+        
         item.GetComponent<Rigidbody>().AddForce(transform.forward * force, ForceMode.Impulse);
     }
 

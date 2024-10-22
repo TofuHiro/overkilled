@@ -71,12 +71,12 @@ public static class PlayerList
         s_playerAliveDictionary[player] = isAlive;
         OnPlayerAliveUpdate?.Invoke();
 
-        bool allPlayersAlive = true;
+        bool allPlayersDead = true;
         foreach (var playerAlive in s_playerAliveDictionary)
-            if (playerAlive.Value == false)
-                allPlayersAlive = false;
+            if (playerAlive.Value == true)
+                allPlayersDead = false;
 
-        if (!allPlayersAlive)
+        if (allPlayersDead)
             OnAllPlayersDead?.Invoke();
     }
 

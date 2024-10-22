@@ -113,7 +113,7 @@ public class LobbyLateJoinManager : NetworkBehaviour
         {
             networkObjectReferences[i].TryGet(out NetworkObject itemNetworkObject);
             if (itemNetworkObject != null)
-                _itemHoldersToSync[i].SetItem(itemNetworkObject.GetComponent<Item>(), false);
+                _itemHoldersToSync[i].SyncHolder(itemNetworkObject.GetComponent<Item>());
         }
     }
 
@@ -124,7 +124,7 @@ public class LobbyLateJoinManager : NetworkBehaviour
         {
             networkObjectReferences[i].TryGet(out NetworkObject itemNetworkObject);
             if (itemNetworkObject != null)
-                _playerItemHoldersToSync[i].SetItem(itemNetworkObject.GetComponent<Item>(), false);
+                _playerItemHoldersToSync[i].SyncHolder(itemNetworkObject.GetComponent<Item>());
         }
     }
 }
