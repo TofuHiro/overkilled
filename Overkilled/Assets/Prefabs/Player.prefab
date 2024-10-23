@@ -24,7 +24,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6701016025123570082}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0.328, y: 1, z: 0.371}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -51,7 +51,7 @@ GameObject:
   - component: {fileID: 4998910605803664010}
   - component: {fileID: 6210217734690124960}
   - component: {fileID: 6457565049515844094}
-  - component: {fileID: 7816694388690394052}
+  - component: {fileID: 3007050831721287905}
   m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
@@ -138,7 +138,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3220570652
+  GlobalObjectIdHash: 3987055694
   InScenePlacedSourceGlobalObjectIdHash: 2852306063
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -281,9 +281,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c54a2bb59c45e64991dc2d769f9a959, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _holder: {fileID: 0}
   _dropThrowForce: 5
   _throwForce: 20
---- !u!114 &7816694388690394052
+--- !u!114 &3007050831721287905
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

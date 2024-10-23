@@ -418,6 +418,7 @@ public class MultiplayerManager : NetworkBehaviour
     void DestroyObjectServerRpc(NetworkObjectReference networkObjectReference, float delay)
     {
         networkObjectReference.TryGet(out NetworkObject networkObject);
+        networkObject.Despawn();
         Destroy(networkObject.gameObject, delay);
     }
 

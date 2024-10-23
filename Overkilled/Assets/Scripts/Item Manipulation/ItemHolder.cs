@@ -10,8 +10,6 @@ public class ItemHolder : NetworkBehaviour
     [SerializeField] float _itemShrinkfactor = 1f;
     [Tooltip("The rotation to set to objects when being held")]
     [SerializeField] Vector3 _lockRotation = Vector3.zero;
-    [Tooltip("If is static, when parenting, object will just be placed at hold position once, while if not static, the object will constantly be set to the position")]
-    [SerializeField] bool _isStatic = true;
 
     /// <summary>
     /// Whether this holder is currently holding an object
@@ -46,19 +44,6 @@ public class ItemHolder : NetworkBehaviour
     /// <returns></returns>
     public Vector3 GetHoldPosition() { return _holdPosition.position; }
 
-    void Update()
-    {
-        if (_isStatic)
-            return;
-
-        if (IsOccupied)
-        {
-            _currentItem.transform.position = _holdPosition.position;
-            _currentItem.transform.rotation = _holdPosition.rotation;
-        }
-    }
-
-
     /// <summary>
     /// Assigns a new item to this holder, locking it into place
     /// </summary>
@@ -74,10 +59,12 @@ public class ItemHolder : NetworkBehaviour
         itemNetworkObjectReference.TryGet(out NetworkObject itemNetworkObject);
         if (itemNetworkObject != null && !IsOccupied)
         {
+            itemNetworkObject.TrySetParent(_networkObject);
             SetItemClientRpc(itemNetworkObjectReference);
         }
         else if (itemNetworkObject == null && IsOccupied)
         {
+            _currentItem.GetNetworkObject().TryRemoveParent();
             SetItemClientRpc(new NetworkObjectReference());
         }
     }
@@ -89,8 +76,7 @@ public class ItemHolder : NetworkBehaviour
 
         if (itemNetworkObject != null)
         {
-            Item item = itemNetworkObject.GetComponent<Item>();
-            _currentItem = item;
+            _currentItem = itemNetworkObject.GetComponent<Item>();
             IsOccupied = true;
             SetLockItem(true, true);
         }
@@ -118,14 +104,14 @@ public class ItemHolder : NetworkBehaviour
         }
     }
 
-    public void SetLockItem(bool lockState, bool useShrink)
+    void SetLockItem(bool lockState, bool useShrink)
     {
         _currentItem.ToggleItemLock(lockState);
 
         if (lockState == true)
         {
             _currentItem.transform.position = _holdPosition.transform.position;
-            _currentItem.transform.rotation = Quaternion.Euler(_lockRotation);
+            _currentItem.transform.localRotation = Quaternion.Euler(_lockRotation);
             
             if (useShrink)
                 _currentItem.transform.localScale *= _itemShrinkfactor;
