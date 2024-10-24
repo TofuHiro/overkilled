@@ -28,8 +28,11 @@ public class ItemHolder : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        _currentItem = null;
-        IsOccupied = false;
+        if (_currentItem == null)
+        {
+            _currentItem = null;
+            IsOccupied = false;
+        }
     }
 
     /// <summary>
