@@ -124,7 +124,6 @@ namespace SurvivalGame
 
             if (IsServer)
             {
-                NetworkManager.Singleton.OnConnectionEvent += TestPauseOnPlayerDisconnect;
                 NetworkManager.Singleton.OnConnectionEvent += TestPlayersReadyOnPlayerDisconnect;
                 NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += SpawnPlayers;
             }
@@ -140,7 +139,6 @@ namespace SurvivalGame
 
             if (IsServer)
             {
-                NetworkManager.Singleton.OnConnectionEvent -= TestPauseOnPlayerDisconnect;
                 NetworkManager.Singleton.OnConnectionEvent -= TestPlayersReadyOnPlayerDisconnect;
                 NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= SpawnPlayers;
             }
@@ -230,11 +228,6 @@ namespace SurvivalGame
                 _autoTestGameReadyStart = false;
                 TestReadyToStartGame();
             }
-            if (_autoTestGamePausedState)
-            {
-                _autoTestGamePausedState = false;
-                TestPauseGame();
-            }
         }
 
 
@@ -293,8 +286,25 @@ namespace SurvivalGame
         #endregion
 
 
-        #region Pausing
+        public void TogglePauseGame()
+        {
+            if (_currentGameState.Value != GameState.GameStarted)
+                return;
 
+            _isLocalPlayerPaused = !_isLocalPlayerPaused;
+            if (_isLocalPlayerPaused)
+            {
+                OnLocalGamePause?.Invoke();
+                if (IsServer)
+                    _isGamePaused.Value = true;
+            }
+            else
+            {
+                OnLocalGameUnpause?.Invoke();
+                if (IsServer)
+                    _isGamePaused.Value = false;
+            }
+        }
 
         void OnGamePausedChange(bool previousValue, bool newValue)
         {
@@ -309,64 +319,6 @@ namespace SurvivalGame
                 Time.timeScale = 1f;
             }
         }
-
-        public void TogglePauseGame()
-        {
-            if (_currentGameState.Value != GameState.GameStarted)
-                return;
-
-            _isLocalPlayerPaused = !_isLocalPlayerPaused;
-            if (_isLocalPlayerPaused)
-            {
-                PauseGameServerRpc();
-                OnLocalGamePause?.Invoke();
-            }
-            else
-            {
-                UnpauseGameServerRpc();
-                OnLocalGameUnpause?.Invoke();
-            }
-        }
-
-        [ServerRpc(RequireOwnership = false)]
-        void PauseGameServerRpc(ServerRpcParams serverRpcParams = default)
-        {
-            _playerPausedDictionary[serverRpcParams.Receive.SenderClientId] = true;
-
-            TestPauseGame();
-        }
-
-        [ServerRpc(RequireOwnership = false)]
-        void UnpauseGameServerRpc(ServerRpcParams serverRpcParams = default)
-        {
-            _playerPausedDictionary[serverRpcParams.Receive.SenderClientId] = false;
-
-            TestPauseGame();
-        }
-
-        void TestPauseGame()
-        {
-            foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
-            {
-                if (_playerPausedDictionary.ContainsKey(clientId) && _playerPausedDictionary[clientId])
-                {
-                    _isGamePaused.Value = true;
-                    return;
-                }
-            }
-
-            _isGamePaused.Value = false;
-        }
-
-        void TestPauseOnPlayerDisconnect(NetworkManager manager, ConnectionEventData data)
-        {
-            if (data.EventType == ConnectionEvent.ClientDisconnected)
-                _autoTestGamePausedState = true;
-        }
-
-
-        #endregion
-
 
         void OnStateChange(GameState previousValue, GameState newValue)
         {
