@@ -1,16 +1,9 @@
 using SurvivalGame;
 using System;
-using TMPro;
 using Unity.Netcode;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(PlayerMotor))]
-[RequireComponent(typeof(PlayerRotation))]
-[RequireComponent(typeof(PlayerStamina))]
-[RequireComponent(typeof(PlayerInteraction))]
-[RequireComponent(typeof(PlayerHand))]
 public class PlayerController : NetworkBehaviour
 {
     /// <summary>
@@ -47,12 +40,15 @@ public class PlayerController : NetworkBehaviour
     PlayerInteraction _interaction;
     PlayerHand _hand;
     PlayerVisuals _visuals;
+    PlayerCombat _combat;
 
     PlayerInput _input;
     Camera _camera;
 
     bool _canMove;
     bool _canSprint = true;
+    bool _canAttack;
+    bool _canInteract;
     bool _toggleManualLook;
     Plane _groundPlane = new Plane(Vector3.down, 0);
 
@@ -65,6 +61,9 @@ public class PlayerController : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         _canMove = true;
+        _canSprint = true;
+        _canAttack = true;
+        _canInteract = true;
 
         _input = new PlayerInput();
         _camera = Camera.main;
@@ -74,6 +73,7 @@ public class PlayerController : NetworkBehaviour
         _stamina = GetComponent<PlayerStamina>();
         _interaction = GetComponent<PlayerInteraction>();
         _hand = GetComponent<PlayerHand>();
+        _combat = GetComponent<PlayerCombat>();
         _visuals = GetComponentInChildren<PlayerVisuals>();
 
         _input.Player.Enable();
@@ -85,6 +85,7 @@ public class PlayerController : NetworkBehaviour
         _input.Player.AltFire.started += SecondaryAttack;
         _input.Player.AltFire.canceled += SecondaryAttack;
         _input.Player.Throw.performed += Throw;
+        _input.Player.Craft.performed += Craft;
 
         _input.UI.Back.performed += Cancel;
 
@@ -109,8 +110,8 @@ public class PlayerController : NetworkBehaviour
 
         /*_hand.OnWeaponPickUp += PlayerHand_OnWeaponPickUp;
         _hand.OnWeaponDrop += PlayerHand_OnWeaponDrop;*/
-        _hand.OnSecondaryAttackStart += PlayerHand_OnSecondaryAttackStart;
-        _hand.OnSecondaryAttackStop += PlayerHand_OnSecondaryAttackStop;
+        _combat.OnSecondaryAttackStart += PlayerHand_OnSecondaryAttackStart;
+        _combat.OnSecondaryAttackStop += PlayerHand_OnSecondaryAttackStop;
 
         PlayerList.AddPlayer(gameObject);
 
@@ -131,7 +132,9 @@ public class PlayerController : NetworkBehaviour
         _input.Player.Fire.canceled -= Attack;
         _input.Player.AltFire.started -= SecondaryAttack;
         _input.Player.AltFire.canceled -= SecondaryAttack;
-        
+        _input.Player.Throw.performed -= Throw;
+        _input.Player.Craft.performed -= Craft;
+
         _input.UI.Disable();
         _input.UI.Back.performed -= Cancel;
 
@@ -158,6 +161,8 @@ public class PlayerController : NetworkBehaviour
     {
         if (GameManager.Instance.IsWaiting)
             _canMove = false;
+        if (GameManager.Instance.IsStarting)
+            _canMove = true;
         else if (GameManager.Instance.GameStarted)
             _canMove = true;
         else if (GameManager.Instance.GameEnded)
@@ -177,7 +182,11 @@ public class PlayerController : NetworkBehaviour
     {
         if (!GameManager.Instance.IsPaused)
         {
-            _canMove = true;
+            if (!GameManager.Instance.IsWaiting)
+            {
+                _canMove = true;
+            }
+
             SetUIControls(false);
         }
     }
@@ -194,7 +203,7 @@ public class PlayerController : NetworkBehaviour
         _rotation.ToggleLockRotationSpeed(true);
     }*/
 
-    void PlayerHand_OnSecondaryAttackStart(float movementSpeedMultiplier)
+    void PlayerHand_OnSecondaryAttackStart(float movementSpeedMultiplier, SecondaryType secondaryType)
     {
         //Aiming
         _toggleManualLook = true;
@@ -206,7 +215,7 @@ public class PlayerController : NetworkBehaviour
         _stamina.SetSprint(false);
     }
 
-    void PlayerHand_OnSecondaryAttackStop(float movementSpeedMultiplier)
+    void PlayerHand_OnSecondaryAttackStop(float movementSpeedMultiplier, SecondaryType secondaryType)
     {
         //Aiming
         _toggleManualLook = false;
@@ -229,8 +238,8 @@ public class PlayerController : NetworkBehaviour
             _input.UI.Enable();
 
             _stamina.SetSprint(false);
-            _interaction.SetAttackState(false);
-            _interaction.SetSecondaryAttackState(false);
+            _combat.SetAttackState(false);
+            _combat.SetSecondaryAttackState(false);
         }
         else
         {
@@ -239,10 +248,9 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    public void SetCanMove(bool state)
-    {
-        _canMove = state;
-    }
+    public void SetCanMove(bool state) { _canMove = state; }
+    public void SetCanAttack(bool state) { _canAttack = state; }
+    public void SetCanInteract(bool state) { _canInteract = state; }
 
     public void SetPositionAndRotation(Vector3 position, Quaternion rotation)
     {
@@ -276,7 +284,7 @@ public class PlayerController : NetworkBehaviour
 
     void Rotation()
     {
-        if (!IsOwner || !_canMove)
+        if (!_canMove)
             return;
 
         if (_toggleManualLook)
@@ -316,31 +324,31 @@ public class PlayerController : NetworkBehaviour
         {
             OnPlayerInteractInput?.Invoke();
             
-            if (_canMove)
+            if (_canInteract)
                 _interaction.Interact();
         }
     }
 
     void Attack(InputAction.CallbackContext context)
     {
-        if (!IsOwner || !_canMove)
+        if (!IsOwner || !_canAttack)
             return;
 
         if (context.started)
-            _interaction.SetAttackState(true);
+            _combat.SetAttackState(true);
         else if (context.canceled)
-            _interaction.SetAttackState(false);
+            _combat.SetAttackState(false);
     }
 
     void SecondaryAttack(InputAction.CallbackContext context)
     {
-        if (!IsOwner || !_canMove)
+        if (!IsOwner || !_canAttack)
             return;
 
         if (context.started)
-            _interaction.SetSecondaryAttackState(true);
+            _combat.SetSecondaryAttackState(true);
         else if (context.canceled)
-            _interaction.SetSecondaryAttackState(false);
+            _combat.SetSecondaryAttackState(false);
     }
 
     void Throw(InputAction.CallbackContext context)
@@ -350,6 +358,15 @@ public class PlayerController : NetworkBehaviour
 
         if (context.performed)
             _interaction.Throw();
+    }
+
+    void Craft(InputAction.CallbackContext context)
+    {
+        if (!IsOwner || !_canInteract)
+            return;
+
+        if (context.performed)
+            _interaction.Craft();
     }
 
     void Pause(InputAction.CallbackContext context)

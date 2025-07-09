@@ -17,7 +17,7 @@ public class Item : NetworkBehaviour, IInteractable
             Debug.LogWarning("Warning. Item " + name + "'s ScriptableObject is not assign");
 
         _rigidbody = GetComponent<Rigidbody>();
-        _colliders = GetComponents<Collider>();
+        _colliders = GetComponentsInChildren<Collider>();
         _networkObject = GetComponent<NetworkObject>();
     }
 

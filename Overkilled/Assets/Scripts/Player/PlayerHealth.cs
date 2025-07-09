@@ -8,6 +8,10 @@ public class PlayerHealth : ObjectHealth, IInteractable
     public static event PlayerLifeAction OnPlayerDowned;
     public static event PlayerLifeAction OnPlayerRevive;
 
+    /// <summary>
+    /// Get whether if this player is downed or not
+    /// </summary>
+    public bool IsDown { get { return _isDown; } }
     bool _isDown;
 
     PlayerController _controller;
@@ -29,6 +33,8 @@ public class PlayerHealth : ObjectHealth, IInteractable
         _isDown = true;
 
         _controller.SetCanMove(false);
+        _controller.SetCanAttack(false);
+        _controller.SetCanInteract(false);
         OnPlayerDowned?.Invoke(this);
     }
 
@@ -47,6 +53,8 @@ public class PlayerHealth : ObjectHealth, IInteractable
         SetHealth(_maxHealth);
 
         _controller.SetCanMove(true);
+        _controller.SetCanAttack(true);
+        _controller.SetCanInteract(true);
         OnPlayerRevive?.Invoke(this);
     }
 }

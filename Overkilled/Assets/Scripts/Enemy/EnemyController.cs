@@ -21,8 +21,8 @@ public class EnemyController : NetworkBehaviour
     [SerializeField] float _attackDistance = 1.5f;
     [Tooltip("The duration of an attack")]
     [SerializeField] float _attackDuration = 1f;
-    [Tooltip("The weapon this enemy starts with")]
-    [SerializeField] Weapon _weapon;
+    [Tooltip("The time delay before performing an attack")]
+    [SerializeField] float _attackDelay = .5f;
 
     /// <summary>
     /// Whether if this enemy currently has a target or not
@@ -33,6 +33,7 @@ public class EnemyController : NetworkBehaviour
     public EnemyStateMachine StateMachine { get; private set; }
     public EnemyIdleState IdleState { get; private set; }
     public EnemyChaseState ChaseState { get; private set; }
+    public EnemyStartAttackState StartAttackState { get; private set; }
     public EnemyAttackState AttackState { get; private set; }
     public EnemyStaggeredState StaggeredState { get; private set; }
     public EnemyStunnedState StunnedState { get; private set; }
@@ -41,6 +42,7 @@ public class EnemyController : NetworkBehaviour
     PlayerRotation _rotation;
     EnemyTargetFinder _targetFinder;
     EnemyMovement _movement;
+    PlayerCombat _combat;
 
     void Awake()
     {
@@ -48,10 +50,12 @@ public class EnemyController : NetworkBehaviour
         _rotation = GetComponent<PlayerRotation>();
         _targetFinder = GetComponent<EnemyTargetFinder>();
         _movement = GetComponent<EnemyMovement>();
+        _combat = GetComponent<PlayerCombat>();
 
         StateMachine = new EnemyStateMachine();
         IdleState = new EnemyIdleState(this, StateMachine);
         ChaseState = new EnemyChaseState(this, StateMachine);
+        StartAttackState = new EnemyStartAttackState(this, StateMachine, _attackDelay);
         AttackState = new EnemyAttackState(this, StateMachine, _attackDuration);
         StaggeredState = new EnemyStaggeredState(this, StateMachine, _health.GetStaggerTime());
         StunnedState = new EnemyStunnedState(this, StateMachine);
@@ -172,13 +176,14 @@ public class EnemyController : NetworkBehaviour
         _rotation.SetLookDirection(new Vector2(dirFromTarget.x, dirFromTarget.z));
     }
 
-    /// <summary>
-    /// Trigger an attack
-    /// </summary>
-    public void Attack()
+    public void StartAttack()
     {
-        _movement.Stop();
-        _weapon.Attack();
+        _combat.SetAttackState(true);
+    }
+
+    public void StopAttack()
+    {
+        _combat.SetAttackState(false);
     }
 
     public void Stop()

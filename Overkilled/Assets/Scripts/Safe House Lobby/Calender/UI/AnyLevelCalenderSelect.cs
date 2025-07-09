@@ -35,7 +35,7 @@ public class AnyLevelCalenderSelect : MonoBehaviour, IStartInvoke
         gameObject.SetActive(false);
     }
 
-    void LevelSelectManager_OnLevelSelectChange(Level level)
+    void LevelSelectManager_OnLevelSelectChange(Level level, LevelSelectManager manager)
     {
         if (level == Level.None)
         {

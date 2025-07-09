@@ -288,8 +288,8 @@ namespace SurvivalGame
 
         public void TogglePauseGame()
         {
-            if (_currentGameState.Value != GameState.GameStarted)
-                return;
+            //if (_currentGameState.Value != GameState.GameStarted)
+            //    return;
 
             _isLocalPlayerPaused = !_isLocalPlayerPaused;
             if (_isLocalPlayerPaused)
@@ -372,7 +372,7 @@ namespace SurvivalGame
             //Host and online
             if (GameLobby.Instance.InLobby && IsServer)
             {
-                Loader.LoadSceneNetwork(Loader.Scene.SafeHouseScene);
+                Loader.Instance.LoadSceneNetwork(Loader.Scene.SafeHouseScene, Loader.TransitionType.FadeOut, Loader.TransitionType.FadeIn);
 
                 if (IsServer)
                     GameLobby.Instance.UnlockLobby();
@@ -383,13 +383,15 @@ namespace SurvivalGame
                 try
                 {
                     await MultiplayerManager.Instance.LeaveMultiplayer();
-                    Loader.LoadScene(Loader.Scene.SafeHouseScene);
+                    Loader.Instance.LoadScene(Loader.Scene.SafeHouseScene, Loader.TransitionType.FadeOut, Loader.TransitionType.FadeIn);
                 }
                 catch (Exception e)
                 {
                     Debug.LogError("Error trying to leave multiplayer" + "\n" + e);
                 }
             }
+
+            Time.timeScale = 1f;
         }
 
         public void LeaveTeamToLobby()
@@ -397,27 +399,29 @@ namespace SurvivalGame
             //Save progress on returning lobby if completed level
             if (GameEnded && !_gameFailed.Value)
             {
-                PersistentDataManager.Instance.OnSave += PersistantDataManager_OnSave;
+                //Leave when save complete (Rpc cannot be async, so waits for save event)
+                PersistentDataManager.Instance.OnSave += leaveTeamToLobby;
                 RequestSaveServerRpc();
             }
             else
             {
-                PersistantDataManager_OnSave();
+                leaveTeamToLobby();
             }
         }
-        async void PersistantDataManager_OnSave()
+        async void leaveTeamToLobby()
         {
             try
             {
                 await MultiplayerManager.Instance.LeaveMultiplayer();
-                Loader.LoadScene(Loader.Scene.SafeHouseScene);
+                Loader.Instance.LoadScene(Loader.Scene.SafeHouseScene, Loader.TransitionType.FadeOut, Loader.TransitionType.FadeIn);
             }
             catch (Exception e)
             {
                 Debug.LogError("Error trying to leave multiplayer" + "\n" + e);
             }
 
-            PersistentDataManager.Instance.OnSave -= PersistantDataManager_OnSave;
+            PersistentDataManager.Instance.OnSave -= leaveTeamToLobby;
+            Time.timeScale = 1f;
         }
 
         public async void ReturnToMenu()
@@ -428,12 +432,14 @@ namespace SurvivalGame
             try
             {
                 await MultiplayerManager.Instance.LeaveMultiplayer();
-                Loader.LoadScene(Loader.Scene.MainMenuScene);
+                Loader.Instance.LoadScene(Loader.Scene.MainMenuScene, Loader.TransitionType.FadeOut, Loader.TransitionType.FadeIn);
             }
             catch (Exception e)
             {
                 Debug.LogError("Error trying to leave multiplayer" + "\n" + e);
             }
+
+            Time.timeScale = 1f;
         }
 
         public void RestartGame()
@@ -441,7 +447,8 @@ namespace SurvivalGame
             //Save progress on returning lobby if completed level
             SaveGame();
 
-            Loader.LoadLevel(LevelSelectManager.Instance.CurrentLevel);
+            Loader.Instance.LoadLevel(LevelSelectManager.Instance.CurrentLevel, Loader.TransitionType.FadeOut, Loader.TransitionType.FadeIn);
+            Time.timeScale = 1f;
         }
 
         void SaveGame()

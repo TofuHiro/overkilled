@@ -444,7 +444,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69fc23800e8e6f4419e2d011bb13fc18, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _weaponSO: {fileID: 11400000, guid: b9d905449a300a84988509d527bf17ec, type: 2}
+  _weaponSO: {fileID: 11400000, guid: bacadeb34e2d3724d89933826f550f10, type: 2}
   _projectileExit: {fileID: 3114317701587974403}
 --- !u!4 &7609651737677749045 stripped
 Transform:

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd5cb800f2a6f944a84cb537611cf88f, type: 3}
+  m_Name: Test Explosive
+  m_EditorClassIdentifier: 
+  damage: 50
+  knockBackForce: 20
+  entityTarget: 3
+  prefab: {fileID: 6982079906923042587, guid: 4c32daa3b7f7d1442ba9cf639965d2f3, type: 3}
+  projectileVelocity: 12
+  pointCollision: 0
+  projectileGravity: 1
+  stunTime: 0
+  explosionRadius: 7
+  explodeOnContact: 0
+  explosionFuse: 3

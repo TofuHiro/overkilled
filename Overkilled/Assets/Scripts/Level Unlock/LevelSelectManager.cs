@@ -12,7 +12,7 @@ public class LevelSelectManager : NetworkBehaviour, IDataPersistence
     /// </summary>
     public Level CurrentLevel { get { return _currentLevel.Value; } }
 
-    public delegate void LevelSelectAction(Level level);
+    public delegate void LevelSelectAction(Level level, LevelSelectManager manager);
     /// <summary>
     /// Invoked when the selected level is changed
     /// </summary>
@@ -26,7 +26,12 @@ public class LevelSelectManager : NetworkBehaviour, IDataPersistence
     NetworkVariable<Level> _currentLevel = new NetworkVariable<Level>();
 
     SerializableDictionary<Level, LevelInfo> _levelInfos;
-    
+
+    public string GetLevelText() 
+    { 
+        return _currentLevel.Value.ToString().Replace("_", " "); 
+    }
+
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -66,13 +71,13 @@ public class LevelSelectManager : NetworkBehaviour, IDataPersistence
             SetLevelRpc(level);
         }
 
-        OnLevelSelectChange?.Invoke(level);
+        OnLevelSelectChange?.Invoke(level, Instance);
     }
 
     [Rpc(SendTo.NotMe)]
     void SetLevelRpc(Level level)
     {
-        OnLevelSelectChange?.Invoke(level);
+        OnLevelSelectChange?.Invoke(level, Instance);
     }
 
     /// <summary>
@@ -116,7 +121,7 @@ public class LevelSelectManager : NetworkBehaviour, IDataPersistence
             else
                 _levelInfos[nextLevel].Unlocked = true;
 
-            OnLevelUnlock?.Invoke(nextLevel);
+            OnLevelUnlock?.Invoke(nextLevel, Instance);
         }
     }
 
@@ -136,7 +141,7 @@ public class LevelSelectManager : NetworkBehaviour, IDataPersistence
         {
             if (level.Value.Unlocked)
             {
-                OnLevelUnlock?.Invoke(level.Key);
+                OnLevelUnlock?.Invoke(level.Key, Instance);
             }
         }
     }

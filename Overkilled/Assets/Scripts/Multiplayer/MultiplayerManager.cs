@@ -152,7 +152,7 @@ public class MultiplayerManager : NetworkBehaviour
 
                 await LeaveMultiplayer();
 
-                Loader.LoadScene(Loader.Scene.SafeHouseScene);
+                Loader.Instance.LoadScene(Loader.Scene.SafeHouseScene, Loader.TransitionType.FadeOut, Loader.TransitionType.FadeIn);
             }
             catch (Exception e)
             {

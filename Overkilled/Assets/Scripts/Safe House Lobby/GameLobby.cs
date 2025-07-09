@@ -91,7 +91,7 @@ public class GameLobby : MonoBehaviour
         _joinedLobby = null;
     }
 
-    void LevelSelectManager_OnLevelSelectChange(Level level)
+    void LevelSelectManager_OnLevelSelectChange(Level level, LevelSelectManager manager)
     {
         if (_joinedLobby == null)
             return;

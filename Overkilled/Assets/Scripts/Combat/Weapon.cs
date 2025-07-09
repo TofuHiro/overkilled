@@ -8,9 +8,16 @@ public abstract class Weapon : NetworkBehaviour
     [Tooltip("Ensure that the type of this ScriptableObject matches the type of weapon")]
     [SerializeField] protected WeaponSO _weaponSO;
 
+    public delegate void AttackAction();
+    public event AttackAction OnAttack;
+    public event AttackAction OnSecondaryAttack;
+    public event AttackAction OnSecondaryAttackStart;
+    public event AttackAction OnSecondaryAttackStop;
+
+    protected Transform _attackPosition;
     protected bool _isAttacking = false, _isSecondaryAttacking;
     float _nextTimeToAttack = 0f;
-    float _timer = 0f;
+    float _attackTimer = 0f;
 
     /// <summary>
     /// Current durability of this weapon
@@ -25,7 +32,10 @@ public abstract class Weapon : NetworkBehaviour
 
     protected void DecreaseDurablity(int amount)
     {
-        DecreaseDurabilityServerRpc(amount);
+        if (_weaponSO.useDurability)
+        {
+            DecreaseDurabilityServerRpc(amount);
+        }
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -47,11 +57,18 @@ public abstract class Weapon : NetworkBehaviour
 
     void Update()
     {
-        if (_timer < _nextTimeToAttack)
-            _timer += Time.deltaTime;
+        if (_attackTimer < _nextTimeToAttack)
+            _attackTimer += Time.deltaTime;
 
-        if (_isAttacking && _timer >= _nextTimeToAttack)
+        if (_isAttacking && _attackTimer >= _nextTimeToAttack)
+        {
             Attack();
+
+            if (_isSecondaryAttacking)
+                OnSecondaryAttack?.Invoke();
+            else
+                OnAttack?.Invoke();
+        }
     }
 
     /// <summary>
@@ -64,17 +81,27 @@ public abstract class Weapon : NetworkBehaviour
     }
 
     /// <summary>
+    /// Set the position to attack from. This may be a ray cast origin or center point for a boxcast
+    /// </summary>
+    /// <param name="attackPosition"></param>
+    public void SetAttackPosition(Transform attackPosition)
+    {
+        _attackPosition = attackPosition;
+    }
+
+    /// <summary>
     /// Perform an attack
     /// </summary>
     public virtual void Attack()
     {
-        if (_timer < _nextTimeToAttack)
+        if (_attackTimer < _nextTimeToAttack)
             return;
 
-        if (Durability > 0)
+        if (Durability > 0 || !_weaponSO.useDurability)
         {
             if (_weaponSO.semiAutomatic)
                 SetAttackState(false);
+
             SetNextTimeAttack(_weaponSO.attackFrequency);
         }
         else
@@ -92,10 +119,15 @@ public abstract class Weapon : NetworkBehaviour
     public virtual void SetSecondaryAttackState(bool state)
     {
         _isSecondaryAttacking = state;
+
+        if (state)
+            OnSecondaryAttackStart?.Invoke();
+        else 
+            OnSecondaryAttackStop?.Invoke();
     }
 
     protected void SetNextTimeAttack(float delay)
     {
-        _nextTimeToAttack = _timer + delay;
+        _nextTimeToAttack = _attackTimer + delay;
     }
 }

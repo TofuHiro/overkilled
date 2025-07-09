@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class PlayerRespawnManager : NetworkBehaviour
 {
-    [Tooltip("The number of times required ")]
+    [Tooltip("The threshold value to reach to revive a player")]
     [SerializeField] float _reviveMaxThreshold;
     [Tooltip("The value to add per interact attempt to revive progress")]
     [SerializeField] float _reviveTick;
@@ -63,13 +63,12 @@ public class PlayerRespawnManager : NetworkBehaviour
 
     void ReviveDecayTick()
     {
-        foreach (var downedPlayer in _downedPlayersReviveProgress)
+        foreach (PlayerHealth downedPlayer in _downedPlayersReviveProgress.Keys)
         {
-            PlayerHealth player = downedPlayer.Key;
-
-            float reviveProgress = _downedPlayersReviveProgress[player];
-            reviveProgress -= Time.deltaTime * _reviveDecayPerSecond;
-            reviveProgress = Mathf.Clamp(reviveProgress, 0f, _reviveMaxThreshold);
+            if (_downedPlayersReviveProgress[downedPlayer] > 0f)
+                _downedPlayersReviveProgress[downedPlayer] -= (_reviveDecayPerSecond * Time.deltaTime);  
+            else
+                _downedPlayersReviveProgress[downedPlayer] = 0f;
         }
     }
 

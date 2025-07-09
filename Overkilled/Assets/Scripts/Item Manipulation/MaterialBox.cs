@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class MaterialBox : CounterTop
 {
-    [Tooltip("The source object to spawn from this box")]
-    [SerializeField] GameObject _materialPrefab;
+    [Tooltip("The source objects to spawn from this box")]
+    [SerializeField] GameObject[] _materialPrefabs;
 
     MultiplayerManager _multiplayerManager;
 
@@ -17,6 +17,14 @@ public class MaterialBox : CounterTop
 
     protected override void TakeFromEmptyCounter(PlayerHand hand)
     {
-        _multiplayerManager.CreateObject(_materialPrefab, hand);
+        _multiplayerManager.CreateObject(GetObject(), hand);
+    }
+
+    GameObject GetObject()
+    {
+        if (_materialPrefabs.Length > 1)
+            return _materialPrefabs[Random.Range(0, _materialPrefabs.Length)];
+        else
+            return _materialPrefabs[0];
     }
 }

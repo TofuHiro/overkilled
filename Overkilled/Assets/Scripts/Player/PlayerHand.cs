@@ -10,12 +10,9 @@ public class PlayerHand : NetworkBehaviour
     [Tooltip("Force applied to objects when throwing them")]
     [SerializeField] float _throwForce = 20f;
 
-    public event Action OnWeaponPickUp;
-    public event Action OnWeaponDrop;
-
-    public delegate void AttackAction(float movementSpeedMultiplier);
-    public event AttackAction OnSecondaryAttackStart;
-    public event AttackAction OnSecondaryAttackStop;
+    public delegate void HandAction(Item item);
+    public event HandAction OnPickUp;
+    public event HandAction OnDrop;
 
     /// <summary>
     /// Whether this hand is holding an item
@@ -23,7 +20,6 @@ public class PlayerHand : NetworkBehaviour
     public bool IsHoldingItem { get { return _holder.IsOccupied; } }
 
     ItemHolder _holder;
-    Weapon _currentWeapon;
 
     void Awake()
     {
@@ -49,28 +45,6 @@ public class PlayerHand : NetworkBehaviour
             DropItem();
     }
 
-    public void SetAttackState(bool state)
-    {
-        if (_currentWeapon == null)
-            return;
-
-        _currentWeapon.SetAttackState(state);
-    }
-
-    public void SetSecondaryAttackState(bool state)
-    {
-        if (_currentWeapon == null)
-            return;
-
-        _currentWeapon.SetSecondaryAttackState(state);
-
-        float movementSpeedMultiplier = _currentWeapon.GetWeaponInfo().secondaryAttackMovementSpeedMultiplier;
-        if (state)
-            OnSecondaryAttackStart?.Invoke(movementSpeedMultiplier);
-        else
-            OnSecondaryAttackStop?.Invoke(movementSpeedMultiplier);
-    }
-
     /// <summary>
     /// Get the item this holder is currently assigned
     /// </summary>
@@ -86,19 +60,11 @@ public class PlayerHand : NetworkBehaviour
     /// <param name="newItem"></param>
     public void SetItem(Item newItem)
     {
-        if (IsHoldingItem)
+        if (IsHoldingItem || !newItem)
             return;
 
         _holder.SetItem(newItem);
-
-        _currentWeapon = newItem.GetComponent<Weapon>();
-        if (_currentWeapon != null)
-        {
-            SetAttackState(false);
-            SetSecondaryAttackState(false);
-
-            OnWeaponPickUp?.Invoke();
-        }
+        OnPickUp?.Invoke(newItem);
     }
 
     /// <summary>
@@ -144,15 +110,7 @@ public class PlayerHand : NetworkBehaviour
             return;
 
         _holder.SetItem(null);
-
-        if (_currentWeapon != null)
-        {
-            SetAttackState(false);
-            SetSecondaryAttackState(false);
-            _currentWeapon = null;
-
-            OnWeaponDrop?.Invoke();
-        }
+        OnDrop?.Invoke(null);
     }
 
     /// <summary>

@@ -1,9 +1,14 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class PlayerInteraction : MonoBehaviour
+public class PlayerInteraction : NetworkBehaviour
 {
     [Tooltip("Maximum distance player can interact within")]
-    [SerializeField] float _interactDistance = 1f;
+    [SerializeField] float _interactDistance = 1.3f;
+    [Tooltip("Maximum distance player can interact within")]
+    [SerializeField] float _craftDistance = 1.3f;
+    [Tooltip("Radius to poll at the interact distance")]
+    [SerializeField] float _interactRadius = 1f;
     [Tooltip("Layer mask to use when player is not holding anything")]
     [SerializeField] LayerMask _unarmedLayerMask;
     [Tooltip("Layer mask to use when player is holding something")]
@@ -17,6 +22,7 @@ public class PlayerInteraction : MonoBehaviour
     public bool IsHoldingItem { get { return _hand.IsHoldingItem; } }
 
     IInteractable _hoveredInteract;
+    HighlightItem _hoveredHighlightItem;
     PlayerHand _hand;
 
     /// <summary>
@@ -32,25 +38,49 @@ public class PlayerInteraction : MonoBehaviour
 
     void Update()
     {
+        if (!IsOwner)
+            return;
+
         CheckInteractable();
     }
 
     void CheckInteractable()
     {
-        Physics.Raycast(transform.position + Vector3.up, transform.forward, out RaycastHit hit, _interactDistance, IsHoldingItem ? _armedLayerMask : _unarmedLayerMask);
+        Physics.Raycast(transform.position + (Vector3.up * 0.5f), transform.forward, out RaycastHit hit, _interactDistance, IsHoldingItem ? _armedLayerMask : _unarmedLayerMask);
         if (hit.transform != null)
         {
             IInteractable interactable = hit.transform.GetComponent<IInteractable>();
+
             if (interactable == _hoveredInteract)
                 return;
-            else if (interactable != null)
+
+            //Was looking at another item before
+            if (_hoveredHighlightItem != null)
+                _hoveredHighlightItem.SetHighlight(false);
+
+            if (interactable != null)
+            {
                 _hoveredInteract = interactable;
+
+                //Highlight
+                _hoveredHighlightItem = hit.transform.GetComponent<HighlightItem>();
+                if (_hoveredHighlightItem != null)
+                    _hoveredHighlightItem.SetHighlight(true);
+            }
             else
+            {
                 _hoveredInteract = null;
+                _hoveredHighlightItem = null;
+            }
         }
         else
         {
+            //Was looking at another item before
+            if (_hoveredHighlightItem != null)
+                _hoveredHighlightItem.SetHighlight(false);
+
             _hoveredInteract = null;
+            _hoveredHighlightItem = null;
         }
     }
 
@@ -67,28 +97,13 @@ public class PlayerInteraction : MonoBehaviour
             _hoveredInteract.Interact(this);
     }
 
-    public void SetAttackState(bool state)
-    {
-        if (IsHoldingItem)
-            _hand.SetAttackState(state);
-        else
-            if (state)
-                TryCraft();
-    }
-
-    public void SetSecondaryAttackState(bool state)
-    {
-        if (IsHoldingItem)
-            _hand.SetSecondaryAttackState(state);
-    }
-
     public void Throw()
     {
         if (IsHoldingItem)
             _hand.ThrowItem();
     }
 
-    void TryCraft()
+    public void Craft()
     {
         CraftingStation station = CheckCraftingTable();
         if (station != null)
@@ -99,7 +114,7 @@ public class PlayerInteraction : MonoBehaviour
 
     CraftingStation CheckCraftingTable()
     {
-        Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, _interactDistance, _counterMask);
+        Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, _craftDistance, _counterMask);
         if (hit.transform != null)
         {
             return hit.transform.GetComponent<CraftingStation>();
