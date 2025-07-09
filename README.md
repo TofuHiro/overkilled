@@ -15,3 +15,5 @@ After creating this project, I have built a solid foundation for how multiplayer
 ## Notes
 
 The game is in it's prototype stage where temporary assets were used to visualize playing the game. The project was heavily focused on learning netcode and multiplayer.
+
+'Overkilled - Copy' is the upgraded version (Unity 6) of the project
